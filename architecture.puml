@@ -1,7 +1,8 @@
-@startuml
+@startuml 测试案例生成与自动化流程
 !theme plain
 skinparam backgroundColor white
 skinparam packageStyle rectangle
+skinparam componentStyle rectangle
 skinparam defaultFontSize 10
 skinparam nodesep 60
 skinparam ranksep 60
