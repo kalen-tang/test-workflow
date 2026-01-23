@@ -1,0 +1,26 @@
+{
+  "name": "anthropic-agent-skills",
+  "owner": {
+    "name": "anthropic"
+  },
+  "metadata": {
+    "description": "Anthropic example skills",
+    "version": "1.0.0"
+  },
+  "plugins": [
+    {
+      "name": "skill-creator",
+      "description": "skill creation",
+      "source": "./",
+      "strict": false,
+      "skills": ["./skills/skill-creator"]
+    },
+    {
+      "name": "mcp-builder",
+      "description": "Collection of example smcp-builder",
+      "source": "./",
+      "strict": false,
+      "skills": ["./skills/mcp-builder"]
+    }
+  ]
+}
