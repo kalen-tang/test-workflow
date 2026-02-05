@@ -28,6 +28,13 @@
       "source": "./",
       "strict": false,
       "skills": ["./skills/skill-km-analysis"]
+    },
+    {
+      "name": "skill-requirement-implementation-check",
+      "description": "对比需求文档、设计文档、代码差异分析文档生成需求实现检查报告",
+      "source": "./",
+      "strict": false,
+      "skills": ["./skills/skill-requirement-implementation-check"]
     }
   ]
 }
