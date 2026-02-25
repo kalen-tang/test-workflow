@@ -35,6 +35,13 @@
       "source": "./",
       "strict": false,
       "skills": ["./skills/skill-requirement-implementation-check"]
+    },
+    {
+      "name": "skill-api-generator",
+      "description": "分析测试左移方案，生成接口用例",
+      "source": "./",
+      "strict": false,
+      "skills": ["./skills/skill-api-generator"]
     }
   ]
 }
