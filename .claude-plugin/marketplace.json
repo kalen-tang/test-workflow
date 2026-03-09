@@ -11,35 +11,35 @@
     {
       "name": "skill-creator",
       "description": "skill creation",
-      "source": "./",
+      "source": "./skills/skill-creator",
       "strict": false,
       "skills": ["./skills/skill-creator"]
     },
     {
       "name": "mcp-builder",
       "description": "Collection of example smcp-builder",
-      "source": "./",
+      "source": "./skills/mcp-builder",
       "strict": false,
       "skills": ["./skills/mcp-builder"]
     },
     {
       "name": "skill-km-analysis",
       "description": "分析开发方案km文档，生成测试左移方案",
-      "source": "./",
+      "source": "./skills/skill-km-analysis",
       "strict": false,
       "skills": ["./skills/skill-km-analysis"]
     },
     {
       "name": "skill-requirement-implementation-check",
       "description": "对比需求文档、设计文档、代码差异分析文档生成需求实现检查报告",
-      "source": "./",
+      "source": "./skills/skill-requirement-implementation-check",
       "strict": false,
       "skills": ["./skills/skill-requirement-implementation-check"]
     },
     {
       "name": "skill-api-generator",
       "description": "分析测试左移方案，生成接口用例",
-      "source": "./",
+      "source": "./skills/skill-api-generator",
       "strict": false,
       "skills": ["./skills/skill-api-generator"]
     }
