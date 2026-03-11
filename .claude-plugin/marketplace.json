@@ -1,47 +1,71 @@
 {
-  "name": "wf_bank_test",
+  "$schema": "https://anthropic.com/claude-code/marketplace.schema.json",
+  "name": "wf-bank-test",
+  "description": "银行测试自动化工具集 - 包含需求分析、测试左移、接口用例生成等技能",
   "owner": {
-    "name": "anthropic"
-  },
-  "metadata": {
-    "description": "Anthropic example skills",
-    "version": "1.0.0"
+    "name": "WF Bank Test Team",
+    "email": "test-team@example.com"
   },
   "plugins": [
     {
       "name": "skill-creator",
-      "description": "skill creation",
-      "source": "./",
-      "strict": false,
-      "skills": ["./skills/skill-creator"]
+      "description": "Skill 创建和管理工具 - 用于创建、优化和测试 Claude Code Skills",
+      "version": "1.0.0",
+      "author": {
+        "name": "WF Bank Test Team",
+        "email": "test-team@example.com"
+      },
+      "source": "./plugins/skill-creator",
+      "category": "development",
+      "strict": false
     },
     {
       "name": "mcp-builder",
-      "description": "Collection of example smcp-builder",
-      "source": "./",
-      "strict": false,
-      "skills": ["./skills/mcp-builder"]
+      "description": "MCP 服务器构建工具 - 快速搭建和部署 Model Context Protocol 服务器",
+      "version": "1.0.0",
+      "author": {
+        "name": "WF Bank Test Team",
+        "email": "test-team@example.com"
+      },
+      "source": "./plugins/mcp-builder",
+      "category": "development",
+      "strict": false
     },
     {
-      "name": "skill-km-analysis",
-      "description": "分析开发方案km文档，生成测试左移方案",
-      "source": "./",
-      "strict": false,
-      "skills": ["./skills/skill-km-analysis"]
+      "name": "km-analysis",
+      "description": "开发方案分析工具 - 分析 KM 文档并生成测试左移方案，识别潜在风险和测试点",
+      "version": "1.0.0",
+      "author": {
+        "name": "WF Bank Test Team",
+        "email": "test-team@example.com"
+      },
+      "source": "./plugins/km-analysis",
+      "category": "testing",
+      "strict": false
     },
     {
-      "name": "skill-requirement-implementation-check",
-      "description": "对比需求文档、设计文档、代码差异分析文档生成需求实现检查报告",
-      "source": "./",
-      "strict": false,
-      "skills": ["./skills/skill-requirement-implementation-check"]
+      "name": "requirement-check",
+      "description": "需求实现检查工具 - 对比需求文档、设计文档和代码差异，生成需求实现检查报告",
+      "version": "1.0.0",
+      "author": {
+        "name": "WF Bank Test Team",
+        "email": "test-team@example.com"
+      },
+      "source": "./plugins/requirement-check",
+      "category": "testing",
+      "strict": false
     },
     {
-      "name": "skill-api-generator",
-      "description": "分析测试左移方案，生成接口用例",
-      "source": "./",
-      "strict": false,
-      "skills": ["./skills/skill-api-generator"]
+      "name": "api-generator",
+      "description": "接口用例生成器 - 基于测试左移方案自动生成 API 测试用例",
+      "version": "1.0.0",
+      "author": {
+        "name": "WF Bank Test Team",
+        "email": "test-team@example.com"
+      },
+      "source": "./plugins/api-generator",
+      "category": "testing",
+      "strict": false
     }
   ]
 }
