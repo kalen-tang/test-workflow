@@ -1,0 +1,8 @@
+{
+  "name": "requirement-check",
+  "description": "需求实现检查工具 - 对比需求文档、设计文档和代码差异，生成需求实现检查报告",
+  "author": {
+    "name": "WF Bank Test Team",
+    "email": "test-team@example.com"
+  }
+}

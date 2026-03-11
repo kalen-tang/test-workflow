@@ -1,0 +1,8 @@
+{
+  "name": "api-generator",
+  "description": "接口用例生成器 - 基于测试左移方案自动生成 API 测试用例",
+  "author": {
+    "name": "WF Bank Test Team",
+    "email": "test-team@example.com"
+  }
+}
