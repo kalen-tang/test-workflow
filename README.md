@@ -1,317 +1,161 @@
-# wf_bank_test
+# WF Bank Test - 银行测试自动化工具集
+
+[![Version](https://img.shields.io/badge/version-1.0.0-blue.svg)](https://github.com/your-org/wf-bank-test)
+[![Claude Code](https://img.shields.io/badge/Claude-Code-purple.svg)](https://claude.ai/code)
+
+## 📋 概述
+
+基于 Claude Code 插件系统构建的完整测试自动化工具集，提供从需求分析到用例生成的全流程测试左移解决方案。
+
+## 🎯 qa-toolkit 测试工具集
+
+### shift-left-analyzer（测试左移分析器）
+- 📄 分析 KM 开发方案文档
+- 🔍 提取接口信息和依赖关系
+- 📊 生成测试左移方案和用例建议
+- **使用**: `/shift-left-analyzer ./docs/plan.md`
+
+### requirement-validator（需求验证器）
+- 📋 对比需求、设计、代码差异文档
+- ✅ 验证需求实现完整性
+- 📊 生成质量评分报告（A/B/C/D）
+- **使用**: `/requirement-validator`
+
+### api-case-generator（API用例生成器）
+- 🎯 基于测试方案生成 API 测试用例
+- 🧪 自动生成测试代码和数据
+- 📝 支持多种测试框架
+- **使用**: `/api-case-generator ./reports/analysis.md`
+
+## 🚀 快速开始
+
+```bash
+# 1. 分析开发方案
+/shift-left-analyzer ./docs/development-plan.md
+
+# 2. 验证需求实现
+/requirement-validator
+
+# 3. 生成 API 测试用例
+/api-case-generator ./result/test-analysis.md
+```
+
+## 📁 项目结构
+
+```
+wf_bank_test/
+├── .claude-plugin/
+│   └── marketplace.json          # 插件市场配置
+│
+├── plugins/                      # 插件目录
+│   └── qa-toolkit/               # 测试自动化工具集
+│       ├── .claude-plugin/
+│       │   └── plugin.json
+│       ├── skills/
+│       │   ├── shift-left-analyzer/
+│       │   ├── requirement-validator/
+│       │   └── api-case-generator/
+│       └── README.md
+│
+├── result/                       # 输出结果
+└── README.md                     # 本文档
+```
+
+## 🔄 完整工作流
+
+```
+┌─────────────────────────────────────────┐
+│     QA Toolkit 测试左移工作流            │
+└─────────────────────────────────────────┘
+
+📄 KM 开发方案文档
+        ↓
+📊 shift-left-analyzer
+        ↓
+📋 测试左移分析报告
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+📄 需求 + 设计 + 代码差异
+        ↓
+✅ requirement-validator
+        ↓
+📊 需求实现检查报告
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+📋 测试左移分析报告
+        ↓
+🧪 api-case-generator
+        ↓
+🎯 API 测试用例集
+```
+
+## 🔧 插件配置
+
+### 两级配置结构
+
+#### 1. 项目级配置
+`.claude-plugin/marketplace.json` - 定义所有可用插件
+
+```json
+{
+  "$schema": "https://anthropic.com/claude-code/marketplace.schema.json",
+  "name": "wf-bank-test",
+  "plugins": [
+    {
+      "name": "qa-toolkit",
+      "source": "./plugins/qa-toolkit",
+      "category": "testing"
+    }
+  ]
+}
+```
 
-## 📊 系统概述
+#### 2. 插件级配置
+`plugins/qa-toolkit/.claude-plugin/plugin.json` - 插件元数据
 
-这是一个**测试案例生成与自动化流程系统**，旨在建立一个完整的从需求到测试执行的自动化流水线，大幅提升测试效率和质量。
+```json
+{
+  "name": "qa-toolkit",
+  "description": "银行测试自动化工具集...",
+  "version": "1.0.0",
+  "author": {...}
+}
+```
 
-## 🏗️ 系统架构
 
-📋 **架构文档**: [architecture.puml](./architecture.puml)
+## 🔌 推荐官方插件
 
-### 🖼️ 架构图示
+如需扩展更多能力，推荐以下官方插件：
 
-![测试案例生成与自动化流程](https://plantuml.in.za/svg/bLTTJnj757sVNp6bgWIE2CLIfTGFbS0yj59H0scVIbLjrWjUOUywwxL8KY6PJuCDjX4j2Y8230MSFfYcIGGOG_zBwvbTF-KlT7PcTptxOL1vOcVkd7lkdNlFN7-Y9wMq13CfGLP0TbPMCe8cfE5JGPoTqTISaeYhALM3SqbPbxZz3DaNPgGd-ekK13L9r0Lb9iKRY6eweogIeljDW2xhP05_A9ddl-7QMlksPFnwWDUgxSkoMVW35UjeOmT_M33g9G1iDx0FbG_GMQdTF4E5fh7-fW_-0Y3vSxqu5ftNUVns4UyKSEsu3mfPg0bpazApCLKCjpSRjsQZvhKVaxBoZ19sf9L7bQtszR5nk42DiveOLnDIE3GghwBANon21_fhEQkhsWimpuNslQgciav0xkgJMJdLNVOvuACqpvRDZIL8xQSKL3dlvDTZw6WV5G_91qappf_Xupm-E64aQ3AeDVnqz8lubwEFmZpmUU4zK8o4aw1xOV1w2LsSi1nm06b1oGcfk92LR8IHHnP6xr1HOzye_yd2u718CF6a9CxQA1QBaN0UvHDKENRBYuCGCdAG0xaUpsMCnn_tk8du-BUGx4ufk59jt-wHJnPi--yQNZZttGVRCj_NEuMAURwCrbOf1J6T6XSpToN1AZ8u9azFyxvO7QAB1cej4YYyN_LV_yrRjBr9hWxjlMS6xFO83lNNErq_95GnIfro_bWEkUhFMLOYiRg7_MDDVVx2WrJSHXihB4KKAMDP-3dDUxg45I6vEqu3o4b5rT92Iduf9RxBwPcSdWqAGr0IGlKWe0I9dZBWR-oatTK-E_k2Agzm8F-JKaRLT2l0EqiT5q_GLj5JwkoacwXkWeA26YAIV3zEAVt6zJRUNxRqzh25MfK1NtDc0pbozRaRl93JLMRiZGQldvcr3UhXDHUzz5mI9wLiBgK3u6ep74oeSyhWLxmw0LwflFim1aU-UT1kDaaiwFTDV7ZPZuit96NHppyReB2kXBidlPe5V18MiBhVXItbxb7MnS1kPcVLBWq2Xu_U6TLLL2tpvGE0_OHq6R3k14wNyklstSSWwMyY8Qpr7_1j3a2m8RZSyHKKW-RjDbev0LuH7TJacQGUPivAqbowGSMzk_nmzMDHNQbtbkgsAx_kkywyP_1kaxXXHGm0l-Vuw1QT-ryNh5jY5XOjGm0yOkMQTa_7e3s5qAO5hYA5cZ8fxEIlpTijuBuWuQRKlvCraZPTWazLNLVJK9tszLeamlSdunE90Bh3CXWZdn3oYlPlVe5NBlB9rnVv3AeG0sJmUEUAD3w33JxMdfleYWKhNKb9G2kSG53Uog7EUadR_u-kLpWMGg794Fx97q5xTE7UMjW_CZGw51yQ6x1DU5Be_AfpKqNDKyRE0Q6QsYbi6ejNwBffDXhEqUDoP_SDMSM71Vokxiy5BGGh5PpQiUlrQsACPS32D4zNZRqTermmhWz8nFQgqMfsTYzGPRDpkkQmOXD6wnMv2vjLrx_x7enO0qxW0OX49eRRbqMqMVpOMfiOVZZyiRKUYP31uQ1frFAklhDwdLAekx3PoTuAL0nRTwSYwyCpJD0tuDdmpyEUWI50i4G83ar4UQPHyktIvGTJyhk1RnZcjFU4J5DzrtHBs4KzCwsNNPIniqX57qPjFgpEMEqGFknkhIcirUJv1CTOEr_U-SvQSeScnYbgSNBUV8iKpU7WZqavaP2KdvZoKEhERZIuIq30_7y0)
+### 插件开发
+- **plugin-dev** - 最全面的开发套件，包含 `agent-creator`、`skill-reviewer` 等工具
+- **skill-creator** - Skill 专用创建和优化工具
 
-## 功能描述
+### 代码质量
+- **pr-review-toolkit** - PR 全面审查（6个专业 Agents）
+- **code-simplifier** - 代码简化和重构
 
-#### Skills 组件
+### 工作流
+- **commit-commands** - 简化 Git 提交流程
+- **feature-dev** - 功能开发全流程助手
 
-| 组件               | 用途                                                               |
-| ------------------ | ------------------------------------------------------------------ |
-| 需求文档规范 Skill | 用于规范化转化原始需求文档                                         |
-| 设计文档规范 Skill | 用于规范化转化原始设计文档                                         |
-| 手工案例 Skill     | 用于收集规范化产出物后，生成手工案例                               |
-| 接口自动化 Skill   | 用于用产出的手工案例，结合自动化项目产出自动化案例                 |
-| 需求实现检查 Skill | 用于检查需求与实现的对齐度，顺便输出风险点、测试建议、文档质量评分 |
+**官方仓库**: [claude-plugins-official](https://github.com/anthropics/claude-plugins-official)
 
-#### MCP 组件
+## 📚 相关文档
 
-| 组件          | -                                                        |
-| ------------- | -------------------------------------------------------- |
-| CML MCP       | 用来梳理历史案例，以便于转成规范化可参考的历史案例       |
-| Udoc2Code MCP | 用于生成与更新接口自动化底层 service 接口代码            |
-| Code Diff MCP | 用于比对迭代代码差异，产出差异报告，用于检查开发实现内容 |
+- [qa-toolkit 使用指南](./plugins/qa-toolkit/README.md)
+- [Claude Code 文档](https://claude.ai/code)
 
-## 🔄 流程分析
+## 🤝 贡献
 
-### 第一阶段：原始产出物规范化
+欢迎提交 Issue 和 Pull Request！
 
-**目标**: 将各种原始文档标准化
+## 📄 许可证
 
-- **输入**: 原始需求文档、设计文档、开发代码、历史案例
-- **处理工具**:
-  - 需求文档规范 Skill (可选增加可测性检查)
-  - 设计文档规范 Skill
-  - CML MCP (提供历史案例信息，可选案例质量评分)
-  - Code Diff MCP (代码差异分析，可选影响范围分析)
-- **输出**: 标准化的需求文档、设计文档、历史案例、代码变更分析报告
-- **质量保证**: AI+人工复核(抽检 20%)
+MIT License
 
-### 第二阶段：手工案例生成
+## 👥 团队
 
-**目标**: 智能生成结构化测试案例
+WF Bank Test Team
 
-- **输入**: 全部规范化产出物
-- **处理**: 手工案例 Skill 智能生成
-- **输出**: 结构化格式的手工测试案例
+---
 
-### 第三阶段：自动化执行
-
-**目标**: 将手工案例转换为自动化案例并执行
-
-- **流程**: 手工案例 → 自动化案例 → 执行结果分析
-- **输出**: 执行结果分析，包括：
-  - 覆盖率统计
-  - 缺陷反馈
-  - 案例优化建议
-
-### 第四阶段：辅助工具增强
-
-**目标**: 通过辅助工具提升自动化案例质量
-
-- **增强工具**:
-
-  - Udoc2Code MCP: 生成接口代码
-  - Proxy MCP: 提供抓包接口逻辑
-
-- **质量检查功能**:
-  - 需求实现检查 Skill: 验证需求与实现一致性，提供质量反馈
-    - 输出文档质量评分 (A/B/C/D)
-    - 需求实现对齐度检查
-    - 测试重点建议和风险点标注
-    - 为整体测试流程提供质量保障
-
-## 📅 实施计划
-
-### Q1 上半（Q1.1）- 基础自动化能力 🟦
-
-- 接口自动化 Skill
-- 手工案例 Skill
-- CML MCP
-- Udoc2Code MCP
-
-### Q1 下半/Q2 上半（Q1.2/Q2.1）- 文档规范与案例生成 🟩
-
-- 需求文档规范 Skill
-- 设计文档规范 Skill
-
-### Q2 下半（Q2.2）- 质量检查与分析增强 🟨
-
-- 需求实现检查 Skill
-- Code Diff MCP
-- Proxy MCP
-
-## 🎯 核心价值
-
-1. **标准化流程**: 将原始文档转换为标准化格式，确保信息一致性
-2. **智能生成**: AI 驱动的测试案例自动生成，提高案例质量和覆盖度
-3. **质量保证**: 多维度的需求实现检查，降低缺陷泄漏风险
-4. **自动化执行**: 从手工案例到自动化执行的完整链路，提升执行效率
-5. **持续优化**: 基于执行结果的案例优化建议，形成闭环反馈
-
-## ⏰ 开发与投产计划
-
-### 📋 投产时间节点 (基于 2026 年，1 月 27 日后启动)
-
-- **2026 年 4 月投产目标**: 所有 Skills 和 CML、Udoc2Code MCP 上线 (分批投产)
-- **2026 年 6 月前**: Code Diff MCP 投产
-- **2026 年 Q2 目标**: 功能优化和增强 (6 月底)
-
-### 🚀 全面开发计划 (1 月 27 日后启动)
-
-**开发周期**:
-
-- **Skills+CML/Udoc2Code MCP**: 2026 年 2 月-4 月 (2 个月)
-- **Code Diff MCP**: 2026 年 2 月-6 月 (4 个月)
-
-#### ⏰ 时间投入分析
-
-- **培训期**: 1 月 27 日-31 日 (5 天紧急培训)
-- **春节假期**: 2 月 16 日-28 日 (13 天)
-- **额外休假**: 人均 3 天
-- **工作日计算**:
-  - 2 月工作日: 10 天 (去除春节假期和周末)
-  - 3 月工作日: 22 天
-  - 4 月工作日: 22 天
-  - 5 月前半月工作日: 11 天
-  - 总计: 65 个工作日
-- **重要约束**: 所有参与者为测试工程师，项目投入仅占总时间 10%
-- **实际可投入**: 每人约 6.5 个工作日 (65 天 ×10%)
-
-#### Skills 组件
-
-| 组件               | 负责人 | 实际投入     | 开发周期 | 投产时间   | 复核人 |
-| ------------------ | ------ | ------------ | -------- | ---------- | ------ |
-| 手工案例 Skill     | 宇宸   | 4.4 天 (10%) | 2 个月   | 4 月 10 日 | 陈贝   |
-| 需求文档规范 Skill | 陈贝   | 4.4 天 (10%) | 2 个月   | 4 月 10 日 | 泉政   |
-| 设计文档规范 Skill | 陈贝   | 4.4 天 (10%) | 2 个月   | 4 月 10 日 | 泉政   |
-| 接口自动化 Skill   | 泉政   | 4.4 天 (10%) | 2 个月   | 4 月 10 日 | 奕翔   |
-| 需求实现检查 Skill | 宇豪   | 4.4 天 (10%) | 2 个月   | 4 月 10 日 | 慧芳   |
-
-_注：泉政负责接口自动化 Skill 的开发和 CML MCP 开发，同时复核需求和设计文档规范 Skills_
-_需求实现检查 Skill 与其他 Skills 同步开发投产_
-_实际投入：按 2 个月工作日约 44 天计算（去除周末），项目投入约 4.4 天(10%)_
-
-#### MCP 组件
-
-| 组件          | 负责人 | 实际投入     | 开发周期 | 投产时间   |
-| ------------- | ------ | ------------ | -------- | ---------- |
-| CML MCP       | 泉政   | 4.4 天 (10%) | 2 个月   | 4 月 10 日 |
-| Udoc2Code MCP | 鼎中   | 4.4 天 (10%) | 2 个月   | 4 月 10 日 |
-| Code Diff MCP | 奕翔   | 8.8 天 (10%) | 4 个月   | 6 月 15 日 |
-
-_实际投入：按开发周期工作日计算（去除周末），项目投入占总时间 10%_
-_CML、Udoc2Code MCP: 2 个月约 44 个工作日，投入 4.4 天_
-_Code Diff MCP: 4 个月约 88 个工作日，投入 8.8 天_
-
-### 🎯 调整后开发策略 (1 月 27 日启动)
-
-**2 月上半月 (2 月 1-15 日)**:
-
-- **正式启动**: 基于 1 月底紧急培训，正式进入开发阶段
-- **MCP 组开发**: 泉政(CML)、鼎中(Udoc2Code)、奕翔(Code Diff)启动 MCP 开发
-- **Skills 设计**: 陈贝、宇宸进行 Skills 设计和架构准备
-
-**春节假期 (2 月 16-28 日)**:
-
-- **弹性安排**: 部分人员可选择性进行设计工作
-- **远程协调**: 维持必要的技术沟通
-
-**3 月冲刺 (3 月 1-31 日)**:
-
-- **全面并行**: 所有组件进入开发高峰期
-- **每周 Review**: 定期进度 Review，加强进度管控
-- **技术支持**: 鼎中为 Skills 开发提供技术指导
-
-**4 月投产冲刺 (4 月 1-30 日)**:
-
-- **集成测试**: 组件间集成和系统测试
-- **分批投产**: 按完成度分批上线
-- **4 月 10 日**: 所有 Skills 和主要 MCP 集中投产
-  - 需求文档规范 Skill (陈贝负责开发，泉政负责复核)
-  - 设计文档规范 Skill (陈贝负责开发，泉政负责复核)
-  - 手工案例 Skill (宇宸负责开发，陈贝负责复核)
-  - 接口自动化 Skill (泉政负责开发，奕翔负责复核)
-  - 需求实现检查 Skill (宇豪负责开发，慧芳负责复核)
-  - CML MCP (泉政负责)
-  - Udoc2Code MCP (鼎中负责)
-
-**Code Diff MCP 延期开发**:
-
-- **4-6 月**: 奕翔继续 Code Diff MCP 开发 (技术复杂度最高)
-- **6 月 15 日**: Code Diff MCP 最终投产
-
-### 📈 Q2 优化阶段
-
-**Q2 (4-6 月)**: 功能增强和用户反馈优化
-
-## 🔮 远期展望
-
-### 系统优化和扩展 (后期规划)
-
-随着核心功能的稳定运行和团队经验的积累，可以考虑以下增强方向：
-
-- **流程优化**: 基于使用数据优化各阶段的处理效率
-- **质量提升**: 增强 AI 模型的准确性和智能化水平
-- **功能扩展**: 支持更多类型的测试场景和文档格式
-- **集成增强**: 与更多外部工具和平台的深度集成
-
-## 📚 Claude 培训计划 (开发前必修)
-
-### 🎯 1 月底 Claude 培训 (2026 年 1 月 27 日-31 日启动)
-
-**培训周安排**:
-
-- **1 月 27 日**: 准备工作，环境检查和材料准备
-- **1 月 28 日**: 第 1 次培训会话 (1.5 小时)
-- **1 月 29 日**: 自主学习和实践时间
-- **1 月 30 日**: 第 2 次培训会话 (1.5 小时)
-- **1 月 31 日**: 培训总结和开发准备
-
-#### 第 1 次培训会话 (1.5 小时) - Claude 基础能力
-
-**时间**: 1 月 28 日下午 14:00-15:30 (鼎中主讲)
-**参与者**: 全员
-
-**培训内容**:
-
-- **Claude Code CLI 基础操作** (30 分钟)
-
-  - 基本命令和工作流
-  - 项目初始化和管理
-  - 代码生成和编辑能力
-
-- **Claude 开发环境搭建** (30 分钟)
-
-  - VS Code + Claude 扩展安装配置
-  - API 密钥设置和认证
-  - 开发工具链集成
-
-- **Claude 对话与 Prompt 基础** (30 分钟)
-  - 有效 Prompt 编写技巧
-  - Claude 能力边界和最佳实践
-  - 调试和问题排查方法
-
-#### 第 2 次培训会话 (1.5 小时) - Skills 与 MCP 开发
-
-**时间**: 1 月 30 日下午 14:00-15:30 (鼎中主讲)
-**参与者**: 全员
-
-**培训内容**:
-
-- **Claude Skills 开发** (45 分钟)
-
-  - Skills 框架原理和架构
-  - 业务逻辑到 AI 逻辑转换
-  - Skill 创建、测试和部署流程
-
-- **Claude MCP 开发** (45 分钟)
-  - MCP 框架和通信机制
-  - 外部系统集成方法
-  - Claude API 使用和集成实践
-
-### 📋 培训目标
-
-**必达标准**:
-
-- 熟练使用 Claude Code CLI 进行开发
-- 掌握 Claude Prompt 工程基础
-- 了解 Skills 和 MCP 开发流程
-- 能够独立搭建开发环境
-
-### 🚀 培训后支持 (2 月开始)
-
-**持续指导** (鼎中提供):
-
-- **每周二**: 技术答疑会 (1 小时)
-- **问题升级**: 重大技术问题即时支持
-- **Code Diff MCP 专项**: 4-6 月期间为奕翔提供深度技术指导
-
-## 🤝 协作机制
-
-### 项目管理
-
-- **每周例会**: 嘉龙主持，同步进度和解决问题
-- **技术评审**: 鼎中主导技术架构组评审
-- **跨组协调**: 鼎中负责技术架构统一性
-- **组件集成**: 鼎中负责 MCP 组件间技术集成和 Skills 业务逻辑集成
-
-### 培训与支持
-
-- **培训答疑**: 鼎中每周二答疑时间，解决开发中的技术问题
-- **技术架构组指导**: 鼎中负责 MCP 开发指导和技术攻关
-
-### 质量保证
-
-- **代码 Review**: 鼎中负责技术架构组 Review
-- **集成测试**: 每个里程碑节点进行集成测试，鼎中负责技术架构验证
-- **进度把控**: 嘉龙负责整体项目统筹，确保 4 月中旬分批投产
-- **质量审核**: 嘉龙负责项目整体质量审核和验收
-- **假期协调**: 春节期间保持必要的远程协作和进度跟踪
-
-## 🚀 预期效果
-
-- **效率提升**: 测试案例生成效率提升 80%以上
-- **质量保证**: 需求覆盖率达到 95%以上
-- **风险控制**: 提前识别并标注测试重点和风险点
-- **成本降低**: 减少人工重复性工作，释放测试人员创造力
+**版本**: v1.0.0 | **更新**: 2026-03-11 | **维护**: WF Bank Test Team

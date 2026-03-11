@@ -1,8 +1,0 @@
-{
-  "name": "mcp-builder",
-  "description": "MCP 服务器构建工具 - 快速搭建和部署 Model Context Protocol 服务器",
-  "author": {
-    "name": "WF Bank Test Team",
-    "email": "test-team@example.com"
-  }
-}
