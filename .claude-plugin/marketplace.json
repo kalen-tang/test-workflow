@@ -11,16 +11,37 @@
     {
       "name": "skill-creator",
       "description": "skill creation",
-      "source": "./claude/",
+      "source": "./",
       "strict": false,
-      "skills": ["./skills/skill-creator", "./skills/mcp-builder"]
+      "skills": ["./skills/skill-creator"]
     },
     {
-      "name": "qa-builder",
-      "description": "Collection of qa builder",
-      "source": "./qa/",
+      "name": "mcp-builder",
+      "description": "Collection of example smcp-builder",
+      "source": "./",
       "strict": false,
-      "skills": ["./skills/skill-km-analysis", "./skills/skill-requirement-implementation-check", "./skills/skill-api-generator"]
+      "skills": ["./skills/mcp-builder"]
+    },
+    {
+      "name": "skill-km-analysis",
+      "description": "分析开发方案km文档，生成测试左移方案",
+      "source": "./",
+      "strict": false,
+      "skills": ["./skills/skill-km-analysis"]
+    },
+    {
+      "name": "skill-requirement-implementation-check",
+      "description": "对比需求文档、设计文档、代码差异分析文档生成需求实现检查报告",
+      "source": "./",
+      "strict": false,
+      "skills": ["./skills/skill-requirement-implementation-check"]
+    },
+    {
+      "name": "skill-api-generator",
+      "description": "分析测试左移方案，生成接口用例",
+      "source": "./",
+      "strict": false,
+      "skills": ["./skills/skill-api-generator"]
     }
   ]
 }
