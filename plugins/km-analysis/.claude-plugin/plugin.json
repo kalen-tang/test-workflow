@@ -1,8 +1,0 @@
-{
-  "name": "km-analysis",
-  "description": "开发方案分析工具 - 分析 KM 文档并生成测试左移方案，识别潜在风险和测试点",
-  "author": {
-    "name": "WF Bank Test Team",
-    "email": "test-team@example.com"
-  }
-}

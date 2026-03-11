@@ -32,38 +32,14 @@
       "strict": false
     },
     {
-      "name": "km-analysis",
-      "description": "开发方案分析工具 - 分析 KM 文档并生成测试左移方案，识别潜在风险和测试点",
+      "name": "qa-toolkit",
+      "description": "银行测试自动化工具集 - 从需求分析到用例生成的完整测试左移解决方案，包含测试左移分析、需求验证和API用例生成三大核心能力",
       "version": "1.0.0",
       "author": {
         "name": "WF Bank Test Team",
         "email": "test-team@example.com"
       },
-      "source": "./plugins/km-analysis",
-      "category": "testing",
-      "strict": false
-    },
-    {
-      "name": "requirement-check",
-      "description": "需求实现检查工具 - 对比需求文档、设计文档和代码差异，生成需求实现检查报告",
-      "version": "1.0.0",
-      "author": {
-        "name": "WF Bank Test Team",
-        "email": "test-team@example.com"
-      },
-      "source": "./plugins/requirement-check",
-      "category": "testing",
-      "strict": false
-    },
-    {
-      "name": "api-generator",
-      "description": "接口用例生成器 - 基于测试左移方案自动生成 API 测试用例",
-      "version": "1.0.0",
-      "author": {
-        "name": "WF Bank Test Team",
-        "email": "test-team@example.com"
-      },
-      "source": "./plugins/api-generator",
+      "source": "./plugins/qa-toolkit",
       "category": "testing",
       "strict": false
     }
