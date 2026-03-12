@@ -8,30 +8,6 @@
   },
   "plugins": [
     {
-      "name": "skill-creator",
-      "description": "Skill 创建和管理工具 - 用于创建、优化和测试 Claude Code Skills",
-      "version": "1.0.0",
-      "author": {
-        "name": "WF Bank Test Team",
-        "email": "test-team@example.com"
-      },
-      "source": "./plugins/skill-creator",
-      "category": "development",
-      "strict": false
-    },
-    {
-      "name": "mcp-builder",
-      "description": "MCP 服务器构建工具 - 快速搭建和部署 Model Context Protocol 服务器",
-      "version": "1.0.0",
-      "author": {
-        "name": "WF Bank Test Team",
-        "email": "test-team@example.com"
-      },
-      "source": "./plugins/mcp-builder",
-      "category": "development",
-      "strict": false
-    },
-    {
       "name": "qa-toolkit",
       "description": "银行测试自动化工具集 - 从需求分析到用例生成的完整测试左移解决方案，包含测试左移分析、需求验证和API用例生成三大核心能力",
       "version": "1.0.0",
