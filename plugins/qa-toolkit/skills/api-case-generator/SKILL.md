@@ -204,6 +204,10 @@ class Test{InterfaceName}:
         # 步骤2: 构造请求
         user_id = step.get("user_id", "")
         header = {{"userid": user_id, "language": "ca"}}
+
+        # ⚠️ 重要: 必须使用 model.{ModelClassName}() 实例化参数对象
+        # ❌ 错误写法: activity_sc.controller.method_to_model("activity_za_zone_get_verify_code")()
+        # ✅ 正确写法: model.ActivityZaZoneGetVerifyCode()
         params = model.{ModelClassName}()
         params.json_data = {{
             {request_params}
@@ -390,6 +394,65 @@ echo "测试执行完成!"
 2. 读取该服务的`__init__.py`获取接口映射
 3. 查找或提示创建对应的scenario类
 4. 自动生成适配配置
+
+## ⚠️ 关键规范：Model类实例化方式
+
+**极其重要**: 生成测试代码时，必须使用以下正确方式实例化Model类：
+
+### ✅ 正确写法 (必须使用)
+
+```python
+# 1. 导入model模块
+from service.zabank_imc_activity_service import model
+
+# 2. 直接使用Model类实例化
+params = model.ActivityZaZoneGetVerifyCode()
+params.json_data = {
+    "revIdType": "EMAIL",
+    "revId": "test@example.com",
+    "redeemCode": "ABC123"
+}
+
+# 3. 调用接口
+resp = activity_sc.controller.activity_za_zone_get_verify_code(load=params, headers=header)
+```
+
+### ❌ 错误写法 (禁止使用)
+
+```python
+# ❌ 错误1: 使用 method_to_model 动态查找
+params = activity_sc.controller.method_to_model("activity_za_zone_get_verify_code")()
+
+# ❌ 错误2: 直接导入类但不通过model模块
+from service.zabank_imc_activity_service.model.activity_za_zone_get_verify_code import ActivityZaZoneGetVerifyCode
+params = ActivityZaZoneGetVerifyCode()
+```
+
+### 为什么必须使用正确写法?
+
+1. **代码可读性**: `model.ActivityZaZoneGetVerifyCode()` 直观清晰
+2. **IDE支持**: 静态导入可以获得自动补全和类型检查
+3. **维护性**: 重构时容易追踪和修改
+4. **性能**: 避免运行时动态查找的开销
+5. **符合Python最佳实践**: 明确的静态导入优于动态查找
+
+### Model类命名规则
+
+从接口方法名转换为Model类名：
+
+```python
+# 接口方法名(snake_case) -> Model类名(PascalCase)
+activity_za_zone_get_verify_code  →  ActivityZaZoneGetVerifyCode
+activity_za_zone_entry_page       →  ActivityZaZoneEntryPage
+activity_za_zone_homepage         →  ActivityZaZoneHomepage
+activity_za_zone_verify           →  ActivityZaZoneVerify
+activity_za_zone_quit             →  ActivityZaZoneQuit
+```
+
+**转换算法**:
+1. 按下划线分割: `["activity", "za", "zone", "get", "verify", "code"]`
+2. 每个单词首字母大写: `["Activity", "Za", "Zone", "Get", "Verify", "Code"]`
+3. 拼接: `ActivityZaZoneGetVerifyCode`
 
 ## 智能特性
 
@@ -853,6 +916,8 @@ class TestZaZoneGetVerifyCode:
 
         # 步骤2: 构造请求(使用.get()方法获取,支持环境变量替换)
         header = {"language": "ca"}
+
+        # ✅ 正确写法: 直接使用 model.{ModelClassName}() 实例化
         params = model.ActivityZaZoneGetVerifyCode()
         params.json_data = {
             "revIdType": step.get("revIdType", "EMAIL"),
@@ -1191,6 +1256,13 @@ env:
   - ✅ 测试代码使用data[0]获取数据
   - ✅ 必须在conftest.py添加scenario fixture
   - ✅ 明确YAML文件命名规范
+- **v1.5** (2026-03-11): 【关键修复】修正Model类实例化方式
+  - ❌ 移除错误的动态查找方式: `activity_sc.controller.method_to_model("method_name")()`
+  - ✅ 强制使用正确的静态导入方式: `model.{ModelClassName}()`
+  - ✅ 新增专门章节说明Model类实例化规范
+  - ✅ 添加命名规则转换算法说明
+  - ✅ 在模板和示例中添加明确的注释说明
+  - 📌 此修复解决了代码可读性差、IDE支持不足等问题
 - 后续根据项目结构变化和用户反馈持续优化
 
 ---
