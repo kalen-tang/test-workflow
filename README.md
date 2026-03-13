@@ -1,20 +1,39 @@
 # WF Bank Test - 银行测试自动化工具集
 
-[![Version](https://img.shields.io/badge/version-1.0.0-blue.svg)](https://github.com/your-org/wf-bank-test)
+[![Version](https://img.shields.io/badge/version-1.1.0-blue.svg)](https://github.com/your-org/wf-bank-test)
 [![Claude Code](https://img.shields.io/badge/Claude-Code-purple.svg)](https://claude.ai/code)
+[![Status](https://img.shields.io/badge/status-active-success.svg)](https://github.com/your-org/wf-bank-test)
+[![Updated](https://img.shields.io/badge/updated-2026--03--13-blue.svg)](https://github.com/your-org/wf-bank-test)
 
 ## 📑 目录
 
 - [📊 系统概述](#-系统概述)
-- [🚀 快速开始](#-快速开始)
+- [🚀 快速开始](#-快速开始) ⭐ **最快上手：`/qa-quick ./docs/plan.md`**
 - [🔄 完整工作流](#-完整工作流)
 - [🔧 系统组件详解](#-系统组件详解)
 - [📅 实施计划](#-实施计划)
-- [📚 附录](#-附录)
+- [📚 附录](#-附录) - 包含优化总结、工作流命令、引用路径更新报告
+
+## 💡 快速上手
+
+**新用户最快开始方式**：
+```bash
+/qa-quick ./docs/your-plan.md
+```
+一条命令完成：KM文档分析 → 测试左移报告 → API自动化用例生成 ✅
+
+---
 
 ## 📊 系统概述
 
 基于 Claude Code 插件系统构建的**银行测试自动化工具集**,提供从需求分析到用例生成的全流程测试左移解决方案,建立从需求到测试执行的完整自动化流水线,大幅提升测试效率和质量。
+
+### ✨ 最新更新 (v1.1.0 - 2026-03-13)
+
+- ⭐ **新增工作流命令**: `/qa-quick` 一键执行快速模式（效率提升75%）
+- 🔧 **新增辅助命令**: `/qa-status`、`/qa-config`、`/qa-help`
+- 📚 **文档规范化**: references 文档编号命名，引用路径全部更新
+- 📖 **完善文档**: 3份优化总结报告，详细使用指南
 
 ### 🏗️ 系统架构
 
@@ -35,7 +54,13 @@ wf_bank_test/
 │   └── qa-toolkit/               # 测试自动化工具集
 │       ├── .claude-plugin/
 │       │   └── plugin.json
-│       ├── skills/
+│       ├── commands/              # ✅ 工作流命令
+│       │   ├── status.md          # /qa-status
+│       │   ├── config.md          # /qa-config
+│       │   ├── help.md            # /qa-help
+│       │   ├── quick-workflow.md  # /qa-quick ⭐
+│       │   └── full-workflow.md   # /qa-full 🚧
+│       ├── skills/                # 核心能力
 │       │   ├── shift-left-analyzer/
 │       │   ├── requirement-validator/
 │       │   └── api-case-generator/
@@ -43,7 +68,9 @@ wf_bank_test/
 │
 ├── result/                       # 输出结果
 ├── architecture.puml             # 系统架构图
-└── README.md                     # 本文档
+├── OPTIMIZATION_SUMMARY.md       # 优化总结
+├── WORKFLOW_COMMANDS_SUMMARY.md  # 工作流命令总结
+└── REFERENCES_UPDATE_REPORT.md   # 引用路径更新报告
 ```
 
 ### 🎯 核心价值
@@ -67,23 +94,55 @@ wf_bank_test/
 
 ### 🎯 qa-toolkit 测试工具集
 
-当前已实现三个核心 Skills，支持**快速模式**和**完整模式**两种独立的测试左移工作流：
+当前已实现三个核心 Skills 和五个便捷 Commands，支持**快速模式**和**完整模式**两种测试左移工作流：
 
-| Skill | 功能 | 适用模式 | 使用命令 | 状态 |
-| ----- | ---- | ------ | -------- | ---- |
-| **shift-left-analyzer** | 分析 KM 文档，生成测试左移分析报告 | 快速模式 | `/shift-left-analyzer ./docs/plan.md` | ✅ |
-| **api-case-generator** | 生成 API 测试用例代码和数据 | 快速模式 / 完整模式 | `/api-case-generator ./reports/analysis.md` | ✅ |
-| **requirement-validator** | 验证需求实现完整性，生成质量评分报告 | 完整模式 | `/requirement-validator` | ✅ |
+#### ⚡ 工作流命令（推荐使用）
 
-**推荐工作流**：
-- ⚡ **快速模式**（接口测试，2步到位）：`shift-left-analyzer` → `api-case-generator`
-- 📊 **完整模式**（全面质量保证，四阶段流程）：规范化 → `requirement-validator` → 手工案例生成 → `api-case-generator`
+| 命令 | 功能 | 使用方式 | 状态 |
+| ---- | ---- | ------ | ---- |
+| **`/qa-quick`** ⭐ | 一键执行快速模式 | `/qa-quick ./docs/plan.md` | ✅ 立即可用 |
+| **`/qa-status`** | 查看工具状态 | `/qa-status` | ✅ 可用 |
+| **`/qa-config`** | 配置工具参数 | `/qa-config mode quick` | ✅ 可用 |
+| **`/qa-help`** | 显示帮助信息 | `/qa-help` | ✅ 可用 |
+| **`/qa-full`** | 完整模式工作流 | `/qa-full ./project-root` | 🚧 开发中 |
 
-> 💡 详细使用说明请参考 [qa-toolkit 使用指南](./plugins/qa-toolkit/README.md)
+#### 🔧 核心 Skills（高级使用）
+
+| Skill | 功能 | 使用命令 | 状态 |
+| ----- | ---- | -------- | ---- |
+| **shift-left-analyzer** | 分析 KM 文档，生成测试左移分析报告 | `/shift-left-analyzer ./docs/plan.md` | ✅ |
+| **api-case-generator** | 生成 API 测试用例代码和数据 | `/api-case-generator ./reports/analysis.md` | ✅ |
+| **requirement-validator** | 验证需求实现完整性，生成质量评分报告 | `/requirement-validator` | ✅ |
+
+#### 🎯 推荐工作流
+
+**⚡ 快速模式（推荐）** - **一条命令完成**：
+```bash
+/qa-quick ./docs/za-zone-development.md
+```
+等价于手动执行：`shift-left-analyzer` → `api-case-generator`
+
+**📊 完整模式（开发中）** - 四阶段流程：
+- 规范化 → `requirement-validator` → 手工案例生成 → `api-case-generator`
+- 当前替代方案：`/requirement-validator` + `/qa-quick ./docs/plan.md`
+
+> 💡 **新用户建议**：一键使用 `/qa-quick`，高级用户可单独使用 Skills
 
 ### 📝 使用示例
 
-#### 快速模式使用示例
+#### 一键快速模式（推荐）
+
+```bash
+# 一条命令完成快速模式测试左移
+/qa-quick ./docs/development-plan.md
+
+# 自动执行：
+# 1. 分析 KM 开发方案
+# 2. 生成 API 自动化测试用例
+# 3. 显示执行结果
+```
+
+#### 分步使用示例（高级）
 
 ```bash
 # 步骤 1: 分析 KM 开发方案
@@ -93,17 +152,18 @@ wf_bank_test/
 /api-case-generator ./result/test-analysis.md
 ```
 
-#### 完整模式使用示例（部分可用）
+#### 完整模式使用示例（组合使用）
 
 ```bash
-# 第二阶段：需求实现检查（当前可用）
+# 完整模式替代方案（当前建议）：
+# 1. 需求实现检查
 /requirement-validator
 
-# 第四阶段：自动化用例生成（当前可用）
-/api-case-generator ./result/manual-cases.md
+# 2. 一键执行快速模式
+/qa-quick ./docs/development-plan.md
 
-# 注：第一阶段（规范化）和第三阶段（手工案例生成）的工具正在开发中
-# 当前需要手动准备规范化文档作为输入
+# 完整模式工作流（开发中，预计 2026-04-20）：
+# /qa-full ./project-root
 ```
 
 ## 🔄 完整工作流
@@ -112,17 +172,19 @@ wf_bank_test/
 
 系统支持两种独立的测试左移模式，根据项目需求和文档完整性选择合适的模式。
 
-#### 模式一：快速模式 (当前可用) ✅
+#### 模式一：快速模式 (一键完成) ✅
 
 **适用场景**：接口测试为主，快速迭代，仅有 KM 开发方案
 
 ```
-┌─────────────────────────────────────────┐
-│     快速模式 - 聚焦接口测试              │
-└─────────────────────────────────────────┘
+┌──────────────────────────────────────────┐
+│     快速模式 - 一键完成接口测试           │
+└──────────────────────────────────────────┘
 
 📄 KM 开发方案文档
         ↓
+🔄 /qa-quick 工作流命令 ⭐
+        ↓ [自动执行]
 📊 shift-left-analyzer (负责人: 奕翔)
    - 提取接口信息（微服务路径、参数、响应）
    - 生成单接口测试用例建议
@@ -132,7 +194,7 @@ wf_bank_test/
    - 接口信息汇总
    - 单接口测试用例（正常/异常/边界）
    - 场景测试用例（业务流程）
-        ↓
+        ↓ [自动检测路径]
 🧪 api-case-generator
    - 生成 Python 测试代码
    - 生成多环境测试数据（sit/auto_qe/uat）
@@ -144,10 +206,21 @@ wf_bank_test/
 ```
 
 **特点**：
-- ✅ 快速上手，2 步到位
-- ✅ 专注接口测试，效率高
-- ✅ 当前已完全可用
-- 💡 适合接口变更、快速迭代场景
+- ⭐ **一键完成**，无需手动执行多步
+- ✅ 自动检测中间文件路径，不易出错
+- ✅ 详细执行反馈和错误处理
+- ✅ 支持中断和恢复功能
+- 💡 最适合接口变更、快速迭代场景
+
+**使用方式**：
+```bash
+# 最简单：一条命令搞定
+/qa-quick ./docs/za-zone-development.md
+
+# 等价于手动执行：
+/shift-left-analyzer ./docs/za-zone-development.md
+/api-case-generator ./result/za_zone_测试左移分析报告.md
+```
 
 ---
 
@@ -232,12 +305,14 @@ wf_bank_test/
 
 | 维度 | 快速模式 | 完整模式 |
 |-----|---------|-----------|
+| **执行命令** | `/qa-quick ./docs/plan.md` ⭐ | `/qa-full ./project-root` 🚧 |
+| **执行步骤** | 1条命令（自动串联2个Skills） | 1条命令（自动串联4个阶段） |
 | **输入要求** | 仅需 KM 开发方案 | 需求 + 设计 + 代码 + 历史案例 |
-| **处理时间** | 短（2步） | 长（4阶段） |
+| **处理时间** | 短（10-20分钟） | 长（1-2小时） |
 | **测试覆盖** | 接口自动化测试 | 手工 + 自动化 + 需求验证 |
 | **质量保证** | 接口级验证 | 全流程验证（规范化→检查→生成→执行） |
 | **产出物** | API 自动化用例 | 检查报告 + 手工用例 + 自动化用例 |
-| **当前状态** | ✅ 可用 | 🚧 部分开发中 |
+| **当前状态** | ✅ 立即可用 | 🚧 开发中（预计 2026-04-20） |
 | **推荐场景** | 接口变更、快速迭代 | 新功能开发、重大变更 |
 | **与架构图关系** | 独立快速通道 | 对应架构图四阶段流程 |
 
@@ -445,11 +520,29 @@ api-case-generator ✅
 ### 当前进度 (截至 2026-03-13)
 
 #### ✅ 已完成 (Q1 上半)
+
+**核心 Skills**:
 - ✅ **shift-left-analyzer** - 测试左移分析器
 - ✅ **requirement-validator** - 需求验证器
 - ✅ **api-case-generator** - API用例生成器
 
+**工作流命令** (新增):
+- ✅ **`/qa-quick`** - 快速模式工作流 ⭐ 一键执行
+- ✅ **`/qa-status`** - 查看工具状态
+- ✅ **`/qa-config`** - 配置工具参数
+- ✅ **`/qa-help`** - 显示帮助信息
+
+**文档优化**:
+- ✅ **references 文档规范化命名**（添加编号前缀）
+- ✅ **SKILL.md 引用路径更新**（20处引用已全部更新）
+- ✅ **项目文档完善**（3份优化总结报告）
+
 #### 🚧 进行中 (Q1 下半 - 目标 4 月 20 日)
+
+**完整模式工作流**:
+- 🚧 **`/qa-full`** - 完整模式工作流命令（预留接口）
+
+**第一阶段组件** (规范化)
 
 **高优先级**（完整模式核心依赖）：
 - 🚧 **需求文档规范 Skill** - 需求文档规范化器 (陈贝负责)
@@ -503,6 +596,49 @@ api-case-generator ✅
 - **质量保证**: 代码 Review + 集成测试 + 用户验收
 
 ## 📚 附录
+
+### 📖 项目文档
+
+#### 核心文档
+- **[README.md](./README.md)** - 项目主文档（本文档）
+- **[architecture.puml](./architecture.puml)** - 系统架构图
+- **[plugins/qa-toolkit/README.md](./plugins/qa-toolkit/README.md)** - qa-toolkit 插件使用指南
+
+#### 优化总结文档 (2026-03-13 新增)
+- **[OPTIMIZATION_SUMMARY.md](./OPTIMIZATION_SUMMARY.md)** - 结构优化总结
+  - references 文档规范化命名
+  - Commands 目录创建
+  - api-case-generator 结构评估
+  - 优化前后对比
+
+- **[WORKFLOW_COMMANDS_SUMMARY.md](./WORKFLOW_COMMANDS_SUMMARY.md)** - 工作流命令总结
+  - `/qa-quick` 快速模式命令详解
+  - `/qa-full` 完整模式命令详解
+  - 用户体验提升分析
+  - 使用场景和最佳实践
+
+- **[REFERENCES_UPDATE_REPORT.md](./REFERENCES_UPDATE_REPORT.md)** - 引用路径更新报告
+  - 20处引用路径更新详情
+  - 文件重命名对照表
+  - 验证结果和后续建议
+
+#### Commands 文档
+- **[commands/status.md](./plugins/qa-toolkit/commands/status.md)** - `/qa-status` 命令文档
+- **[commands/config.md](./plugins/qa-toolkit/commands/config.md)** - `/qa-config` 命令文档
+- **[commands/help.md](./plugins/qa-toolkit/commands/help.md)** - `/qa-help` 命令文档
+- **[commands/quick-workflow.md](./plugins/qa-toolkit/commands/quick-workflow.md)** - `/qa-quick` 命令文档 ⭐
+- **[commands/full-workflow.md](./plugins/qa-toolkit/commands/full-workflow.md)** - `/qa-full` 命令文档 🚧
+
+#### Skills 文档
+- **[shift-left-analyzer/SKILL.md](./plugins/qa-toolkit/skills/shift-left-analyzer/SKILL.md)**
+  - [references/](./plugins/qa-toolkit/skills/shift-left-analyzer/references/) - 4个参考文档（已编号）
+  - [examples/](./plugins/qa-toolkit/skills/shift-left-analyzer/examples/) - 使用示例
+
+- **[requirement-validator/SKILL.md](./plugins/qa-toolkit/skills/requirement-validator/SKILL.md)**
+
+- **[api-case-generator/SKILL.md](./plugins/qa-toolkit/skills/api-case-generator/SKILL.md)**
+  - [references/](./plugins/qa-toolkit/skills/api-case-generator/references/) - 6个参考文档（已编号）
+  - [examples/](./plugins/qa-toolkit/skills/api-case-generator/examples/) - 使用示例
 
 ### 🔧 插件配置
 

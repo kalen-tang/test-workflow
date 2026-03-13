@@ -69,14 +69,14 @@ claude mcp add playwright npx @playwright/mcp@latest
 
 2. **微服务识别**：
    - 如果路径中不包含 `dmb`，则根据路径前缀自动识别所属微服务
-   - 微服务映射规则参见 `references/interface-validation.md`
+   - 微服务映射规则参见 `references/01-interface-validation.md`
 
 3. **完整路径格式**：
    - 标准格式：`微服务域名 + 接口路径`
    - 示例：`zabank_imc_activity_service/activity/list`
    - 如果文档中只提供了接口路径，需要根据映射规则补充微服务域名
 
-> 📖 **详细规则**：参见 `references/interface-validation.md` - 接口路径校验与微服务映射规则
+> 📖 **详细规则**：参见 `references/01-interface-validation.md` - 接口路径校验与微服务映射规则
 
 ### 4. 测试用例推荐
 
@@ -94,7 +94,7 @@ claude mcp add playwright npx @playwright/mcp@latest
 - 状态码验证（各种场景下的 HTTP 状态码）
 - 错误处理验证（异常情况下的错误响应格式）
 
-> 📖 **详细模式**：参见 `references/test-case-patterns.md` - 测试用例设计模式
+> 📖 **详细模式**：参见 `references/04-test-case-patterns.md` - 测试用例设计模式
 
 #### 场景测试用例
 
@@ -127,7 +127,7 @@ claude mcp add playwright npx @playwright/mcp@latest
    - 分析状态的可能流转路径
    - 识别状态流转的触发接口
 
-> 📖 **详细指南**：参见 `references/scenario-identification.md` - 场景测试用例识别指南
+> 📖 **详细指南**：参见 `references/03-scenario-identification.md` - 场景测试用例识别指南
 
 ## 工作流程
 
@@ -216,7 +216,7 @@ claude mcp add playwright npx @playwright/mcp@latest
 - 理由
 - 预计工时（可选）
 
-> 📖 **完整格式参考**：参见 `references/output-format.md` - 完整输出格式参考
+> 📖 **完整格式参考**：参见 `references/02-output-format.md` - 完整输出格式参考
 
 ## 最佳实践建议
 
@@ -275,10 +275,10 @@ claude mcp add playwright npx @playwright/mcp@latest
 ### 参考文件
 
 详细的技术参考和模式文档：
-- **`references/interface-validation.md`** - 接口路径校验与微服务映射规则
-- **`references/test-case-patterns.md`** - 测试用例设计模式
-- **`references/scenario-identification.md`** - 场景测试用例识别指南
-- **`references/output-format.md`** - 完整输出格式参考
+- **`references/01-interface-validation.md`** - 接口路径校验与微服务映射规则
+- **`references/04-test-case-patterns.md`** - 测试用例设计模式
+- **`references/03-scenario-identification.md`** - 场景测试用例识别指南
+- **`references/02-output-format.md`** - 完整输出格式参考
 
 ### 示例文件
 
