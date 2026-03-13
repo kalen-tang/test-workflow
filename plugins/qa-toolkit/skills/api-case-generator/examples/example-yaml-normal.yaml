@@ -1,0 +1,32 @@
+# data/za_zone/entry_page_01_joined.yaml
+# 正常场景示例: 已参与用户查询
+# 特点: 需要env配置,使用环境变量引用
+
+# ===== 环境配置部分 =====
+env:
+  sit:
+    # SIT环境测试账号 - 已参与ZA Zone活动的用户
+    joined_user_id: "2328059639100342784"
+    joined_customer_no: "8000361216"
+
+  auto_qe:
+    # AutoQE环境测试账号 - 已参与ZA Zone活动的用户
+    joined_user_id: "2358240469768503808"
+    joined_customer_no: "8000771073"
+
+  uat:
+    # UAT环境测试账号 - 已参与ZA Zone活动的用户
+    joined_user_id: "2351253385396617728"
+    joined_customer_no: "8090337081"
+
+# ===== 测试用例部分 (必须,且只包含1个case) =====
+tests:
+  - case: 已参与用户查询
+    data:
+      - step: 已参与用户查询活动状态
+        input:
+          user_id: ${joined_user_id}        # 使用${}引用环境变量
+          customer_no: ${joined_customer_no}
+        expected:
+          expected_code: "IA0000"           # 预期成功响应码
+        description: "用户已参与ZA Zone活动,查询返回活动状态、等级、进度等信息"
