@@ -1,7 +1,7 @@
 {
   "name": "qa-toolkit",
-  "description": "银行测试自动化工具集 - 从需求分析到用例生成的完整测试左移解决方案，包含测试左移分析、需求验证和API用例生成三大核心能力",
-  "version": "1.0.0",
+  "description": "银行测试自动化工具集 - 从需求分析到用例生成的完整测试左移解决方案，包含测试左移分析、需求验证、手工案例生成和API用例生成四大核心能力",
+  "version": "1.2.0",
   "author": {
     "name": "WF Bank Test Team",
     "email": "test-team@example.com"

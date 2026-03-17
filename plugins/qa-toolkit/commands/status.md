@@ -10,6 +10,7 @@ description: 查看 qa-toolkit 工具集当前状态和可用功能
 1. **列出所有可用 Skills**
    - shift-left-analyzer（测试左移分析器）
    - requirement-validator（需求验证器）
+   - manual-case-generator（手工测试案例生成器）
    - api-case-generator（API用例生成器）
 
 2. **检查工作模式**
@@ -30,9 +31,10 @@ description: 查看 qa-toolkit 工具集当前状态和可用功能
 🔧 qa-toolkit 工具集状态
 ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-✅ 可用 Skills (3个):
+✅ 可用 Skills (4个):
   • /shift-left-analyzer - 测试左移分析器
   • /requirement-validator - 需求验证器
+  • /qa-manual - 手工测试案例生成器
   • /api-case-generator - API用例生成器
 
 ⚡ 工作模式:
