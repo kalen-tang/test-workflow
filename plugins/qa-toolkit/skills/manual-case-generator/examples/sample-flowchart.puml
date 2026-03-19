@@ -1,0 +1,95 @@
+@startuml
+!theme materia
+
+title 搜索功能业务流程图
+
+|用户|
+start
+:打开APP首页;
+:查看搜索栏;
+note right: 搜索栏位于页面顶部
+
+:点击搜索栏;
+
+|系统|
+:跳转搜索页面;
+note right
+  URL: /search?scene=home
+  场景码: home
+end note
+
+|搜索页面|
+:搜索框自动获得焦点;
+:显示搜索历史;
+:显示热门搜索;
+
+|用户|
+if (选择历史或热门?) then (是)
+  :点击历史/热门关键词;
+  |系统|
+  :自动填充搜索框;
+else (否)
+  :手动输入关键词;
+endif
+
+:点击搜索按钮;
+
+|系统|
+if (关键词为空?) then (是)
+  :提示"请输入搜索关键词";
+  stop
+else (否)
+  :调用搜索接口;
+  note right
+    接口: /api/search
+    方法: POST
+    参数: keyword, page, pageSize
+  end note
+endif
+
+if (接口调用成功?) then (是)
+  if (有搜索结果?) then (是)
+    :返回搜索结果列表;
+    :保存搜索历史;
+
+    |用户|
+    :查看搜索结果;
+    :关键词高亮显示;
+
+    if (点击结果?) then (是)
+      |系统|
+      :跳转详情页;
+      stop
+    else (否)
+      if (滑动到底部?) then (是)
+        |系统|
+        :加载下一页;
+        if (还有更多数据?) then (是)
+          :追加结果到列表;
+        else (否)
+          :显示"已加载全部";
+        endif
+      endif
+    endif
+
+  else (否)
+    :显示"暂无搜索结果";
+    stop
+  endif
+
+else (否)
+  :显示"网络异常,请稍后重试";
+  :显示重试按钮;
+
+  |用户|
+  if (点击重试?) then (是)
+    |系统|
+    :重新调用搜索接口;
+  else (否)
+    stop
+  endif
+endif
+
+stop
+
+@enduml

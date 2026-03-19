@@ -5,7 +5,7 @@
 
 ## 📋 概述
 
-QA Toolkit 是一个完整的测试左移解决方案，提供从需求分析到用例生成的全流程自动化能力。通过三个核心 Skills 的协同工作，帮助测试团队在开发早期介入，提升测试效率和质量。
+QA Toolkit 是一个完整的测试左移解决方案，提供从需求分析到用例生成的全流程自动化能力。通过四个核心 Skills 的协同工作，帮助测试团队在开发早期介入，提升测试效率和质量。
 
 ## 🎯 核心能力
 
@@ -33,9 +33,10 @@ QA Toolkit 是一个完整的测试左移解决方案，提供从需求分析到
 🔧 qa-toolkit 工具集状态
 ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-✅ 可用 Skills (3个):
+✅ 可用 Skills (4个):
   • /shift-left-analyzer - 测试左移分析器
   • /requirement-validator - 需求验证器
+  • /qa-manual - 手工测试案例生成器
   • /api-case-generator - API用例生成器
 
 ⚡ 工作模式:
@@ -141,7 +142,10 @@ QA Toolkit 是一个完整的测试左移解决方案，提供从需求分析到
   2️⃣ /requirement-validator
      验证需求实现完整性，生成质量评分报告
 
-  3️⃣ /api-case-generator <报告路径>
+  3️⃣ /qa-manual <文档路径>
+     从需求文档生成手工测试案例（PlantUML流程图+MindMap）
+
+  4️⃣ /api-case-generator <报告路径>
      生成 API 测试用例代码和数据
 
 🚀 推荐工作流:
@@ -296,7 +300,34 @@ QA Toolkit 是一个完整的测试左移解决方案，提供从需求分析到
 
 ---
 
-#### 3. api-case-generator（API用例生成器）
+#### 3. qa-manual（手工测试案例生成器）
+
+**用途**: 从需求文档生成可视化的手工测试设计
+
+**功能**:
+- 📄 解析需求文档（支持 Markdown、Word、PDF、纯文本）
+- 📊 生成业务流程图（PlantUML Activity Diagram）
+- 🗺️ 生成测试功能点（PlantUML MindMap，三层）
+- 📋 生成详细测试案例（PlantUML MindMap，四层）
+- ✅ 应用命名规范（去掉"测试"后缀、动作与结果分离）
+
+**使用方式**:
+```bash
+# 从单个文档生成
+/qa-manual ./docs/requirement.md
+
+# 从多个文档生成（自动合并）
+/qa-manual ./docs/req1.md ./docs/req2.docx ./docs/req3.txt
+
+# 指定输出目录
+/qa-manual ./docs/requirement.md --output ./review
+```
+
+**输出**: 手工测试案例文档（Markdown格式，包含PlantUML代码）
+
+---
+
+#### 4. api-case-generator（API用例生成器）
 
 **用途**: 基于测试方案生成 API 测试用例
 
@@ -575,6 +606,7 @@ requirement-validator 需要配置文档目录，可以在 SKILL.md 中修改默
 
 **工作流命令**：
 - [/qa-quick 命令文档](./commands/quick-workflow.md) - 快速模式工作流 ⭐ 推荐
+- [/qa-manual 命令文档](./commands/manual-case.md) - 手工测试案例生成 ✅ 可用
 - [/qa-full 命令文档](./commands/full-workflow.md) - 完整模式工作流 🚧 开发中
 
 ### Skills 文档
@@ -585,6 +617,9 @@ requirement-validator 需要配置文档目录，可以在 SKILL.md 中修改默
   - [references/](./skills/shift-left-analyzer/references/) - 详细参考文档（4个文件）
   - [examples/](./skills/shift-left-analyzer/examples/) - 使用示例
 - [requirement-validator/SKILL.md](./skills/requirement-validator/SKILL.md)
+- [manual-case-generator/SKILL.md](./skills/manual-case-generator/SKILL.md)
+  - [references/](./skills/manual-case-generator/references/) - 详细参考文档（4个文件）
+  - [examples/](./skills/manual-case-generator/examples/) - 使用示例（5个文件）
 - [api-case-generator/SKILL.md](./skills/api-case-generator/SKILL.md)
   - [references/](./skills/api-case-generator/references/) - 详细参考文档（6个文件）
   - [examples/](./skills/api-case-generator/examples/) - 使用示例

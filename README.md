@@ -1,9 +1,9 @@
 # WF Bank Test - 银行测试自动化工具集
 
-[![Version](https://img.shields.io/badge/version-1.1.0-blue.svg)](https://github.com/your-org/wf-bank-test)
+[![Version](https://img.shields.io/badge/version-1.2.0-blue.svg)](https://github.com/your-org/wf-bank-test)
 [![Claude Code](https://img.shields.io/badge/Claude-Code-purple.svg)](https://claude.ai/code)
 [![Status](https://img.shields.io/badge/status-active-success.svg)](https://github.com/your-org/wf-bank-test)
-[![Updated](https://img.shields.io/badge/updated-2026--03--13-blue.svg)](https://github.com/your-org/wf-bank-test)
+[![Updated](https://img.shields.io/badge/updated-2026--03--17-blue.svg)](https://github.com/your-org/wf-bank-test)
 
 ## 📑 目录
 
@@ -28,7 +28,14 @@
 
 基于 Claude Code 插件系统构建的**银行测试自动化工具集**,提供从需求分析到用例生成的全流程测试左移解决方案,建立从需求到测试执行的完整自动化流水线,大幅提升测试效率和质量。
 
-### ✨ 最新更新 (v1.1.0 - 2026-03-13)
+### ✨ 最新更新 (v1.2.0 - 2026-03-17)
+
+- 🎉 **新增核心 Skill**: `manual-case-generator` 手工测试案例生成器
+- ⭐ **新增工作流命令**: `/qa-manual` 一键生成手工测试案例（PlantUML流程图+MindMap）
+- ✅ **完整模式第三阶段完成**: 打通手工案例生成流程
+- 📚 **完善文档**: 新增 manual-case-generator 完整参考文档和示例
+
+### 历史更新 (v1.1.0 - 2026-03-13)
 
 - ⭐ **新增工作流命令**: `/qa-quick` 一键执行快速模式（效率提升75%）
 - 🔧 **新增辅助命令**: `/qa-status`、`/qa-config`、`/qa-help`
@@ -59,10 +66,12 @@ wf_bank_test/
 │       │   ├── config.md          # /qa-config
 │       │   ├── help.md            # /qa-help
 │       │   ├── quick-workflow.md  # /qa-quick ⭐
+│       │   ├── manual-case.md     # /qa-manual
 │       │   └── full-workflow.md   # /qa-full 🚧
 │       ├── skills/                # 核心能力
 │       │   ├── shift-left-analyzer/
 │       │   ├── requirement-validator/
+│       │   ├── manual-case-generator/
 │       │   └── api-case-generator/
 │       └── README.md
 │
@@ -94,13 +103,14 @@ wf_bank_test/
 
 ### 🎯 qa-toolkit 测试工具集
 
-当前已实现三个核心 Skills 和五个便捷 Commands，支持**快速模式**和**完整模式**两种测试左移工作流：
+当前已实现四个核心 Skills 和六个便捷 Commands，支持**快速模式**和**完整模式**两种测试左移工作流：
 
 #### ⚡ 工作流命令（推荐使用）
 
 | 命令 | 功能 | 使用方式 | 状态 |
 | ---- | ---- | ------ | ---- |
 | **`/qa-quick`** ⭐ | 一键执行快速模式 | `/qa-quick ./docs/plan.md` | ✅ 立即可用 |
+| **`/qa-manual`** | 手工测试案例生成 | `/qa-manual ./docs/req.md` | ✅ 可用 |
 | **`/qa-status`** | 查看工具状态 | `/qa-status` | ✅ 可用 |
 | **`/qa-config`** | 配置工具参数 | `/qa-config mode quick` | ✅ 可用 |
 | **`/qa-help`** | 显示帮助信息 | `/qa-help` | ✅ 可用 |
@@ -111,8 +121,9 @@ wf_bank_test/
 | Skill | 功能 | 使用命令 | 状态 |
 | ----- | ---- | -------- | ---- |
 | **shift-left-analyzer** | 分析 KM 文档，生成测试左移分析报告 | `/shift-left-analyzer ./docs/plan.md` | ✅ |
-| **api-case-generator** | 生成 API 测试用例代码和数据 | `/api-case-generator ./reports/analysis.md` | ✅ |
 | **requirement-validator** | 验证需求实现完整性，生成质量评分报告 | `/requirement-validator` | ✅ |
+| **manual-case-generator** | 生成手工测试案例（PlantUML流程图+MindMap） | `/qa-manual ./docs/req.md` | ✅ |
+| **api-case-generator** | 生成 API 测试用例代码和数据 | `/api-case-generator ./reports/analysis.md` | ✅ |
 
 #### 🎯 推荐工作流
 
@@ -124,7 +135,7 @@ wf_bank_test/
 
 **📊 完整模式（开发中）** - 四阶段流程：
 - 规范化 → `requirement-validator` → 手工案例生成 → `api-case-generator`
-- 当前替代方案：`/requirement-validator` + `/qa-quick ./docs/plan.md`
+- 当前替代方案：`/requirement-validator` + `/qa-manual ./docs/req.md` + `/qa-quick ./docs/plan.md`
 
 > 💡 **新用户建议**：一键使用 `/qa-quick`，高级用户可单独使用 Skills
 
@@ -159,7 +170,10 @@ wf_bank_test/
 # 1. 需求实现检查
 /requirement-validator
 
-# 2. 一键执行快速模式
+# 2. 手工测试案例生成
+/qa-manual ./docs/requirement.md
+
+# 3. 一键执行快速模式（API自动化）
 /qa-quick ./docs/development-plan.md
 
 # 完整模式工作流（开发中，预计 2026-04-20）：
@@ -261,7 +275,7 @@ wf_bank_test/
 ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 📦 规范化产出物（需求、设计、历史案例、代码差异）
         ↓
-📝 manual-case-generator
+📝 manual-case-generator ✅
         ↓
 📄 结构化手工测试用例
 
@@ -290,10 +304,10 @@ wf_bank_test/
 
 **当前状态**：
 - ✅ requirement-validator (已完成)
+- ✅ manual-case-generator (已完成)
 - ✅ api-case-generator (已完成)
 - 🚧 需求文档规范 Skill (规划中)
 - 🚧 设计文档规范 Skill (规划中)
-- 🚧 手工案例生成 Skill (规划中)
 - 🚧 CML MCP (规划中)
 - 🚧 Code Diff MCP (规划中)
 - 🚧 Udoc2Code MCP (规划中)
@@ -367,7 +381,7 @@ requirement-validator ✅
         ↓
 规范化产出物（需求、设计、历史案例、代码差异）
         ↓
-manual-case-generator 🚧
+manual-case-generator ✅
         ↓
 结构化手工测试用例
 ├── 功能测试用例
@@ -502,7 +516,7 @@ api-case-generator ✅
 | `api-case-generator` | API用例生成器 | 生成接口自动化测试用例代码和数据 | 泉政 | ✅ 已完成 |
 | *`requirement-normalizer` (建议)* | 需求文档规范化器 | 规范化转化原始需求文档 | 陈贝 | 🚧 规划中 |
 | *`design-normalizer` (建议)* | 设计文档规范化器 | 规范化转化原始设计文档 | 陈贝 | 🚧 规划中 |
-| *`manual-case-generator` (建议)* | 手工案例生成器 | 收集规范化产出物后,生成手工测试案例 | 宇宸 | 🚧 规划中 |
+| `manual-case-generator` | 手工案例生成器 | 生成手工测试案例（PlantUML流程图+MindMap） | 宇宸 | ✅ 已完成 |
 
 ### MCP 组件
 
@@ -515,6 +529,177 @@ api-case-generator ✅
 | *`code-diff-mcp` (建议)* | 代码差异分析服务 | 比对迭代代码差异,产出差异报告,用于检查开发实现内容 | 奕翔 | 🚧 规划中 |
 | *`proxy-mcp` (建议)* | 抓包服务 | 提供抓包接口逻辑,辅助接口自动化 | - | 🚧 规划中 |
 
+## 🛠️ 开发指南
+
+### 新增或更新 Skill 的完整流程
+
+当创建新 Skill 或更新现有 Skill 时，需要更新以下文件以保持项目文档的一致性：
+
+#### 1. 核心 Skill 文件
+
+**位置**: `plugins/qa-toolkit/skills/<skill-name>/`
+
+- **SKILL.md** - Skill 定义文件
+  - 必须包含 YAML frontmatter（name、description、status）
+  - description 字段应包含触发关键词（口语化表达）
+  - 详细说明 Skill 的目标、功能、使用方式
+
+- **references/** - 参考文档目录
+  - 使用编号前缀命名：`01-xxx.md`、`02-xxx.md`
+  - 编号顺序反映文档的重要性和阅读顺序
+  - 在 SKILL.md 中引用时使用相对路径
+
+- **examples/** - 示例文件目录
+  - 提供实际使用示例
+  - 包括输入输出示例
+
+#### 2. 工作流命令（可选）
+
+**位置**: `plugins/qa-toolkit/commands/<command-name>.md`
+
+如果 Skill 需要便捷的工作流命令（推荐使用 `/qa-` 前缀）：
+
+- 文件名对应命令（如 `manual-case.md` → `/qa-manual`）
+- 必须包含 YAML frontmatter（name、description、arguments）
+- 详细描述命令的功能、使用方式、执行流程
+- Claude Code 会自动识别 commands/ 目录下的 .md 文件，无需手动注册
+
+#### 3. 插件配置文件（必须更新）
+
+**`.claude-plugin/marketplace.json`**
+- 更新 `description` 字段，反映正确的核心能力数量
+- 示例：从"三大核心能力"改为"四大核心能力"
+
+**`plugins/qa-toolkit/.claude-plugin/plugin.json`**
+- 更新 `version` 字段（遵循语义化版本）
+- 更新 `description` 字段，与 marketplace.json 保持一致
+
+#### 4. 插件级文档（必须更新）
+
+**`plugins/qa-toolkit/README.md`**
+- 更新"核心 Skills"数量描述
+- 在"工作流命令"表格中添加新命令（如有）
+- 在"核心 Skills"部分添加新 Skill 的完整文档
+- 更新 Skills 文档链接列表
+
+**`plugins/qa-toolkit/commands/help.md`**
+- 更新 Skills 数量
+- 在 Skills 列表中添加新 Skill
+
+**`plugins/qa-toolkit/commands/status.md`**
+- 更新 Skills 数量
+- 在输出示例中添加新命令（如有）
+
+#### 5. 项目级文档（必须更新）
+
+**`README.md`** （项目主文档）
+- 更新版本徽章和日期
+- 在"最新更新"部分添加更新说明
+- 更新项目结构图（添加新的 skill 目录和 command 文件）
+- 更新"核心 Skills"和"工作流命令"数量描述
+- 在工作流命令表格中添加新命令
+- 在核心 Skills 表格中添加新 Skill
+- 更新完整模式流程图（如涉及）
+- 更新 Skills 组件表格（状态、描述等）
+- 更新实施计划（已完成/进行中/计划中）
+- 在"Commands 文档"和"Skills 文档"部分添加链接
+- 更新完整模式替代方案（如涉及）
+- 更新底部版本信息
+
+**`CLAUDE.md`** （开发指南）
+- 更新项目概述（Skills 和 Commands 数量）
+- 在"最常用命令"或"核心 Skills 使用"中添加示例
+- 更新项目结构图
+- 更新工作流模式说明（如涉及）
+- 在"重要文档"部分添加新 Skill 的 SKILL.md 路径
+- 更新开发状态（已完成/开发中）
+
+#### 6. 文档更新清单
+
+创建或更新 Skill 时，请按照以下清单逐项检查：
+
+**核心文件** ✅
+- [ ] 创建/更新 `skills/<skill-name>/SKILL.md`
+- [ ] 创建/更新 `skills/<skill-name>/references/` 参考文档
+- [ ] 创建/更新 `skills/<skill-name>/examples/` 示例文件
+- [ ] 创建/更新 `commands/<command-name>.md`（如需要工作流命令）
+
+**配置文件** ✅
+- [ ] 更新 `.claude-plugin/marketplace.json` 描述和能力数量
+- [ ] 更新 `plugins/qa-toolkit/.claude-plugin/plugin.json` 版本和描述
+
+**插件文档** ✅
+- [ ] 更新 `plugins/qa-toolkit/README.md`
+  - [ ] Skills 数量
+  - [ ] 工作流命令表格
+  - [ ] Skills 详细文档
+  - [ ] 文档链接列表
+- [ ] 更新 `plugins/qa-toolkit/commands/help.md`
+- [ ] 更新 `plugins/qa-toolkit/commands/status.md`
+
+**项目文档** ✅
+- [ ] 更新 `README.md`
+  - [ ] 版本徽章和日期
+  - [ ] 最新更新说明
+  - [ ] 项目结构图
+  - [ ] Skills/Commands 数量
+  - [ ] 工作流命令表格
+  - [ ] 核心 Skills 表格
+  - [ ] 完整模式流程图
+  - [ ] Skills 组件表格
+  - [ ] 实施计划
+  - [ ] Commands 文档链接
+  - [ ] Skills 文档链接
+  - [ ] 完整模式替代方案
+  - [ ] 底部版本信息
+- [ ] 更新 `CLAUDE.md`
+  - [ ] 项目概述
+  - [ ] 最常用命令/核心 Skills 使用
+  - [ ] 项目结构图
+  - [ ] 工作流模式
+  - [ ] 重要文档
+  - [ ] 开发状态
+
+#### 7. 版本管理
+
+**语义化版本规则**：
+- **主版本号（Major）**：重大架构变更或不兼容的 API 修改
+- **次版本号（Minor）**：新增功能、新增 Skill、新增 Command
+- **修订号（Patch）**：Bug 修复、文档更新、小幅优化
+
+**示例**：
+- `1.0.0` → `1.1.0`：新增 `/qa-quick` 命令
+- `1.1.0` → `1.2.0`：新增 `manual-case-generator` Skill
+- `1.2.0` → `1.2.1`：修复 Bug 或更新文档
+
+#### 8. 最佳实践
+
+1. **命名规范**
+   - Skill 目录：使用 kebab-case（如 `manual-case-generator`）
+   - Command 文件：使用 kebab-case（如 `manual-case.md`）
+   - Command 名称：使用 `/qa-` 前缀保持一致性（如 `/qa-manual`）
+
+2. **文档质量**
+   - SKILL.md 的 description 字段使用口语化表达，便于触发
+   - references 文档使用编号前缀，体现阅读顺序
+   - 提供完整的使用示例和输出示例
+
+3. **渐进式披露**
+   - SKILL.md 保持简洁，详细内容放在 references
+   - README.md 提供概览，详细文档链接到 SKILL.md
+
+4. **一致性检查**
+   - 确保所有文档中的 Skills 数量一致
+   - 确保所有文档中的 Commands 数量一致
+   - 确保版本号在所有配置文件中同步
+
+#### 9. 参考示例
+
+参考 `manual-case-generator` Skill 的完整实现：
+- [SKILL.md](./plugins/qa-toolkit/skills/manual-case-generator/SKILL.md)
+- [Command 定义](./plugins/qa-toolkit/commands/manual-case.md)
+- [v1.2.0 更新清单](#-最新更新-v120---2026-03-17)
+
 ## 📅 实施计划
 
 ### 当前进度 (截至 2026-03-13)
@@ -524,10 +709,12 @@ api-case-generator ✅
 **核心 Skills**:
 - ✅ **shift-left-analyzer** - 测试左移分析器
 - ✅ **requirement-validator** - 需求验证器
+- ✅ **manual-case-generator** - 手工案例生成器
 - ✅ **api-case-generator** - API用例生成器
 
 **工作流命令** (新增):
 - ✅ **`/qa-quick`** - 快速模式工作流 ⭐ 一键执行
+- ✅ **`/qa-manual`** - 手工测试案例生成
 - ✅ **`/qa-status`** - 查看工具状态
 - ✅ **`/qa-config`** - 配置工具参数
 - ✅ **`/qa-help`** - 显示帮助信息
@@ -551,7 +738,6 @@ api-case-generator ✅
 - 🚧 **CML MCP** - CML历史案例服务 (泉政负责)
 
 **中优先级**（辅助增强）：
-- 🚧 **手工案例 Skill** - 手工案例生成器 (宇宸负责)
 - 🚧 **Udoc2Code MCP** - 接口代码生成服务 (鼎中负责)
 
 #### 📋 计划中 (Q2)
@@ -571,17 +757,18 @@ api-case-generator ✅
 #### Q1 下半（Q1.2）- 文档规范与案例生成 🟩 🚧
 - **目标日期**: 2026 年 4 月 20 日
 - **开发重点**: 补齐完整模式第一阶段和第三阶段组件
-- **预期交付**: 6 个组件（建议将 Code Diff MCP 从 Q2 提前）
+- **预期交付**: 5 个组件（建议将 Code Diff MCP 从 Q2 提前）
   - 需求文档规范 Skill（第一阶段）
   - 设计文档规范 Skill（第一阶段）
   - CML MCP（第一阶段）
   - **Code Diff MCP（第一阶段）⚠️ 建议提前**
-  - 手工案例 Skill（第三阶段）
   - Udoc2Code MCP（第四阶段辅助）
+
+**已完成里程碑** ✅：
+- ✅ 手工案例生成器（manual-case-generator），打通完整模式第三阶段
 
 **关键里程碑**：
 - 4 月 20 日前完成规范化工具，实现 requirement-validator 的全自动输入
-- 完成手工案例生成器，打通完整模式第三阶段
 
 #### Q2（Q2.1-Q2.2）- 辅助工具与集成优化 🟨 📋
 - **Proxy MCP**: 根据实际需求排期（第四阶段辅助工具，优先级较低）
@@ -627,6 +814,7 @@ api-case-generator ✅
 - **[commands/config.md](./plugins/qa-toolkit/commands/config.md)** - `/qa-config` 命令文档
 - **[commands/help.md](./plugins/qa-toolkit/commands/help.md)** - `/qa-help` 命令文档
 - **[commands/quick-workflow.md](./plugins/qa-toolkit/commands/quick-workflow.md)** - `/qa-quick` 命令文档 ⭐
+- **[commands/manual-case.md](./plugins/qa-toolkit/commands/manual-case.md)** - `/qa-manual` 命令文档
 - **[commands/full-workflow.md](./plugins/qa-toolkit/commands/full-workflow.md)** - `/qa-full` 命令文档 🚧
 
 #### Skills 文档
@@ -635,6 +823,10 @@ api-case-generator ✅
   - [examples/](./plugins/qa-toolkit/skills/shift-left-analyzer/examples/) - 使用示例
 
 - **[requirement-validator/SKILL.md](./plugins/qa-toolkit/skills/requirement-validator/SKILL.md)**
+
+- **[manual-case-generator/SKILL.md](./plugins/qa-toolkit/skills/manual-case-generator/SKILL.md)**
+  - [references/](./plugins/qa-toolkit/skills/manual-case-generator/references/) - 4个参考文档（已编号）
+  - [examples/](./plugins/qa-toolkit/skills/manual-case-generator/examples/) - 示例需求和输出
 
 - **[api-case-generator/SKILL.md](./plugins/qa-toolkit/skills/api-case-generator/SKILL.md)**
   - [references/](./plugins/qa-toolkit/skills/api-case-generator/references/) - 6个参考文档（已编号）
@@ -812,4 +1004,4 @@ MIT License
 
 ---
 
-**版本**: v1.0.0 | **更新**: 2026-03-13 | **维护**: WF Bank Test Team
+**版本**: v1.2.0 | **更新**: 2026-03-17 | **维护**: WF Bank Test Team

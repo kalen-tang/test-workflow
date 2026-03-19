@@ -19,6 +19,7 @@ arguments:
 显示所有可用 Skills 的详细说明：
 - shift-left-analyzer：测试左移分析器
 - requirement-validator：需求验证器
+- manual-case-generator：手工测试案例生成器
 - api-case-generator：API用例生成器
 
 ### 2. 工作流帮助
@@ -56,7 +57,10 @@ arguments:
   2️⃣ /requirement-validator
      验证需求实现完整性，生成质量评分报告
 
-  3️⃣ /api-case-generator <报告路径>
+  3️⃣ /qa-manual <文档路径>
+     从需求文档生成手工测试案例（PlantUML流程图+MindMap）
+
+  4️⃣ /api-case-generator <报告路径>
      生成 API 测试用例代码和数据
 
 🚀 推荐工作流:
