@@ -1,519 +1,570 @@
-# YAML测试数据格式参考
+# YAML 测试数据格式参考（v2.0）
 
-## 标准YAML文件结构
+**版本**: 2.0（基于银行标准测试框架）
+**更新日期**: 2026-03-19
+**适用框架**: pytest_zabank 系列插件（pytest_zabank_wholesale、pytest_zati_base 等）
+**重大变更**: 使用 `variables` 替代 `env` 多环境配置
 
-**核心原则**: 1个测试方法 = 1个YAML文件 = 1个case
+---
+
+## 🏦 银行标准测试框架说明
+
+本格式规范基于 **pytest_zabank 系列插件**，这是专为银行业务测试定制的标准化框架：
+
+### 核心插件
+
+- **pytest_zabank_wholesale**: 批发银行业务测试插件（BBM、Ticket、Zero 等）
+- **pytest_zati_base**: 基础测试工具插件（Data、MySQL、XxlJob 等）
+- **pytest_zabank_lns**: 贷款系统测试插件
+- **pytest_zabank_momo**: 移动银行测试插件
+
+### 框架特性
+
+- ✅ **数据驱动**: 使用 `@pytest.mark.data()` 装饰器自动加载 YAML
+- ✅ **变量替换**: 支持 `${变量名}` 语法，自动替换环境变量
+- ✅ **Scenario 模式**: 封装业务逻辑，自动处理认证、断言、日志
+- ✅ **多环境支持**: 通过 `env` fixture 切换 sit/qe/uat/prod 环境
+
+---
+
+## 📋 标准 YAML 文件结构
+
+### 核心原则
+
+- ✅ **1个接口 = 1个 YAML 文件 = 多个 step**
+- ✅ **正常场景和异常场景分离为不同文件**
+- ✅ **使用 `variables` 定义全局变量**
+- ✅ **input 中包含方法名和 `json.reqBody` 结构**
+- ✅ **移除 `expected` 字段（由 Scenario 处理断言）**
+
+### 基础结构
 
 ```yaml
-# data/{service_module}/{interface_name}_{scene_number}_{scene_name}.yaml
-# 示例: data/za_zone/entry_page_01_joined.yaml
+# data/{module}/{interface_group}.yaml
 
-# ===== 环境配置部分 (可选,正常/边界场景需要) =====
-env:
-  sit:
-    # 场景相关的测试账号
-    {scenario}_user_id: "{实际user_id}"
-    {scenario}_customer_no: "{实际customer_no}"
+# ===== 全局变量（必须） =====
+variables:
+  username: ${ENV_USERNAME}
+  password: ${ENV_PASSWORD}
+  resource_id: 'RES_001'
+  account_no: 'ACC_123456'
 
-  auto_qe:
-    {scenario}_user_id: "{实际user_id}"
-    {scenario}_customer_no: "{实际customer_no}"
-
-  uat:
-    {scenario}_user_id: "{实际user_id}"
-    {scenario}_customer_no: "{实际customer_no}"
-
-# ===== 测试用例部分 (必须,且只包含1个case) =====
+# ===== 测试用例（必须） =====
 tests:
-  - case: {用例名称}
+  - case: {功能模块描述}
     data:
-      - step: {步骤名称}
+      - step: 0{步骤名称}
         input:
-          user_id: ${变量名}  # 引用env中的变量
-          customer_no: ${变量名}
-          param1: "value1"
-        expected:
-          expected_code: "000000"
-        description: "{场景说明}"
+          {method_name}:  # 关键：方法名作为 key
+            json:
+              reqBody:  # 关键：对应 Model 的 json_data 结构
+                {param1}: ${variable1}
+                {param2}: "fixed_value"
 ```
 
-## 环境配置规则
+---
+
+## 🔧 Variables 配置规则
 
 ### 变量命名规范
 
-使用`{场景}_user_id`格式,便于区分不同场景的测试账号:
+**推荐命名**：使用业务语义，避免环境前缀
 
 ```yaml
-env:
-  sit:
-    # 正常场景
-    normal_user_id: "2328059639100342784"
-    normal_customer_no: "8000361216"
+variables:
+  # ✅ 推荐：业务语义命名
+  username: TestUser
+  password: TestPass123
+  account_id: 'ACC_123456'
+  resource_id: 'RES_001'
 
-    # 未参与场景
-    not_joined_user_id: "2328059639100342785"
-    not_joined_customer_no: "8000361217"
+  # ✅ 可选：环境变量引用（由框架替换）
+  test_user_id: ${TEST_USER_ID}
+  test_account_no: ${TEST_ACCOUNT_NO}
+```
 
-    # VIP用户场景
-    vip_user_id: "2328059639100342786"
-    vip_customer_no: "8000361218"
+**避免命名**：
+
+```yaml
+# ❌ 不推荐：过于复杂的环境前缀
+sit_normal_user_id: "xxx"
+qe_normal_user_id: "yyy"
+prod_normal_user_id: "zzz"
 ```
 
 ### 变量引用语法
 
-使用`${变量名}`引用环境变量,测试框架会根据`--envId`参数自动替换:
+使用 `${变量名}` 引用变量：
+
+```yaml
+variables:
+  account_id: 'ACC_123456'
+  user_id: 'USER_001'
+
+tests:
+  - case: 账户查询接口测试
+    data:
+      - step: 0查询账户信息
+        input:
+          query_account_info:
+            json:
+              reqBody:
+                accountId: ${account_id}  # 引用变量
+                userId: ${user_id}
+                pageSize: '10'
+                currPage: '1'
+```
+
+---
+
+## 📝 Tests 结构规则
+
+### Input 结构（关键）
+
+**重要**：`input` 中必须包含**方法名作为 key**，方便 Scenario 识别：
+
+```yaml
+- step: 0查询账户信息
+  input:
+    query_account_info:  # ✅ 方法名作为 key
+      json:
+        reqBody:  # ✅ 对应 Model 的 json_data 结构
+          accountId: ${account_id}
+          pageSize: '10'
+```
+
+**错误示例**：
+
+```yaml
+# ❌ 缺少方法名
+- step: 0查询账户信息
+  input:
+    json:  # ❌ 错误：缺少方法名
+      reqBody:
+        accountId: ${account_id}
+```
+
+### Step 编号规则
+
+使用数字前缀标识执行顺序：
 
 ```yaml
 tests:
-  - case: 已参与用户查询
+  - case: 完整业务流程测试
     data:
-      - step: 查询活动状态
-        input:
-          user_id: ${normal_user_id}        # 自动替换为对应环境的值
-          customer_no: ${normal_customer_no}
+      - step: 0创建资源      # 第1步
+      - step: 1查询资源      # 第2步
+      - step: 2更新资源      # 第3步
+      - step: 3删除资源      # 第4步
 ```
 
-## 正常场景YAML示例
+---
 
-**特点**: 需要env配置,使用环境变量
+## 📚 正常场景示例
+
+### 示例 1: 单接口查询
 
 ```yaml
-# data/za_zone/entry_page_01_joined.yaml
+# data/account/query_account.yaml
 
-env:
-  sit:
-    joined_user_id: "2328059639100342784"
-    joined_customer_no: "8000361216"
-  auto_qe:
-    joined_user_id: "2358240469768503808"
-    joined_customer_no: "8000771073"
-  uat:
-    joined_user_id: "2351253385396617728"
-    joined_customer_no: "8090337081"
+variables:
+  username: TestUser
+  password: TestPass123
+  account_id: 'ACC_123456'
+  user_id: 'USER_001'
 
 tests:
-  - case: 已参与用户查询
+  - case: 账户信息查询
     data:
-      - step: 已参与用户查询活动状态
+      # ===== 步骤0: 查询账户基本信息 =====
+      - step: 0查询账户信息
         input:
-          user_id: ${joined_user_id}
-          customer_no: ${joined_customer_no}
-        expected:
-          expected_code: "IA0000"
-        description: "用户已参与ZA Zone活动,查询返回活动状态"
+          query_account_info:
+            json:
+              reqBody:
+                accountId: ${account_id}
+                userId: ${user_id}
+                pageSize: '10'
+                currPage: '1'
+
+      # ===== 步骤1: 查询账户明细 =====
+      - step: 1查询账户明细
+        input:
+          query_account_details:
+            json:
+              reqBody:
+                accountId: ${account_id}
+
+      # ===== 步骤2: 查询账户历史 =====
+      - step: 2查询账户历史
+        input:
+          query_account_history:
+            json:
+              reqBody:
+                accountId: ${account_id}
+                startDate: '2026-01-01'
+                endDate: '2026-03-19'
 ```
 
-## 边界场景YAML示例
-
-**特点**: 需要env配置,测试边界值
+### 示例 2: 包含数据准备步骤
 
 ```yaml
-# data/za_zone/entry_page_03_boundary.yaml
+# data/resource/create_resource.yaml
 
-env:
-  sit:
-    new_user_id: "2328059639100342799"
-    new_customer_no: "8000361299"
-  auto_qe:
-    new_user_id: "2358240469768503899"
-    new_customer_no: "8000771199"
-  uat:
-    new_user_id: "2351253385396617899"
-    new_customer_no: "8090337199"
+variables:
+  username: TestUser
+  password: TestPass123
+  resource_name: 'TestResource'
 
 tests:
-  - case: 新注册用户首次查询
+  - case: 资源创建流程
     data:
-      - step: 新用户首次查询活动
+      - step: 登录系统
         input:
-          user_id: ${new_user_id}
-          customer_no: ${new_customer_no}
-        expected:
-          expected_code: "IA0000"
-        description: "刚完成注册的新用户,首次查询活动状态"
+          login:
+            username: ${username}
+            password: ${password}
+
+      - step: 获取数据
+        input:
+          env: "test"
+          data_type: "resource_template"
+          created_date: ${created_date}
+
+      - step: 0创建资源
+        input:
+          create_resource:
+            json:
+              reqBody:
+                resourceName: ${resource_name}
+                resourceType: 'TYPE_A'
+                status: 'active'
 ```
 
-## 异常场景YAML示例
+---
 
-**特点**: 不需要env配置,使用固定无效值
+## ⚠️ 异常场景示例
+
+### 特点
+
+- ❌ **不使用 `variables`**（或使用固定无效值）
+- ✅ **所有异常场景合并在一个 `_fail.yaml` 文件**
+- ✅ **使用键值对访问（不是索引）**
+
+### 示例: 异常测试文件
 
 ```yaml
-# data/za_zone/entry_page_04_invalid.yaml
+# data/account/query_account_fail.yaml
+
+variables:
+  invalid_account_id: 'INVALID_ACC_999'
+  invalid_user_id: 'INVALID_USER_999'
 
 tests:
-  - case: 客户不存在
+  - case: 账户查询异常场景
     data:
-      - step: 使用不存在的客户编号
+      # ===== 异常1: 参数有误 =====
+      - step: 查询参数错误
         input:
-          user_id: "9999999999999999"
-          customer_no: "INVALID_CUST_NOT_EXIST"
-        expected:
-          expected_code: "400011"
-        description: "客户编号不存在时返回错误"
+          query_account_info:
+            json:
+              reqBody:
+                wrongParam: ${invalid_account_id}  # ✅ 错误的参数名
+
+      # ===== 异常2: 账户不存在 =====
+      - step: 账户不存在
+        input:
+          query_account_info:
+            json:
+              reqBody:
+                accountId: ${invalid_account_id}  # ✅ 无效的账户ID
+
+      # ===== 异常3: 用户无权限 =====
+      - step: 用户无权限
+        input:
+          query_account_info:
+            json:
+              reqBody:
+                accountId: 'ACC_123456'
+                userId: ${invalid_user_id}  # ✅ 无效的用户ID
+
+      # ===== 异常4: 请求体为空 =====
+      - step: 请求体为空
+        input:
+          query_account_info:
+            json:
+              reqBody: null  # ✅ 空请求体
 ```
 
-```yaml
-# data/za_zone/entry_page_05_missing_param.yaml
+---
 
-tests:
-  - case: 缺少必填参数
-    data:
-      - step: 缺少customer_no参数
-        input:
-          user_id: "9999999999999999"
-          customer_no: ""  # 缺少必填参数
-        expected:
-          expected_code: "400001"
-        description: "缺少必填参数时返回参数错误"
-```
+## 🔄 正常场景 vs 异常场景对比
 
-## 文件命名规范
+| 维度 | 正常场景 | 异常场景 |
+|-----|---------|---------|
+| **文件命名** | `query_account.yaml` | `query_account_fail.yaml` |
+| **variables** | 使用有效变量 | 使用无效变量或固定值 |
+| **step 访问** | `data[0]`, `data[1]` | `data["步骤名称"]` |
+| **测试方法** | 每个场景一个方法 | 所有异常合并一个方法 |
 
-格式: `{interface_name}_{scene_number}_{scene_name}.yaml`
+---
 
-### 命名示例
-
-| 场景类型 | 文件名 | 说明 |
-|---------|-------|------|
-| 正常场景1 | `entry_page_01_joined.yaml` | 已参与用户 |
-| 正常场景2 | `entry_page_02_not_joined.yaml` | 未参与用户 |
-| 边界场景 | `entry_page_03_boundary.yaml` | 新用户首次访问 |
-| 异常场景1 | `entry_page_04_invalid.yaml` | 客户不存在 |
-| 异常场景2 | `entry_page_05_missing_param.yaml` | 缺少参数 |
-
-### 场景编号规则
-
-- `01-09`: 正常场景
-- `10-19`: 边界场景
-- `20-29`: 异常场景 (参数错误)
-- `30-39`: 异常场景 (业务错误)
-- `40-49`: 异常场景 (系统错误)
-
-## 文件组织结构
+## 📂 文件组织结构
 
 ```
 data/
-├── za_zone/                           # 按模块/功能分目录
-│   ├── entry_page_01_joined.yaml
-│   ├── entry_page_02_not_joined.yaml
-│   ├── entry_page_03_boundary.yaml
-│   ├── entry_page_04_invalid.yaml
-│   ├── entry_page_05_missing_param.yaml
-│   ├── homepage_01_normal.yaml
-│   ├── homepage_02_invalid.yaml
-│   └── verify_01_success.yaml
-├── reward/                            # 另一个模块
-│   ├── redeem_01_normal.yaml
-│   └── redeem_02_insufficient.yaml
-└── cuber/                             # 第三个模块
-    ├── config_query_01_normal.yaml
-    └── config_query_02_invalid.yaml
+├── account/                          # 按模块分目录
+│   ├── query_account.yaml            # 正常场景
+│   ├── query_account_fail.yaml       # 异常场景
+│   ├── create_account.yaml
+│   └── create_account_fail.yaml
+├── resource/
+│   ├── create_resource.yaml
+│   └── create_resource_fail.yaml
+└── payment/
+    ├── process_payment.yaml
+    └── process_payment_fail.yaml
 ```
 
-## 特殊字段处理
+---
 
-### Email字段
-
-```yaml
-# 正常场景 - 使用环境变量
-env:
-  sit:
-    test_email: "test_sit@example.com"
-  auto_qe:
-    test_email: "test_autoqe@example.com"
-
-tests:
-  - case: 正常邮箱验证
-    data:
-      - step: 发送验证码
-        input:
-          email: ${test_email}
-
-# 异常场景 - 使用固定无效值
-tests:
-  - case: 邮箱格式错误
-    data:
-      - step: 无效邮箱格式
-        input:
-          email: "invalid-email-format"
-```
-
-### 手机号字段
-
-```yaml
-# 正常场景
-env:
-  sit:
-    test_mobile: "12345678"
-  auto_qe:
-    test_mobile: "87654321"
-
-tests:
-  - case: 正常手机号验证
-    data:
-      - step: 发送短信验证码
-        input:
-          mobile: ${test_mobile}
-
-# 异常场景
-tests:
-  - case: 手机号格式错误
-    data:
-      - step: 无效手机号
-        input:
-          mobile: "123"  # 位数不足
-```
+## 🎯 特殊字段处理
 
 ### 日期时间字段
 
 ```yaml
-# 正常场景
-tests:
-  - case: 正常日期查询
-    data:
-      - step: 查询特定日期数据
-        input:
-          start_date: "2026-01-01"
-          end_date: "2026-03-31"
+variables:
+  start_date: '2026-01-01'
+  end_date: '2026-03-19'
+  created_date: '2026-03-19'
 
-# 异常场景
 tests:
-  - case: 日期格式错误
+  - case: 日期范围查询
     data:
-      - step: 无效日期格式
+      - step: 查询指定日期范围
         input:
-          start_date: "20260101"  # 格式错误
-          end_date: "2026/03/31"  # 格式错误
+          query_by_date_range:
+            json:
+              reqBody:
+                startDate: ${start_date}
+                endDate: ${end_date}
+                dateFormat: 'YYYY-MM-DD'
 ```
 
-### 金额字段
+### 列表参数
 
 ```yaml
-# 正常场景
 tests:
-  - case: 正常金额交易
+  - case: 批量操作
     data:
-      - step: 积分兑换
+      - step: 批量创建资源
         input:
-          amount: "100.00"
-          points: 1000
-
-# 边界场景
-tests:
-  - case: 最小金额
-    data:
-      - step: 最小金额兑换
-        input:
-          amount: "0.01"
-          points: 1
-
-# 异常场景
-tests:
-  - case: 负数金额
-    data:
-      - step: 负数金额
-        input:
-          amount: "-100.00"
-          points: -1000
+          batch_create_resources:
+            json:
+              reqBody:
+                resourceNames:  # ✅ 列表参数
+                  - 'Resource_A'
+                  - 'Resource_B'
+                  - 'Resource_C'
+                approvers:
+                  - 'User_001'
+                  - 'User_002'
 ```
-
-## 复杂数据结构
 
 ### 嵌套对象
 
 ```yaml
 tests:
-  - case: 用户信息更新
+  - case: 复杂对象创建
     data:
-      - step: 更新用户资料
+      - step: 创建带详细信息的资源
         input:
-          user_id: ${user_id}
-          user_info:
-            name: "Test User"
-            email: ${test_email}
-            address:
-              city: "Hong Kong"
-              district: "Central"
-              street: "Test Street 123"
-        expected:
-          expected_code: "000000"
+          create_resource_with_details:
+            json:
+              reqBody:
+                resourceName: 'ComplexResource'
+                details:  # ✅ 嵌套对象
+                  description: 'Resource description'
+                  owner: 'TestUser'
+                  metadata:
+                    category: 'TypeA'
+                    priority: 'high'
 ```
 
-### 列表数据
+---
+
+## ✅ 正确格式检查清单
+
+生成 YAML 文件后，检查以下几点：
+
+- [ ] 文件命名符合规范：`{module}/{interface_group}.yaml`
+- [ ] 包含 `variables` 配置
+- [ ] 必须有 `tests:` 列表包裹
+- [ ] 每个 `step` 的 `input` 包含方法名
+- [ ] `input.{method_name}.json.reqBody` 结构正确
+- [ ] 使用 `${变量名}` 语法引用变量
+- [ ] 异常场景分离到 `_fail.yaml` 文件
+- [ ] Step 使用数字前缀（0、1、2...）
+
+---
+
+## 🚫 常见错误对比
+
+### ❌ 错误格式 1: 旧版 env 配置
 
 ```yaml
-tests:
-  - case: 批量查询用户
-    data:
-      - step: 批量查询
-        input:
-          customer_nos:
-            - ${customer_no_1}
-            - ${customer_no_2}
-            - ${customer_no_3}
-          activity_codes:
-            - "ZA_ZONE"
-            - "REWARD"
-        expected:
-          expected_code: "000000"
+# ❌ 旧格式（不推荐）
+env:
+  sit:
+    user_id: "xxx"
+  qe:
+    user_id: "yyy"
+  prod:
+    user_id: "zzz"
 ```
 
-## 多步骤场景 (不推荐)
-
-**注意**: 当前框架推荐1个YAML = 1个case = 1个step,避免参数化问题。
-
-如果确实需要多步骤,使用以下格式:
+### ✅ 正确格式 1: 使用 variables
 
 ```yaml
-# ⚠️ 不推荐: 多步骤在一个YAML中
-tests:
-  - case: 完整兑换流程
-    data:
-      - step: 步骤1-获取验证码
-        input:
-          email: ${test_email}
-        expected:
-          expected_code: "000000"
-
-      - step: 步骤2-验证码校验
-        input:
-          email: ${test_email}
-          verify_code: "123456"  # 从步骤1获取
-        expected:
-          expected_code: "000000"
-
-      - step: 步骤3-完成兑换
-        input:
-          email: ${test_email}
-          token_id: "xxx"  # 从步骤2获取
-        expected:
-          expected_code: "000000"
+# ✅ 新格式（推荐）
+variables:
+  username: TestUser
+  account_id: 'ACC_123456'
 ```
 
-**推荐做法**: 拆分为3个独立的测试方法,每个方法1个YAML文件。
+---
 
-## 环境变量替换机制
+### ❌ 错误格式 2: 缺少方法名
+
+```yaml
+# ❌ input 中缺少方法名
+- step: 0查询
+  input:
+    json:
+      reqBody:
+        accountId: ${account_id}
+```
+
+### ✅ 正确格式 2: 包含方法名
+
+```yaml
+# ✅ input 中包含方法名
+- step: 0查询
+  input:
+    query_account_info:  # ✅ 方法名
+      json:
+        reqBody:
+          accountId: ${account_id}
+```
+
+---
+
+### ❌ 错误格式 3: 包含 expected 字段
+
+```yaml
+# ❌ 旧格式（包含 expected）
+- step: 0查询
+  input:
+    query_account_info:
+      json:
+        reqBody:
+          accountId: ${account_id}
+  expected:  # ❌ 不需要
+    expected_code: "000000"
+```
+
+### ✅ 正确格式 3: 移除 expected
+
+```yaml
+# ✅ 新格式（移除 expected）
+- step: 0查询
+  input:
+    query_account_info:
+      json:
+        reqBody:
+          accountId: ${account_id}
+  # ✅ expected 由 Scenario 处理，不在 YAML 中定义
+```
+
+---
+
+## 🔄 环境变量替换机制
 
 ### 框架如何替换变量
 
 ```python
-# pytest框架在运行时会:
+# pytest框架在运行时会：
 # 1. 读取YAML文件
-# 2. 根据 --envId 参数(如 sit/auto_qe/uat) 选择对应的env配置
-# 3. 将 ${variable} 替换为实际值
+# 2. 识别 ${变量名} 语法
+# 3. 从环境变量或配置文件中获取值
+# 4. 替换为实际值
 
 # 示例:
-# pytest --envId=sit testcases/test_entry_page.py
-
 # YAML中:
-# user_id: ${joined_user_id}
+# account_id: ${ACCOUNT_ID}
 
 # 替换后:
-# user_id: "2328059639100342784"  (sit环境的值)
+# account_id: "ACC_123456"
 ```
 
 ### 测试代码如何获取
 
 ```python
-# 测试代码中使用 .get() 方法获取数据
-step = data[0]
-user_id = step.get("user_id", "")  # 已经被框架替换为实际值
-customer_no = step.get("customer_no", "")
+# 测试代码中通过 data fixture 获取数据
+step = data[0]  # 获取第一个步骤
 
-# 如果YAML中写的是:
-# user_id: ${joined_user_id}
-#
-# 那么step.get("user_id")会得到:
-# "2328059639100342784" (sit环境)
-# 或 "2358240469768503808" (auto_qe环境)
-# 取决于运行时的 --envId 参数
+# 访问方法名和参数
+method_input = step["query_account_info"]
+req_body = method_input["json"]["reqBody"]
+
+# 或使用字典访问（异常场景）
+step = data["查询参数错误"]
 ```
 
-## 错误格式对比
+---
 
-### ❌ 错误格式1: 旧格式(不支持多环境)
+## 📖 通用化命名建议
+
+### 推荐的变量命名
 
 ```yaml
-# 问题: 写死了环境,无法在sit/auto_qe/uat之间切换
-正常场景:
-  user_id: "2367007718494994944"
-  customer_no: "8000782594"
-  expected_code: "000000"
+# ✅ 通用化命名
+variables:
+  username: TestUser
+  password: TestPass123
+  user_id: 'USER_001'
+  account_id: 'ACC_123456'
+  resource_id: 'RES_001'
+  transaction_id: 'TXN_001'
+  order_id: 'ORD_001'
+
+# ❌ 避免项目特定命名
+variables:
+  eln_username: TestUser        # ❌ 包含项目前缀
+  imc_customer_no: '8000123'    # ❌ 包含组织前缀
+  zabank_loan_no: '88001234'    # ❌ 包含公司前缀
 ```
 
-### ❌ 错误格式2: 多个case在一个文件
+### 推荐的方法命名
 
 ```yaml
-# 问题: 会导致pytest参数化,重复运行所有case
-env:
-  sit:
-    user_id: "xxx"
+# ✅ 通用化方法名
+query_account_info
+create_resource
+update_user_profile
+delete_transaction
 
-tests:
-  - case: 场景1
-    data:
-      - step: 步骤1
-        input:
-          user_id: ${user_id}
-
-  - case: 场景2  # ❌ 不要在一个YAML中写多个case
-    data:
-      - step: 步骤2
-        input:
-          user_id: ${user_id}
+# ❌ 避免项目特定方法名
+web_bank_query_by_loan_account_no  # ❌ 包含项目特征
+imc_activity_za_zone_homepage      # ❌ 包含组织和项目特征
 ```
 
-### ❌ 错误格式3: 缺少tests列表
+---
 
-```yaml
-# 问题: 缺少tests列表包裹,框架无法解析
-env:
-  sit:
-    user_id: "xxx"
+**版本历史**:
+- **v1.0** (2026-02-25): 初始版本，使用 `env` 多环境配置
+- **v2.0** (2026-03-19): 重大重构，使用 `variables` 替代 `env`，移除 `expected` 字段，完全通用化
 
-case: 正常场景  # ❌ 缺少tests:
-data:
-  - step: 查询
-    input:
-      user_id: ${user_id}
-```
+---
 
-## ✅ 正确格式检查清单
-
-生成YAML文件后,检查以下几点:
-
-- [ ] 文件命名符合规范: `{interface}_{number}_{scene}.yaml`
-- [ ] 正常/边界场景包含`env`配置
-- [ ] 异常场景不包含`env`配置(或env为空)
-- [ ] 必须有`tests:`列表包裹
-- [ ] 每个YAML只有1个case
-- [ ] 使用`${变量名}`语法引用环境变量
-- [ ] expected中包含`expected_code`字段
-- [ ] 每个字段都有合理的默认值或注释
-
-## 环境切换命令
-
-```bash
-# SIT环境
-pytest testcases/interface_case/test_za_zone_entry_page.py --envId=sit -v
-
-# AutoQE环境
-pytest testcases/interface_case/test_za_zone_entry_page.py --envId=auto_qe -v
-
-# UAT环境
-pytest testcases/interface_case/test_za_zone_entry_page.py --envId=uat -v
-
-# 不指定envId时,使用pytest.ini中配置的默认环境
-pytest testcases/interface_case/test_za_zone_entry_page.py -v
-```
-
-## pytest.ini环境配置
-
-```ini
-[pytest]
-# 默认环境配置
-envId = sit
-
-# 或从命令行传入
-# pytest --envId=uat
-```
+**注意**: 这是基于**银行标准测试框架**（pytest_zabank 系列插件）的 YAML 格式规范，适用于所有遵循银行测试架构规范的项目。

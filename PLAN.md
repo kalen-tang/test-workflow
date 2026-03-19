@@ -1,9 +1,10 @@
 # qa-toolkit 完整模式实施计划
 
-**版本**: v1.0
+**版本**: v1.2
 **创建时间**: 2026-03-18
-**截止日期**: 2026-04-20（剩余 33 天）
-**项目状态**: 🚧 规划中
+**最后更新**: 2026-03-19
+**截止日期**: 2026-04-20（剩余 32 天）
+**项目状态**: 🚧 实施中
 
 ---
 
@@ -33,10 +34,66 @@
 
 ### 成功标准
 
-- ✅ 定义完整的 artifact schemas（7 个标准化格式）
-- ✅ 完成第一阶段 4 个规范化组件
-- ✅ 验证四阶段端到端流程可用
-- ✅ 实现 `/qa-full` 工作流命令
+- ✅ 定义完整的 artifact schemas（7 个标准化格式）**[已完成 2026-03-19]**
+- ⏳ 完成第一阶段 4 个规范化组件
+- ⏳ 验证四阶段端到端流程可用
+- ⏳ 实现 `/qa-full` 工作流命令
+
+### 📊 当前进展（2026-03-19 更新）
+
+#### ✅ 已完成
+
+**Artifact Schemas 定义（100% 完成）**：
+- ✅ `00-overview.md` - 总览文档（四阶段工作流、七种格式依赖关系）
+- ✅ `01-normalized-requirement-v2.md` - 标准化需求文档格式（对齐 ZA Bank PRD 7章）
+- ✅ `02-normalized-design.md` - 标准化设计文档格式（对齐 ZA Bank 设计文档模板）
+- ✅ `03-normalized-cases.md` - 标准化历史案例格式（支持案例复用、智能推荐）
+- ✅ `04-code-diff-report.md` - 代码差异报告格式（Git Diff 分析、影响评估）
+- ✅ `05-validation-report.md` - 需求验证报告格式（三级检查 P0/P1/P2）
+- ✅ `06-manual-test-cases.md` - 手工测试用例格式（PlantUML/XMind/Markdown 输出）
+- ✅ `07-api-test-cases.md` - API 测试案例格式（Python + YAML 代码规范）
+- ✅ `output-normalized-requirement-v2.yaml` - 完整需求文档示例（500+ 行）
+- ✅ `output-normalized-design.yaml` - 完整设计文档示例（600+ 行）
+
+**SpecKit 方案决策**：
+- ✅ 确认 SpecKit 是提示词模式，非独立工具
+- ✅ 确定以产品标准为主（对齐 ZA Bank 模板）
+- ✅ 将 SpecKit 最佳实践（三级检查、置信度标注）融入 Skill 实现
+
+**Skills 基础定义**：
+- ✅ `requirement-normalizer` SKILL.md 已创建
+- ✅ `design-normalizer` 目录结构已创建
+
+**api-case-generator v2.0 重构（2026-03-19 完成）**：
+- ✅ 完全适配银行标准测试框架（pytest_zabank 系列插件）
+- ✅ 从 `env` 多环境配置升级为 `variables` 变量化配置
+- ✅ 从 `parametrize` 模式升级为 `@pytest.mark.data()` 装饰器
+- ✅ Scenario 层接收 Step 对象，自动处理断言
+- ✅ Fixture 智能命名（本服务简化/跨服务完整，自动检测）
+- ✅ 完全通用化（移除所有项目特定示例）
+- ✅ 更新 5 个 references 文档（00-04）
+- ✅ 新增 Scenario 层设计指南（04-scenario-design.md）
+
+#### 🚧 进行中（截止 2026-04-14）
+
+**第一阶段规范化组件开发**：
+- [ ] requirement-normalizer Skill 完整实现 - 负责人：陈贝
+- [ ] design-normalizer Skill 完整实现 - 负责人：陈贝
+- [ ] CML MCP（历史案例规范化）- 负责人：泉政
+- [ ] Code Diff MCP（代码差异分析）- 负责人：奕翔
+
+**现有 Skill 适配**：
+- [ ] requirement-validator 适配标准化输入（01/02/04 格式）- 负责人：宇豪
+
+#### 📋 计划中（2026-04-15 ~ 04-20）
+
+- [ ] manual-case-generator 适配标准化格式 - 负责人：宇宸
+- [x] **api-case-generator 适配标准化格式** - 负责人：泉政 **✅ 已完成（2026-03-19）**
+  - ✅ v2.0 重构完成，完全适配银行标准测试框架
+  - ✅ 更新所有 references 文档为 v2.0
+  - ✅ 新增 Scenario 层设计指南
+- [ ] 实现 `/qa-full` 工作流命令 - 负责人：鼎中
+- [ ] 端到端流程测试 - 负责人：慧芳
 
 ---
 
@@ -258,103 +315,100 @@ Week 5 (04-15~04-20): 集成验证 + 上线
 
 ### 里程碑
 
-| 里程碑 | 日期 | 交付物 |
-|--------|------|--------|
-| M1：标准定义完成 | 2026-03-24 | artifact-schemas 7 个文档 |
-| M2：SpecKit 方案确定 | 2026-03-28 | SpecKit 集成方案文档或自研方案启动 |
-| M3：第一阶段组件完成 | 2026-04-14 | 4 个规范化组件 + 单元测试 |
-| M4：完整模式上线 | 2026-04-20 | `/qa-full` 可用 + 端到端测试通过 |
+| 里程碑 | 计划日期 | 实际完成 | 交付物 |
+|--------|---------|---------|--------|
+| M1：标准定义完成 | 2026-03-24 | **✅ 2026-03-19**（提前5天） | artifact-schemas 全部 8 个文档 + 2 个示例文件 |
+| M2：SpecKit 方案确定 | 2026-03-28 | **✅ 2026-03-18** | 决策采用方案 B（自研），以产品标准为主 |
+| M3：第一阶段组件完成 | 2026-04-14 | ⏳ 进行中 | 4 个规范化组件 + 单元测试 |
+| M4：完整模式上线 | 2026-04-20 | ⏳ 计划中 | `/qa-full` 可用 + 端到端测试通过 |
 
 ---
 
 ## 任务分解
 
-### 阶段 1：定义标准化格式（P0）
+### 阶段 1：定义标准化格式（P0）✅ 已完成（2026-03-19）
 
-#### 任务 1.1：创建 artifact-schemas 目录结构
+#### 任务 1.1：创建 artifact-schemas 目录结构 ✅
 
 **负责人**：鼎中
-**时间**：0.5 天
+**完成时间**：2026-03-19
 **交付物**：
 
 ```
 plugins/qa-toolkit/references/artifact-schemas/
-├── 00-overview.md
-├── 01-normalized-requirement.md
-├── 02-normalized-design.md
-├── 03-normalized-cases.md
-├── 04-code-diff-report.md
-├── 05-validation-report.md
-├── 06-manual-test-cases.md
-└── 07-api-test-cases.md
+├── 00-overview.md           ✅
+├── 01-normalized-requirement-v2.md  ✅
+├── 02-normalized-design.md  ✅
+├── 03-normalized-cases.md   ✅
+├── 04-code-diff-report.md   ✅
+├── 05-validation-report.md  ✅
+├── 06-manual-test-cases.md  ✅
+└── 07-api-test-cases.md     ✅
 ```
 
-#### 任务 1.2：编写 00-overview.md（总览）
+#### 任务 1.2：编写 00-overview.md（总览）✅
 
 **负责人**：鼎中
-**时间**：0.5 天
+**完成时间**：2026-03-19
 **内容**：
-- 标准化格式的设计原则
+- 标准化格式的设计原则（以产品标准为主）
 - 四阶段 Skill 交互流程图
 - 格式版本管理策略
-- 验证机制说明
+- 七种格式依赖关系矩阵
 
-#### 任务 1.3：定义第一阶段输出格式（01-04）
+#### 任务 1.3：定义第一阶段输出格式（01-04）✅
 
-**负责人**：鼎中（协调陈贝、泉政、奕翔）
-**时间**：2 天
-**任务分配**：
+**负责人**：鼎中
+**完成时间**：2026-03-19
 
-| 文档 | 负责人 | 说明 |
-|------|--------|------|
-| 01-normalized-requirement.md | 陈贝 | 标准化需求文档格式 |
-| 02-normalized-design.md | 陈贝 | 标准化设计文档格式 |
-| 03-normalized-cases.md | 泉政 | 规范化历史案例格式 |
-| 04-code-diff-report.md | 奕翔 | 代码差异报告格式 |
+| 文档 | 状态 | 说明 |
+|------|------|------|
+| 01-normalized-requirement-v2.md | ✅ | 对齐 ZA Bank PRD 7章，含完整示例 |
+| 02-normalized-design.md | ✅ | 对齐 ZA Bank 设计文档模板，含完整示例 |
+| 03-normalized-cases.md | ✅ | 支持 Excel/XMind 提取，含案例推荐逻辑 |
+| 04-code-diff-report.md | ✅ | 支持 Git Diff 分析、影响评估、发布建议 |
 
-**必须包含的字段**：
-- 元数据：artifact_type, version, source_file, created_at, normalizer
-- 核心数据：结构化的业务信息（YAML/JSON）
-- 可追溯信息：关联关系（如 related_requirements）
+**重要决策**：采用"以产品的标准为主"原则，需求文档格式升级为 v2.0，100% 对齐 ZA Bank 模板。
 
-#### 任务 1.4：定义后续阶段输出格式（05-07）
+#### 任务 1.4：定义后续阶段输出格式（05-07）✅
 
-**负责人**：鼎中（协调宇豪、宇宸、泉政）
-**时间**：1.5 天
-**任务分配**：
+**负责人**：鼎中
+**完成时间**：2026-03-19
 
-| 文档 | 负责人 | 说明 |
-|------|--------|------|
-| 05-validation-report.md | 宇豪 | 需求检查报告格式 |
-| 06-manual-test-cases.md | 宇宸 | 手工测试用例格式 |
-| 07-api-test-cases.md | 泉政 | API 自动化用例格式 |
+| 文档 | 状态 | 说明 |
+|------|------|------|
+| 05-validation-report.md | ✅ | 三级检查（P0/P1/P2），含决策建议 |
+| 06-manual-test-cases.md | ✅ | 支持 PlantUML/XMind/Markdown 输出 |
+| 07-api-test-cases.md | ✅ | Python pytest 代码规范 + YAML 多环境数据 |
 
-#### 任务 1.5：格式评审和修订
+#### 任务 1.5：格式评审和修订 ⏳
 
 **负责人**：嘉龙
-**时间**：0.5 天
+**状态**：待评审
 **评审要点**：
 - 格式是否可解析（能否用 YAML/JSON 解析）
 - 字段是否完整（覆盖业务需求）
 - 是否易于扩展（可选字段和必选字段清晰）
+- 示例文件是否准确反映实际项目
 
-### 阶段 2：SpecKit 集成或自研方案（P0）
+### 阶段 2：SpecKit 集成或自研方案（P0）✅ 决策完成（2026-03-18）
 
-#### 任务 2.1：SpecKit 能力评估
+#### 任务 2.1：SpecKit 能力评估 ✅
 
 **负责人**：鼎中
-**时间**：1 天
-**评估维度**：
+**完成时间**：2026-03-18
+**评估结论**：SpecKit 是一套提示词模式，非独立工具
 
-| 维度 | 评估标准 | 决策影响 |
-|------|----------|----------|
-| 输出格式 | 能否输出 YAML/JSON 结构化格式？ | 必须支持，否则无法集成 |
-| 集成方式 | 提供 API/CLI/Python 库？ | 决定 MCP 实现方式 |
-| 字段覆盖 | 是否覆盖 01-normalized-requirement.md 的必选字段？ | 缺失字段需要补充逻辑 |
-| 质量保证 | 转换准确率如何？ | 影响后续阶段质量 |
-| 维护成本 | 是否需要定制化开发？ | 影响时间预算 |
+| 维度 | 评估结论 |
+|------|---------|
+| 输出格式 | SpecKit 本身是提示词，无固定输出格式 |
+| 集成方式 | 将 SpecKit 提示词融入 Skill 实现中 |
+| 字段覆盖 | 以 ZA Bank 产品标准为主，融合 SpecKit 最佳实践 |
+| 质量保证 | 引入三级检查（P0/P1/P2）和置信度标注 |
 
-**输出**：SpecKit 评估报告（推荐集成方案 A 或启动方案 B）
+**决策**：采用方案 B（自研 Skill），将 SpecKit 提示词模式融入 requirement-normalizer 和 design-normalizer 的实现逻辑中。
+
+**关键原则**：「以产品的标准为主」— 格式 100% 对齐 ZA Bank PRD 和设计文档模板。
 
 #### 任务 2.2A：SpecKit MCP 适配层开发（方案 A）
 
@@ -738,7 +792,8 @@ plugins/qa-toolkit/references/artifact-schemas/
 | 日期 | 决策 | 理由 |
 |------|------|------|
 | 2026-03-18 | 定义标准化产出物格式（artifact-schemas） | 解决 Skill 间交互标准缺失问题 |
-| 待定 | SpecKit 集成方案（方案 A 或方案 B） | 取决于 SpecKit 能力评估结果 |
+| 2026-03-18 | SpecKit 集成方案：采用方案 B（自研） | SpecKit 是提示词模式，以产品标准为主 |
+| 2026-03-19 | api-case-generator v2.0 重构 | 完全适配银行标准测试框架，提升通用性和可维护性 |
 
 ### 参考文档
 
@@ -758,3 +813,5 @@ plugins/qa-toolkit/references/artifact-schemas/
 
 **版本历史**：
 - v1.0 (2026-03-18)：初始版本，定义四阶段实施计划
+- v1.1 (2026-03-19)：完成 artifact-schemas 定义（7个文档+2个示例）
+- v1.2 (2026-03-19)：完成 api-case-generator v2.0 重构，适配银行标准测试框架
