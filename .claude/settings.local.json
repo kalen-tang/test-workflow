@@ -9,10 +9,6 @@
       "mcp__playwright__browser_evaluate",
       "mcp__playwright__browser_close",
       "mcp__playwright__browser_type",
-      "Bash(cd D:\\\\ai\\\\wf_bank_test\\\\plugins\\\\km-analysis:*)",
-      "Bash(cd D:\\\\ai\\\\wf_bank_test\\\\plugins\\\\requirement-check:*)",
-      "Bash(cd D:\\\\ai\\\\wf_bank_test\\\\plugins\\\\api-generator:*)",
-      "Bash(cd \"D:\\\\ai\\\\wf_bank_test\" && python << 'PYTHON'\nimport json\nimport os\nimport sys\n\n# 设置输出编码\nif sys.platform == 'win32':\n    import codecs\n    sys.stdout = codecs.getwriter\\('utf-8'\\)\\(sys.stdout.buffer, 'strict'\\)\n\nprint\\(\"Name Consistency Check\\\\n\"\\)\n\n# 读取 marketplace.json\nwith open\\('.claude-plugin/marketplace.json', encoding='utf-8'\\) as f:\n    marketplace = json.load\\(f\\)\n\nprint\\(f\"{'Marketplace':<25} {'Plugin.json':<25} {'Directory':<25} {'Skill subdir':<25} {'Status'}\"\\)\nprint\\(\"=\" * 110\\)\n\nfor plugin_config in marketplace['plugins']:\n    mp_name = plugin_config['name']\n    source = plugin_config['source'].replace\\('./plugins/', ''\\)\n    \n    # 读取 plugin.json\n    plugin_json_path = f'plugins/{source}/.claude-plugin/plugin.json'\n    with open\\(plugin_json_path, encoding='utf-8'\\) as f:\n        plugin_data = json.load\\(f\\)\n        pj_name = plugin_data['name']\n    \n    # 获取 skills 子目录\n    skills_dir = f'plugins/{source}/skills'\n    skill_subdirs = os.listdir\\(skills_dir\\) if os.path.exists\\(skills_dir\\) else []\n    skill_name = skill_subdirs[0] if skill_subdirs else 'N/A'\n    \n    # 判断是否一致\n    all_same = \\(mp_name == pj_name == source == skill_name\\)\n    status = \"OK\" if all_same else \"MISMATCH\"\n    \n    print\\(f\"{mp_name:<25} {pj_name:<24} {source:<24} {skill_name:<24} {status}\"\\)\n\nPYTHON)"
     ]
   }
 }
