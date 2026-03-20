@@ -326,6 +326,779 @@ Week 5 (04-15~04-20): 集成验证 + 上线
 
 ## 任务分解
 
+> **执行提示**：使用 superpowers:executing-plans 或 superpowers:subagent-driven-development skill 执行以下 Task，Steps 使用 `- [ ]` checkbox 语法跟踪进度。
+
+### ✅ 已完成（无需实施）
+
+| 组件 | 状态 | 说明 |
+|------|------|------|
+| Artifact Schemas 全部 8 个文档 | ✅ | `references/artifact-schemas/00-07`，2026-03-19 完成 |
+| `requirement-normalizer` SKILL.md | ✅ | 含 examples/ |
+| `api-case-generator` v2.0 | ✅ | 完全适配银行框架，2026-03-19 完成 |
+| `manual-case-generator` | ✅ | 含 references/ + examples/ |
+| `requirement-validator` | ✅ | SKILL.md 存在（缺 references/） |
+| `shift-left-analyzer` | ✅ | 快速模式核心（不在本计划范围） |
+| `/qa-full` 命令占位文件 | ✅ | `commands/full-workflow.md`（需补充内容） |
+
+### ⏳ 待实施任务总览
+
+| 任务 | 负责人 | 优先级 |
+|------|--------|--------|
+| Task 1: `design-normalizer` SKILL.md | 陈贝 | P0 |
+| Task 2: `requirement-validator` references/ | 宇豪 | P1 |
+| Task 3: CML MCP 骨架（Python） | 泉政 | P1 |
+| Task 4: Code Diff MCP 骨架（Python） | 奕翔 | P1 |
+| Task 5: `/qa-full` 完整工作流命令 | 鼎中 | P1 |
+| Task 6: `manual-case-generator` 适配标准格式 | 宇宸 | P2 |
+| Task 7: `requirement-validator` 适配标准格式 | 宇豪 | P2 |
+| Task 8: `api-case-generator` 确认标准格式适配 | 泉政 | P2 |
+| Task 9: 端到端文档验收 | 鼎中 | P2 |
+
+### 文件结构
+
+**将创建的文件：**
+
+```
+plugins/qa-toolkit/
+├── skills/
+│   ├── design-normalizer/
+│   │   ├── SKILL.md                          # [新建] Task 1 核心
+│   │   ├── references/
+│   │   │   ├── 01-design-format-guide.md     # [新建] 设计文档结构解析指南
+│   │   │   └── 02-output-spec.md             # [新建] 输出格式规范引用
+│   │   └── examples/
+│   │       └── (已有 output-normalized-design.yaml)
+│   └── requirement-validator/
+│       └── references/
+│           ├── 01-validation-rules.md         # [新建] Task 2 验证规则参考
+│           └── 02-artifact-schema-refs.md     # [新建] 标准格式引用说明
+├── mcp-servers/
+│   ├── cml-mcp/
+│   │   ├── README.md                          # [新建] Task 3
+│   │   ├── main.py                            # [新建] MCP 主入口
+│   │   ├── normalizer.py                      # [新建] 案例规范化逻辑
+│   │   └── tests/
+│   │       ├── conftest.py                    # [新建] Python 路径设置
+│   │       └── test_normalizer.py             # [新建] 单元测试
+│   └── code-diff-mcp/
+│       ├── README.md                          # [新建] Task 4
+│       ├── main.py                            # [新建] MCP 主入口
+│       ├── analyzer.py                        # [新建] 差异分析逻辑
+│       └── tests/
+│           ├── conftest.py                    # [新建] Python 路径设置
+│           └── test_analyzer.py               # [新建] 单元测试
+└── commands/
+    └── full-workflow.md                       # [修改] Task 5 补充完整内容
+```
+
+**将修改的文件：**
+
+```
+plugins/qa-toolkit/
+├── skills/
+│   ├── manual-case-generator/SKILL.md        # [修改] Task 6 适配标准输入格式
+│   └── requirement-validator/SKILL.md        # [修改] Task 7 适配标准输入/输出格式
+├── commands/help.md                           # [修改] Task 9 添加 /qa-full 说明
+├── commands/status.md                         # [修改] Task 9 更新完整模式状态
+├── README.md                                  # [修改] Task 9 更新完整模式状态
+└── .claude-plugin/plugin.json                # [修改] Task 9 版本 1.2.0 → 1.3.0
+
+# 项目根目录
+CLAUDE.md                                      # [修改] Task 9 添加 /qa-full 使用示例
+```
+
+---
+
+### Task 1：design-normalizer SKILL.md（P0）
+
+**负责人**：陈贝
+**文件：**
+- 创建：`plugins/qa-toolkit/skills/design-normalizer/SKILL.md`
+- 创建：`plugins/qa-toolkit/skills/design-normalizer/references/01-design-format-guide.md`
+- 创建：`plugins/qa-toolkit/skills/design-normalizer/references/02-output-spec.md`
+- 参考：`plugins/qa-toolkit/skills/requirement-normalizer/SKILL.md`（模式参照）
+- 参考：`plugins/qa-toolkit/references/artifact-schemas/02-normalized-design.md`
+
+- [ ] **Step 1: 确认已有 SKILL.md 的结构模式**
+
+  打开 `skills/requirement-normalizer/SKILL.md`，记录其 YAML frontmatter 字段（name, description, status）和章节结构（概述、核心功能、输入、输出、使用方式、Step-by-Step 指南、references 引用）。
+
+- [ ] **Step 2: 确认 artifact-schema 02 的字段结构**
+
+  打开 `references/artifact-schemas/02-normalized-design.md`，记录：
+  - 输出 YAML 的顶层字段（metadata、interfaces、database_changes 等）
+  - 必填字段 vs 可选字段
+  - ZA Bank 设计文档的 7 个章节结构
+
+- [ ] **Step 3: 创建 SKILL.md**
+
+  创建 `skills/design-normalizer/SKILL.md`，内容结构如下：
+
+  ```markdown
+  ---
+  name: design-normalizer
+  description: 设计文档标准化器，将原始设计文档（Word/PDF/Markdown）转换为结构化 YAML 格式，提取接口定义、数据库变更、业务逻辑，输出符合 artifact-schemas 标准的规范化设计文档
+  status: active
+  ---
+
+  # design-normalizer - 设计文档标准化器
+
+  ## 📋 概述
+  [说明作用：将设计文档转为 YAML，供 requirement-validator 和 api-case-generator 使用]
+
+  ## 🎯 核心功能
+  1. **接口提取**：从设计文档中提取 API 接口定义（路径、方法、参数、响应）
+  2. **数据库变更识别**：提取数据库表结构变更（DDL、新增字段等）
+  3. **业务逻辑梳理**：提取业务流程、规则判断、异常处理
+  4. **三级检查**：P0/P1/P2 设计完整性检查
+  5. **置信度标记**：对提取内容标注置信度，便于人工复核
+
+  ## 📥 输入
+  - 设计文档：Word（.docx）、PDF、Markdown（.md）、纯文本
+  - 可选：need_req_doc（关联需求文档路径，用于接口-需求对齐检查）
+
+  ## 📤 输出
+  - 主产出物：标准化设计文档（YAML 格式）
+    - 符合 references/artifact-schemas/02-normalized-design.md 规范
+    - 包含接口列表、数据库变更、业务逻辑
+
+  ## 🚀 使用方式
+  [命令示例，参照 requirement-normalizer 格式]
+
+  ## 📋 Step-by-Step 指南
+  ### Step 1: 解析文档结构
+  ### Step 2: 提取接口定义
+  ### Step 3: 提取数据库变更
+  ### Step 4: 填充 YAML 结构
+  ### Step 5: 三级质量检查
+
+  ## 📚 References
+  - references/01-design-format-guide.md
+  - references/02-output-spec.md
+  - ../../references/artifact-schemas/02-normalized-design.md
+  ```
+
+- [ ] **Step 4: 创建 references/01-design-format-guide.md**
+
+  说明 ZA Bank 设计文档的典型结构（7章）和各章节的提取策略：
+  - 第1章：文档说明（元数据提取）
+  - 第2章：需求背景（关联需求链接）
+  - 第3章：功能设计（接口定义、业务逻辑）
+  - 第4章：数据库设计（DDL、字段变更）
+  - 第5章：异常处理（错误码、降级策略）
+  - 第6章：安全合规（权限、日志要求）
+  - 第7章：测试重点（关键场景）
+
+- [ ] **Step 5: 创建 references/02-output-spec.md**
+
+  说明 `02-normalized-design.md` 格式中各字段的填写规则：
+  - `interfaces` 数组：每个接口的必填字段
+  - `database_changes` 数组：DDL 和字段变更格式
+  - `business_rules` 数组：规则描述和关联接口
+  - 置信度标注规则（何时标 high/medium/low）
+
+- [ ] **Step 6: 提交**
+
+  ```bash
+  git add plugins/qa-toolkit/skills/design-normalizer/
+  git commit -m "feat(design-normalizer): add SKILL.md and references"
+  ```
+
+---
+
+### Task 2：requirement-validator references/（P1）
+
+**负责人**：宇豪
+**文件：**
+- 创建：`plugins/qa-toolkit/skills/requirement-validator/references/01-validation-rules.md`
+- 创建：`plugins/qa-toolkit/skills/requirement-validator/references/02-artifact-schema-refs.md`
+- 参考：`plugins/qa-toolkit/references/artifact-schemas/05-validation-report.md`
+
+- [ ] **Step 1: 阅读当前 SKILL.md**
+
+  打开 `skills/requirement-validator/SKILL.md`，记录当前接受的输入格式、验证规则描述、需要适配标准化格式的地方。
+
+- [ ] **Step 2: 创建 01-validation-rules.md**
+
+  文档内容：三级检查体系（P0 阻断级 / P1 警告级 / P2 信息级）+ 各级检查规则 + 输入/输出格式引用说明。
+
+- [ ] **Step 3: 创建 02-artifact-schema-refs.md**
+
+  说明如何从标准化输入中读取字段：
+  - 标准化需求文档（01）：`requirements[].id`、`requirements[].acceptance_criteria`、`related_interfaces`
+  - 标准化设计文档（02）：`interfaces[].path`、`interfaces[].method`、`business_rules`
+  - 代码差异报告（04，可选）：`changed_files`、`impact_assessment`
+  - 需求验证报告（05）：`validation_summary`、`p0_issues`、`p1_issues`、`p2_issues`、`decision`
+
+- [ ] **Step 4: 提交**
+
+  ```bash
+  git add plugins/qa-toolkit/skills/requirement-validator/references/
+  git commit -m "feat(requirement-validator): add references for artifact-schema alignment"
+  ```
+
+---
+
+### Task 3：CML MCP 骨架（P1）
+
+**负责人**：泉政
+**文件：**
+- 创建：`plugins/qa-toolkit/mcp-servers/cml-mcp/README.md`
+- 创建：`plugins/qa-toolkit/mcp-servers/cml-mcp/main.py`
+- 创建：`plugins/qa-toolkit/mcp-servers/cml-mcp/normalizer.py`
+- 创建：`plugins/qa-toolkit/mcp-servers/cml-mcp/tests/conftest.py`
+- 创建：`plugins/qa-toolkit/mcp-servers/cml-mcp/tests/test_normalizer.py`
+- 参考：`plugins/qa-toolkit/references/artifact-schemas/03-normalized-cases.md`
+
+- [ ] **Step 1: 读取 03-normalized-cases.md 确认输出 schema**
+
+  打开 `references/artifact-schemas/03-normalized-cases.md`，记录顶层字段（`artifact_type`、`test_cases`、`quality_metrics`）和 `test_cases` 数组的必填字段。
+
+- [ ] **Step 2: 写失败测试**
+
+  ```python
+  # tests/test_normalizer.py
+  from normalizer import normalize_cases
+
+  def test_normalize_empty_input():
+      result = normalize_cases([])
+      assert result["artifact_type"] == "normalized_cases"
+      assert result["test_cases"] == []
+
+  def test_normalize_single_case():
+      raw_case = {
+          "id": "TC-001",
+          "title": "正常登录",
+          "steps": ["输入用户名", "输入密码", "点击登录"],
+          "expected": "跳转首页"
+      }
+      result = normalize_cases([raw_case])
+      assert len(result["test_cases"]) == 1
+      assert result["test_cases"][0]["id"] == "TC-001"
+      assert result["test_cases"][0]["title"] == "正常登录"
+  ```
+
+- [ ] **Step 3: 创建 tests/conftest.py 设置 Python 路径**
+
+  ```python
+  # plugins/qa-toolkit/mcp-servers/cml-mcp/tests/conftest.py
+  import sys
+  import os
+  sys.path.insert(0, os.path.join(os.path.dirname(__file__), ".."))
+  ```
+
+- [ ] **Step 4: 运行测试确认失败（预期 ImportError）**
+
+  ```bash
+  python -m pytest plugins/qa-toolkit/mcp-servers/cml-mcp/tests/test_normalizer.py -v
+  ```
+  预期：`ModuleNotFoundError: No module named 'normalizer'`
+
+- [ ] **Step 5: 实现 normalizer.py**
+
+  ```python
+  """CML 历史案例规范化器"""
+  from typing import Any
+  import datetime
+
+
+  def normalize_cases(raw_cases: list[dict[str, Any]]) -> dict[str, Any]:
+      """将 CML 系统原始用例转换为 artifact-schema 03 标准格式。"""
+      return {
+          "artifact_type": "normalized_cases",
+          "version": "1.0",
+          "created_at": datetime.datetime.now().isoformat(),
+          "normalizer": "cml-mcp",
+          "test_cases": [_normalize_single(c) for c in raw_cases],
+          "quality_metrics": {
+              "total_count": len(raw_cases),
+              "processed_count": len(raw_cases),
+          },
+      }
+
+
+  def _normalize_single(raw: dict[str, Any]) -> dict[str, Any]:
+      return {
+          "id": raw.get("id", ""),
+          "title": raw.get("title", ""),
+          "preconditions": raw.get("preconditions", []),
+          "steps": raw.get("steps", []),
+          "expected_result": raw.get("expected", raw.get("expected_result", "")),
+          "priority": raw.get("priority", "medium"),
+          "tags": raw.get("tags", []),
+      }
+  ```
+
+- [ ] **Step 6: 运行测试确认通过**
+
+  ```bash
+  python -m pytest plugins/qa-toolkit/mcp-servers/cml-mcp/tests/test_normalizer.py -v
+  ```
+  预期：2 tests PASSED
+
+- [ ] **Step 7: 实现 main.py MCP 入口骨架**
+
+  ```python
+  """CML MCP - 历史案例规范化 MCP 服务入口（骨架）"""
+  import json
+  import sys
+  from normalizer import normalize_cases
+
+
+  def handle_request(request: dict) -> dict:
+      if request.get("method") == "normalize_cases":
+          raw_cases = request.get("params", {}).get("cases", [])
+          return {"result": normalize_cases(raw_cases)}
+      return {"error": f"Unknown method: {request.get('method')}"}
+
+
+  if __name__ == "__main__":
+      # TODO: 接入 CML 系统 API，替换为真实数据
+      request = json.loads(sys.stdin.read())
+      response = handle_request(request)
+      print(json.dumps(response, ensure_ascii=False))
+  ```
+
+- [ ] **Step 8: 创建 README.md**
+
+  说明功能、输出格式（`03-normalized-cases.md`）、骨架状态和运行示例：
+  `echo '{"method":"normalize_cases","params":{"cases":[]}}' | python main.py`
+
+- [ ] **Step 9: 提交**
+
+  ```bash
+  git add plugins/qa-toolkit/mcp-servers/cml-mcp/
+  git commit -m "feat(cml-mcp): add skeleton implementation with normalizer and tests"
+  ```
+
+---
+
+### Task 4：Code Diff MCP 骨架（P1）
+
+**负责人**：奕翔
+**文件：**
+- 创建：`plugins/qa-toolkit/mcp-servers/code-diff-mcp/README.md`
+- 创建：`plugins/qa-toolkit/mcp-servers/code-diff-mcp/main.py`
+- 创建：`plugins/qa-toolkit/mcp-servers/code-diff-mcp/analyzer.py`
+- 创建：`plugins/qa-toolkit/mcp-servers/code-diff-mcp/tests/conftest.py`
+- 创建：`plugins/qa-toolkit/mcp-servers/code-diff-mcp/tests/test_analyzer.py`
+- 参考：`plugins/qa-toolkit/references/artifact-schemas/04-code-diff-report.md`
+
+- [ ] **Step 1: 读取 04-code-diff-report.md 确认输出 schema**
+
+  打开 `references/artifact-schemas/04-code-diff-report.md`，记录顶层字段（`artifact_type`、`summary`、`changed_files`、`impact_assessment`）和各字段的必填项。
+
+- [ ] **Step 2: 创建 tests/conftest.py 设置 Python 路径**
+
+  ```python
+  # plugins/qa-toolkit/mcp-servers/code-diff-mcp/tests/conftest.py
+  import sys
+  import os
+  sys.path.insert(0, os.path.join(os.path.dirname(__file__), ".."))
+  ```
+
+- [ ] **Step 3: 写失败测试**
+
+  ```python
+  # tests/test_analyzer.py
+  from analyzer import analyze_diff
+
+  def test_analyze_empty_diff():
+      result = analyze_diff(repo_path=".", base_branch="main", target_branch="main")
+      assert result["artifact_type"] == "code_diff_report"
+      assert result["summary"]["total_files_changed"] == 0
+
+  def test_analyze_mock_diff():
+      mock_diff = [
+          {"path": "src/service/UserService.java", "added": 10, "deleted": 5, "change_type": "modified"},
+      ]
+      result = analyze_diff(repo_path=".", base_branch="main", target_branch="feature/x", _mock_diff=mock_diff)
+      assert result["summary"]["total_files_changed"] == 1
+      assert result["changed_files"][0]["path"] == "src/service/UserService.java"
+  ```
+
+- [ ] **Step 4: 运行测试确认失败（预期 ImportError）**
+
+  ```bash
+  python -m pytest plugins/qa-toolkit/mcp-servers/code-diff-mcp/tests/test_analyzer.py -v
+  ```
+  预期：`ModuleNotFoundError: No module named 'analyzer'`
+
+- [ ] **Step 5: 实现 analyzer.py**
+
+  ```python
+  """Code Diff 分析器 - 分析 Git 代码差异并输出标准化报告"""
+  from typing import Any, Optional
+  import datetime
+
+
+  def analyze_diff(
+      repo_path: str,
+      base_branch: str,
+      target_branch: str,
+      _mock_diff: Optional[list[dict]] = None,
+  ) -> dict[str, Any]:
+      """分析两个分支之间的代码差异，输出符合 04-code-diff-report.md 的字典。"""
+      raw_diff = _mock_diff if _mock_diff is not None else []
+      # TODO: 使用 GitPython 获取真实 diff
+      # import git; repo = git.Repo(repo_path); raw_diff = _get_git_diff(...)
+      changed_files = [_normalize_file(f) for f in raw_diff]
+      return {
+          "artifact_type": "code_diff_report",
+          "version": "1.0",
+          "created_at": datetime.datetime.now().isoformat(),
+          "analyzer": "code-diff-mcp",
+          "diff_info": {"base_branch": base_branch, "target_branch": target_branch, "repo_path": repo_path},
+          "summary": {
+              "total_files_changed": len(changed_files),
+              "total_lines_added": sum(f["lines_added"] for f in changed_files),
+              "total_lines_deleted": sum(f["lines_deleted"] for f in changed_files),
+          },
+          "changed_files": changed_files,
+          "impact_assessment": {
+              "risk_level": _assess_risk(changed_files),
+              "affected_interfaces": [],  # TODO: AI 辅助识别
+              "test_suggestions": [],
+          },
+      }
+
+
+  def _normalize_file(raw: dict[str, Any]) -> dict[str, Any]:
+      return {
+          "path": raw.get("path", ""),
+          "change_type": raw.get("change_type", "modified"),
+          "lines_added": raw.get("added", 0),
+          "lines_deleted": raw.get("deleted", 0),
+      }
+
+
+  def _assess_risk(changed_files: list[dict]) -> str:
+      total = sum(f["lines_added"] + f["lines_deleted"] for f in changed_files)
+      if total > 500 or len(changed_files) > 20:
+          return "high"
+      elif total > 100 or len(changed_files) > 5:
+          return "medium"
+      return "low"
+  ```
+
+- [ ] **Step 6: 运行测试确认通过**
+
+  ```bash
+  python -m pytest plugins/qa-toolkit/mcp-servers/code-diff-mcp/tests/test_analyzer.py -v
+  ```
+  预期：2 tests PASSED
+
+- [ ] **Step 7: 实现 main.py 入口骨架**
+
+  ```python
+  """Code Diff MCP - Git 代码差异分析 MCP 服务入口（骨架）"""
+  import json
+  import sys
+  from analyzer import analyze_diff
+
+
+  def handle_request(request: dict) -> dict:
+      if request.get("method") == "analyze_diff":
+          params = request.get("params", {})
+          result = analyze_diff(
+              repo_path=params.get("repo_path", "."),
+              base_branch=params.get("base_branch", "main"),
+              target_branch=params.get("target_branch", "HEAD"),
+          )
+          return {"result": result}
+      return {"error": f"Unknown method: {request.get('method')}"}
+
+
+  if __name__ == "__main__":
+      # TODO: 接入 GitPython 获取真实 diff
+      request = json.loads(sys.stdin.read())
+      response = handle_request(request)
+      print(json.dumps(response, ensure_ascii=False))
+  ```
+
+- [ ] **Step 8: 创建 README.md**
+
+  说明功能、输出格式（`04-code-diff-report.md`）、骨架状态（TODO: GitPython 接入、AI 辅助接口识别）和运行示例：
+  `echo '{"method":"analyze_diff","params":{"repo_path":".","base_branch":"main","target_branch":"feature/x"}}' | python main.py`
+
+- [ ] **Step 9: 提交**
+
+  ```bash
+  git add plugins/qa-toolkit/mcp-servers/code-diff-mcp/
+  git commit -m "feat(code-diff-mcp): add skeleton implementation with analyzer and tests"
+  ```
+
+---
+
+### Task 5：`/qa-full` 完整工作流命令（P1）
+
+**负责人**：鼎中
+**文件：**
+- 修改：`plugins/qa-toolkit/commands/full-workflow.md`
+- 参考：`plugins/qa-toolkit/commands/quick-workflow.md`（模式参照）
+
+- [ ] **Step 1: 阅读 quick-workflow.md 理解命令结构**
+
+  打开 `commands/quick-workflow.md`，记录 YAML frontmatter 结构（name, description, arguments）和各阶段描述格式。
+
+- [ ] **Step 2: 确认现有 full-workflow.md 中需保留的内容**
+
+  打开 `commands/full-workflow.md`（当前约 305 行），识别：
+  - **保留**：四阶段流程图（第22-68行）、分阶段执行参数 `--stage`（第124-144行）、输入/输出目录结构（第146-179行）、完整模式 vs 快速模式对比表（第181-192行）
+  - **删除**：开发中状态提示（第14-20行）、"预期使用方式（4月20日后）"标题、"当前可用替代方案"章节、开发路线图章节
+  - **更新**：状态从🚧开发中改为✅可用，补充实际执行流程的 Step-by-Step 说明
+
+- [ ] **Step 3: 重写 full-workflow.md**
+
+  新文件内容章节顺序：
+  1. 状态标记：✅ 可用
+  2. 四阶段流程图（保留原 ASCII 图，更新各阶段状态为✅）
+  3. 执行流程 Step-by-Step（新增）：准备阶段收集输入 → 第一阶段规范化（产出至 `./result/[项目名]/artifacts/`）→ 第二阶段需求检查（P0 问题则暂停）→ 第三阶段手工案例 → 第四阶段 API 案例 → 汇总
+  4. 分阶段执行参数（保留现有 `--stage` 说明）
+  5. 输入/输出目录结构（保留）
+  6. 完整模式 vs 快速模式对比表（保留，更新状态列为✅）
+  7. 前提条件（新增：需要哪些 Skill/MCP 激活）
+
+- [ ] **Step 4: 验证文件写入正确**
+
+  搜索"开发中"关键词确认已删除，确认"✅ 可用"存在。
+
+- [ ] **Step 5: 提交**
+
+  ```bash
+  git add plugins/qa-toolkit/commands/full-workflow.md
+  git commit -m "feat(commands): complete qa-full workflow command with step-by-step execution guide"
+  ```
+
+---
+
+### Task 6：manual-case-generator 适配标准格式（P2）
+
+**负责人**：宇宸
+**文件：**
+- 修改：`plugins/qa-toolkit/skills/manual-case-generator/SKILL.md`
+- 参考：`plugins/qa-toolkit/references/artifact-schemas/01-normalized-requirement-v2.md`
+- 参考：`plugins/qa-toolkit/references/artifact-schemas/05-validation-report.md`
+- 参考：`plugins/qa-toolkit/references/artifact-schemas/06-manual-test-cases.md`
+
+- [ ] **Step 1: 阅读当前 SKILL.md 的输入/输出规范**
+
+  打开 `skills/manual-case-generator/SKILL.md`，记录当前输入格式、输出产物、需要改动的章节。
+
+- [ ] **Step 2: 阅读 artifact-schemas 06 的输出格式**
+
+  打开 `references/artifact-schemas/06-manual-test-cases.md`，确认输出 YAML 的顶层字段和手工用例的必填字段。
+
+- [ ] **Step 3: 在 "📥 输入" 章节添加标准化输入支持**
+
+  ```markdown
+  ### 完整模式输入（推荐）
+  当以下标准化文件存在时，优先使用：
+  - `01-normalized-requirement.yaml`（来自 requirement-normalizer）
+  - `02-normalized-design.yaml`（来自 design-normalizer，可选）
+  - `05-validation-report.yaml`（来自 requirement-validator，用于测试重点识别）
+
+  从标准化需求中读取：
+  - `requirements[].acceptance_criteria` → 测试用例基础
+  - `requirements[].test_focus == true` → 重点测试标记
+  - `requirements[].risk_level` → 用例优先级
+  - `test_scenarios[].given_when_then` → 直接转换为测试步骤
+  ```
+
+- [ ] **Step 4: 在 "📤 输出" 章节添加标准化输出说明**
+
+  ```markdown
+  ### 标准化输出
+  完整模式下，同时输出：
+  - `06-manual-test-cases.yaml`（符合 references/artifact-schemas/06-manual-test-cases.md）
+  - `manual-cases.md`（PlantUML + XMind，供人工查阅）
+  ```
+
+- [ ] **Step 5: 提交**
+
+  ```bash
+  git add plugins/qa-toolkit/skills/manual-case-generator/SKILL.md
+  git commit -m "feat(manual-case-generator): adapt to artifact-schema standard input/output"
+  ```
+
+---
+
+### Task 7：requirement-validator 适配标准格式（P2）
+
+**负责人**：宇豪
+**文件：**
+- 修改：`plugins/qa-toolkit/skills/requirement-validator/SKILL.md`
+- 参考：`plugins/qa-toolkit/references/artifact-schemas/01-normalized-requirement-v2.md`
+- 参考：`plugins/qa-toolkit/references/artifact-schemas/02-normalized-design.md`
+- 参考：`plugins/qa-toolkit/references/artifact-schemas/05-validation-report.md`
+
+- [ ] **Step 1: 阅读当前 SKILL.md 的输入/输出规范**
+
+  记录当前输入格式和输出格式，确认需要修改的章节。
+
+- [ ] **Step 2: 更新 "📥 输入" 章节**
+
+  添加标准化输入说明（读取 01、02、04 格式的字段位置）。
+
+- [ ] **Step 3: 更新 "📤 输出" 章节**
+
+  说明输出格式符合 `05-validation-report.md`，包含 `validation_summary`、`p0_issues`、`p1_issues`、`p2_issues`、`decision`（pass/fix_required/blocked）。
+
+- [ ] **Step 4: 在 References 章节添加引用**
+
+  ```markdown
+  - references/01-validation-rules.md
+  - references/02-artifact-schema-refs.md
+  ```
+  （无 `./` 前缀，符合项目规范）
+
+- [ ] **Step 5: 提交**
+
+  ```bash
+  git add plugins/qa-toolkit/skills/requirement-validator/SKILL.md
+  git commit -m "feat(requirement-validator): adapt to artifact-schema standard input/output"
+  ```
+
+---
+
+### Task 8：api-case-generator 确认标准格式适配（P2）
+
+**负责人**：泉政
+**背景**：`api-case-generator` v2.0 已重构完成，本 Task 验证并在 SKILL.md 中补充标准格式引用说明。
+**文件：**
+- 修改：`plugins/qa-toolkit/skills/api-case-generator/SKILL.md`（仅在缺少标准格式引用时修改）
+- 参考：`plugins/qa-toolkit/references/artifact-schemas/02-normalized-design.md`
+- 参考：`plugins/qa-toolkit/references/artifact-schemas/06-manual-test-cases.md`
+- 参考：`plugins/qa-toolkit/references/artifact-schemas/07-api-test-cases.md`
+
+- [ ] **Step 1: 阅读 SKILL.md 当前输入说明**
+
+  打开 `skills/api-case-generator/SKILL.md`，确认 "📥 输入" 章节是否已说明读取 `02-normalized-design.yaml` 和 `06-manual-test-cases.yaml`。
+
+- [ ] **Step 2: 若缺少标准格式引用，在输入章节补充说明**
+
+  ```markdown
+  ### 完整模式输入（推荐）
+  - `02-normalized-design.yaml`（来自 design-normalizer）：
+    - `interfaces[].path` → 接口路径
+    - `interfaces[].method` → HTTP 方法
+    - `interfaces[].request_params` → 请求参数
+    - `interfaces[].response_schema` → 响应结构
+  - `06-manual-test-cases.yaml`（来自 manual-case-generator，可选）：
+    - `test_cases[].steps` → 辅助生成测试数据
+    - `test_cases[].related_interfaces` → 用例关联接口
+  ```
+
+- [ ] **Step 3: 确认输出符合 07-api-test-cases.md**
+
+  打开 `references/artifact-schemas/07-api-test-cases.md`，确认生成的 Python + YAML 代码符合其结构。如有差异，在输出章节注明。
+
+- [ ] **Step 4: 提交**
+
+  ```bash
+  git add plugins/qa-toolkit/skills/api-case-generator/SKILL.md
+  git commit -m "feat(api-case-generator): document standard artifact-schema input alignment"
+  ```
+
+---
+
+### Task 9：端到端文档验收（P2）
+
+**负责人**：鼎中
+**文件：**
+- 修改：`plugins/qa-toolkit/commands/help.md`
+- 修改：`plugins/qa-toolkit/commands/status.md`
+- 修改：`plugins/qa-toolkit/README.md`
+- 修改：`plugins/qa-toolkit/.claude-plugin/plugin.json`
+- 修改：`CLAUDE.md`（项目根目录）
+- 修改：`PLAN.md`（更新里程碑进展）
+
+- [ ] **Step 1: 更新 help.md**
+
+  将 `/qa-full` 状态从「开发中」改为「可用」，补充使用说明。
+
+- [ ] **Step 2: 更新 status.md**
+
+  将完整模式状态从 🚧 改为 ✅，列出四个阶段的组件状态。
+
+- [ ] **Step 3: 更新 plugins/qa-toolkit/README.md**
+
+  完整模式状态更新为「可用」，添加 `/qa-full` 命令使用示例，更新 design-normalizer 状态为 ✅。
+
+- [ ] **Step 4: 更新 CLAUDE.md（项目根目录）**
+
+  在 "🚀 常用命令" 章节添加：
+  ```bash
+  # 完整模式（四阶段流程：规范化→需求检查→手工案例→API案例）
+  /qa-full ./docs/
+  ```
+  在工作流模式章节将完整模式状态从 🚧 更新为 ✅。
+
+- [ ] **Step 5: 更新 plugin.json 版本号**
+
+  ```json
+  { "version": "1.3.0" }
+  ```
+
+- [ ] **Step 6: 更新 PLAN.md 里程碑进展**
+
+  将各完成任务标记为 ✅，更新时间戳。
+
+- [ ] **Step 7: 验收自查清单**
+
+  - [ ] `skills/design-normalizer/SKILL.md` 存在且包含 frontmatter
+  - [ ] `skills/design-normalizer/references/` 有 2 个文档
+  - [ ] `skills/requirement-validator/references/` 有 2 个文档
+  - [ ] `mcp-servers/cml-mcp/` 有 main.py + normalizer.py + tests/conftest.py + tests/test_normalizer.py
+  - [ ] `mcp-servers/code-diff-mcp/` 有 main.py + analyzer.py + tests/conftest.py + tests/test_analyzer.py
+  - [ ] `commands/full-workflow.md` 状态为✅且有 Step-by-Step 执行说明
+  - [ ] `skills/manual-case-generator/SKILL.md` 包含标准化输入说明
+  - [ ] `skills/requirement-validator/SKILL.md` 包含标准化输入/输出说明
+  - [ ] `skills/api-case-generator/SKILL.md` 包含 02/06 标准格式引用
+  - [ ] `CLAUDE.md` 包含 `/qa-full` 使用示例
+  - [ ] `plugin.json` 版本号为 1.3.0
+
+- [ ] **Step 8: 最终提交**
+
+  ```bash
+  git add plugins/qa-toolkit/commands/help.md plugins/qa-toolkit/commands/status.md
+  git add plugins/qa-toolkit/README.md plugins/qa-toolkit/.claude-plugin/plugin.json
+  git add CLAUDE.md PLAN.md
+  git commit -m "chore: release qa-toolkit v1.3.0 with full mode support"
+  ```
+
+---
+
+### 里程碑检查点
+
+| 里程碑 | 对应 Task | 验证方式 |
+|--------|-----------|----------|
+| design-normalizer 可用 | Task 1 完成 | `skills/design-normalizer/SKILL.md` 存在且包含 frontmatter |
+| requirement-validator 文档完整 | Task 2 完成 | `skills/requirement-validator/references/` 有 2 个文档 |
+| MCP 骨架可测试 | Task 3+4 完成 | `python -m pytest plugins/qa-toolkit/mcp-servers/cml-mcp/tests/ plugins/qa-toolkit/mcp-servers/code-diff-mcp/tests/ -v` 全部通过 |
+| `/qa-full` 命令可调用 | Task 5 完成 | `commands/full-workflow.md` 状态为✅且有 Step-by-Step 执行说明 |
+| 四个 Skill 全部适配标准格式 | Task 6+7+8 完成 | 各 SKILL.md 包含标准化格式输入/输出说明 |
+| v1.3.0 发布 | Task 9 完成 | `plugin.json` 版本号 = 1.3.0，`CLAUDE.md` 包含 `/qa-full` 示例 |
+
+### 依赖关系
+
+```
+Task 1 (design-normalizer SKILL.md) ─────────────────┐
+Task 2 (requirement-validator references) ────────────┤
+Task 3 (CML MCP) ──────────────────── 独立            │
+Task 4 (Code Diff MCP) ─────────────── 独立           │
+Task 8 (api-case-generator 确认) ───── 独立           │
+                                                       ↓
+Task 1 + Task 2 → Task 5 (qa-full command)         全部完成
+Task 1 → Task 6 (manual-case-generator 适配)          ↓
+Task 2 → Task 7 (requirement-validator 适配)        Task 9
+```
+
+**建议执行顺序**：
+1. 并行：Task 1 + Task 2 + Task 3 + Task 4 + Task 8
+2. 待 Task 1+2 完成：Task 5 + Task 6 + Task 7（可并行）
+3. 最后：Task 9
+
 ### 阶段 1：定义标准化格式（P0）✅ 已完成（2026-03-19）
 
 #### 任务 1.1：创建 artifact-schemas 目录结构 ✅
