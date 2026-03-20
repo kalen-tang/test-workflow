@@ -60,7 +60,7 @@
 | ----- | ---- | ------ | ---- |
 | `shift-left-analyzer` | 分析 KM 文档，生成测试左移分析报告 | 奕翔 | ✅ |
 | `requirement-validator` | 检查需求实现对齐度，生成质量评分报告 | 宇豪 | ✅ |
-| `manual-case-generator` | 生成手工测试案例（PlantUML流程图+MindMap） | 宇宸 | ✅ |
+| `manual-case-generator` | 生成手工测试案例（PlantUML流程图+MindMap） | 鼎中 | ✅ |
 | `api-case-generator` | 生成接口自动化测试用例代码和数据 | 泉政 | ✅ |
 | `requirement-normalizer` | 将原始需求文档转为标准化 YAML | 陈贝 | ✅ |
 | `design-normalizer` | 将原始设计文档转为标准化 YAML | 陈贝 | 🚧 |
@@ -290,7 +290,7 @@ wf_bank_test/
 | ---- | ---- | ---- |
 | 项目管理 | 嘉龙 | 整体统筹、进度把控、质量审核 |
 | 技术架构 | 鼎中 | 技术评审、培训指导、架构设计 |
-| Skills 开发 | 泉政、陈贝、宇宸、宇豪 | Skills 组件开发 |
+| Skills 开发 | 泉政、陈贝、宇豪 | Skills 组件开发 |
 | MCP 开发 | 泉政、鼎中、奕翔 | MCP 组件开发 |
 | 质量保证 | 慧芳 | 质量复核与验证 |
 
