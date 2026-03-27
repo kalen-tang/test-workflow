@@ -1,9 +1,9 @@
-# WF Bank Test - 银行测试自动化工具集
+# QA Toolkit - 银行测试自动化工具集
 
-[![Version](https://img.shields.io/badge/version-1.2.0-blue.svg)](https://github.com/your-org/wf-bank-test)
+[![Version](https://img.shields.io/badge/version-1.2.0-blue.svg)](https://gitlab.in.za/dingzhong.hu/qa-toolkit)
 [![Claude Code](https://img.shields.io/badge/Claude-Code-purple.svg)](https://claude.ai/code)
-[![Status](https://img.shields.io/badge/status-active-success.svg)](https://github.com/your-org/wf-bank-test)
-[![Updated](https://img.shields.io/badge/updated-2026--03--20-blue.svg)](https://github.com/your-org/wf-bank-test)
+[![Status](https://img.shields.io/badge/status-active-success.svg)](https://gitlab.in.za/dingzhong.hu/qa-toolkit)
+[![Updated](https://img.shields.io/badge/updated-2026--03--20-blue.svg)](https://gitlab.in.za/dingzhong.hu/qa-toolkit)
 
 ## 📑 目录
 
@@ -91,7 +91,7 @@
 ### 项目结构
 
 ```
-wf_bank_test/
+qa-toolkit/
 ├── .claude-plugin/
 │   └── marketplace.json          # 插件市场配置
 ├── plugins/
@@ -348,4 +348,4 @@ wf_bank_test/
 
 ---
 
-**版本**: v1.2.0 | **更新**: 2026-03-20 | **维护**: WF Bank Test Team
+**版本**: v1.2.0 | **更新**: 2026-03-20 | **维护**: ZA Bank Test Team

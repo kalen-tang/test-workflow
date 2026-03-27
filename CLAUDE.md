@@ -36,14 +36,16 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 ### 六个核心 Skills
 
-| Skill | 目录 | 状态 | 用途 |
-|-------|------|------|------|
-| `shift-left-analyzer` | `skills/shift-left-analyzer/` | ✅ | 分析 KM 文档，生成测试左移分析报告（快速模式） |
-| `requirement-validator` | `skills/requirement-validator/` | ✅ | 验证需求实现一致性 |
-| `manual-case-generator` | `skills/manual-case-generator/` | ✅ | 生成 PlantUML 流程图和测试用例 MindMap |
-| `api-case-generator` | `skills/api-case-generator/` | ✅ | 生成 Python pytest 测试代码和 YAML 数据 |
-| `requirement-normalizer` | `skills/requirement-normalizer/` | ✅ | 将原始需求文档转为标准化 YAML（完整模式第一阶段） |
-| `design-normalizer` | `skills/design-normalizer/` | 🚧 | 将原始设计文档转为标准化 YAML（完整模式第一阶段） |
+所有 Skill 位于 `plugins/qa-toolkit/skills/` 下：
+
+| Skill | 状态 | 用途 |
+|-------|------|------|
+| `shift-left-analyzer` | ✅ | 分析 KM 文档，生成测试左移分析报告（快速模式） |
+| `requirement-validator` | ✅ | 验证需求实现一致性 |
+| `manual-case-generator` | ✅ | 生成 PlantUML 流程图和测试用例 MindMap |
+| `api-case-generator` | ✅ | 生成 Python pytest 测试代码和 YAML 数据 |
+| `requirement-normalizer` | ✅ | 将原始需求文档转为标准化 YAML（完整模式第一阶段） |
+| `design-normalizer` | 🚧 | 将原始设计文档转为标准化 YAML（完整模式第一阶段） |
 
 ### 工作流模式
 
@@ -92,6 +94,11 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 - Skill 引用 references 文档使用**无 `./` 前缀的相对路径**：`references/01-xxx.md`（不写 `./references/01-xxx.md`）
 - 版本号遵循 SemVer：新增 Skill/Command → 次版本升级（`1.2.0 → 1.3.0`）
 - 所有文档中 Skills 数量和版本号必须保持一致
+
+### References 两级结构
+
+- **插件级**：`plugins/qa-toolkit/references/` — 公共参考文档（如 `artifact-schemas/`）
+- **Skill 级**：`plugins/qa-toolkit/skills/<name>/references/` — Skill 专属参考文档（编号前缀 `01-xxx.md`）
 
 ## 🔧 关键技术点
 

@@ -1,7 +1,7 @@
-# QA Toolkit - 银行测试自动化工具集 用户手册
+# ZA Bank Test Team - 银行测试自动化工具集 用户手册
 
-[![Version](https://img.shields.io/badge/version-1.2.0-blue.svg)](https://github.com/your-org/wf-bank-test)
-[![Category](https://img.shields.io/badge/category-testing-green.svg)](https://github.com/your-org/wf-bank-test)
+[![Version](https://img.shields.io/badge/version-1.2.0-blue.svg)](https://gitlab.in.za/dingzhong.hu/qa-toolkit)
+[![Category](https://img.shields.io/badge/category-testing-green.svg)](https://gitlab.in.za/dingzhong.hu/qa-toolkit)
 
 ## 📋 概述
 
@@ -427,4 +427,4 @@ requirement-validator 需要配置文档目录，可以在 SKILL.md 中修改默
 
 ---
 
-**版本**: v1.2.0 | [项目主文档](../../README.md) | WF Bank Test Team
+**版本**: v1.2.0 | [项目主文档](../../README.md) | ZA Bank Test Team
