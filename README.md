@@ -6,31 +6,32 @@
 
 ## 📌 30秒快速开始（复制粘贴即用）
 
-### Windows (PowerShell)
+### 一键配置
+
+#### windows
 
 ```powershell
-# 1. 一键配置
-if (Test-Path "$env:USERPROFILE\.ssh\id_rsa") { $c="$env:USERPROFILE\.ssh\config"; if ((Test-Path $c) -and (Get-Content $c -ErrorAction SilentlyContinue | Select-String "Host\s+gitlab\.in\.za\b" -Quiet)) { Write-Host "ℹ️ 配置已存在，跳过" } else { "`nHost gitlab.in.za`n    HostName gitlab.in.za`n    User git`n    Port 35001`n    IdentityFile ~/.ssh/id_rsa`n    PreferredAuthentications publickey" | Out-File -Append $c; git config --global url."git@gitlab.in.za:".insteadOf "http://gitlab.in.za/"; Write-Host "✅ 配置完成" } } else { Write-Error "❌ SSH密钥不存在，请先生成 SSH Key" }
-
-# 2. 添加插件市场
-claude plugin marketplace add http://gitlab.in.za/claude/alfie/qe.git
-
-# 3. 安装插件
-claude plugin install za-qe@alfie-qe
-claude plugin install claude-statusbar@alfie-qe
+# 1. 一键配置 Windows
+if (Test-Path "$env:USERPROFILE\.ssh\id_rsa") { $c="$env:USERPROFILE\.ssh\config"; $newConfig="`nHost gitlab.in.za`n    HostName gitlab.in.za`n    User git`n    Port 35001`n    IdentityFile ~/.ssh/id_rsa`n    PreferredAuthentications publickey"; if ((Test-Path $c) -and (Get-Content $c -ErrorAction SilentlyContinue | Select-String "Host\s+gitlab\.in\.za\b" -Quiet)) { $content = (Get-Content $c -Raw) -replace "(?ms)^Host\s+gitlab\.in\.za\b.*?(?=^Host\s|\z)", $newConfig.TrimStart(); $content | Set-Content $c -NoNewline; Write-Host "✅ 配置已更新" } else { $newConfig | Out-File -Append $c; Write-Host "✅ 配置已添加" }; git config --global url."git@gitlab.in.za:".insteadOf "http://gitlab.in.za/" } else { Write-Error "❌ SSH密钥不存在,请先生成 SSH Key" }
 ```
 
-### macOS (Terminal)
+#### mac/linux
 
 ```bash
-# 1. 一键配置
-if [ -f ~/.ssh/id_rsa ]; then config_file=~/.ssh/config; if grep -q "Host gitlab\.in\.za" "$config_file" 2>/dev/null; then echo "ℹ️ 配置已存在，跳过"; else echo -e "\nHost gitlab.in.za\n    HostName gitlab.in.za\n    User git\n    Port 35001\n    IdentityFile ~/.ssh/id_rsa\n    PreferredAuthentications publickey" >> "$config_file"; git config --global url."git@gitlab.in.za:".insteadOf "https://gitlab.in.za/"; echo "✅ 配置完成"; fi; else echo "❌ SSH密钥不存在，请先生成 SSH Key"; exit 1; fi
+if [ -f ~/.ssh/id_rsa ]; then config_file=~/.ssh/config; new_config="\nHost gitlab.in.za\n    HostName gitlab.in.za\n    User git\n    Port 35001\n    IdentityFile ~/.ssh/id_rsa\n    PreferredAuthentications publickey"; if grep -q "Host gitlab\.in\.za" "$config_file" 2>/dev/null; then perl -i.bak -pe 'BEGIN{undef $/;} s/Host\s+gitlab\.in\.za\b.*?(?=\nHost\s|\z)/'"$(echo "$new_config" | sed 's/\\/\\\\/g; s/\//\\\//g; s/&/\\&/g')"'/s' "$config_file"; echo "✅ 配置已更新"; else echo -e "$new_config" >> "$config_file"; echo "✅ 配置已添加"; fi; git config --global url."git@gitlab.in.za:".insteadOf "http://gitlab.in.za/"; else echo "❌ SSH密钥不存在，请先生成 SSH Key"; exit 1; fi
+```
 
 # 2. 添加插件市场
-claude plugin marketplace add https://gitlab.in.za/claude/alfie/qe.git
+
+```bash
+claude plugin marketplace add http://gitlab.in.za/claude/alfie/qe.git
+```
 
 # 3. 安装插件
+
+```bash
 claude plugin install za-qe@alfie-qe
+claude plugin install claude-statusbar@alfie-qe
 ```
 
 **验证：**
@@ -49,18 +50,6 @@ claude plugin list  # 查看已安装的插件
 
 配置完成后，GitLab 上任何项目的 HTTPS 地址都可以直接使用，会自动转换为 SSH 协议。
 
-**Windows (PowerShell)：**
-
-```powershell
-if (Test-Path "$env:USERPROFILE\.ssh\id_rsa") { $c="$env:USERPROFILE\.ssh\config"; if ((Test-Path $c) -and (Get-Content $c -ErrorAction SilentlyContinue | Select-String "Host\s+gitlab\.in\.za\b" -Quiet)) { Write-Host "ℹ️ 配置已存在，跳过" } else { "`nHost gitlab.in.za`n    HostName gitlab.in.za`n    User git`n    Port 35001`n    IdentityFile ~/.ssh/id_rsa`n    PreferredAuthentications publickey" | Out-File -Append $c; git config --global url."git@gitlab.in.za:".insteadOf "https://gitlab.in.za/"; Write-Host "✅ 配置完成" } } else { Write-Error "❌ SSH密钥不存在，请先生成 SSH Key" }
-```
-
-**macOS (Terminal)：**
-
-```bash
-if [ -f ~/.ssh/id_rsa ]; then config_file=~/.ssh/config; if grep -q "Host gitlab\.in\.za" "$config_file" 2>/dev/null; then echo "ℹ️ 配置已存在，跳过"; else echo -e "\nHost gitlab.in.za\n    HostName gitlab.in.za\n    User git\n    Port 35001\n    IdentityFile ~/.ssh/id_rsa\n    PreferredAuthentications publickey" >> "$config_file"; git config --global url."git@gitlab.in.za:".insteadOf "https://gitlab.in.za/"; echo "✅ 配置完成"; fi; else echo "❌ SSH密钥不存在，请先生成 SSH Key"; exit 1; fi
-```
-
 ---
 
 ### 二、验证 SSH 连接
@@ -75,7 +64,7 @@ ssh -T git@gitlab.in.za
 ### 三、添加插件市场
 
 ```bash
-claude plugin marketplace add https://gitlab.in.za/claude/alfie/qe.git
+claude plugin marketplace add http://gitlab.in.za/claude/alfie/qe.git
 claude plugin marketplace list  # 确认添加成功
 ```
 
@@ -137,7 +126,7 @@ Host gitlab.in.za
 
 ```bash
 claude plugin marketplace remove alfie-qe        # 先移除
-claude plugin marketplace add https://gitlab.in.za/claude/alfie/qe.git  # 重新添加
+claude plugin marketplace add http://gitlab.in.za/claude/alfie/qe.git  # 重新添加
 ```
 
 ---
