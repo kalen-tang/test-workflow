@@ -13,7 +13,10 @@
       "Bash(mv req-parser:*)",
       "Bash(mv design-parser:*)",
       "Bash(mv doc-reviewer:*)",
-      "Bash(mv case-designer:*)"
+      "Bash(mv case-designer:*)",
+      "Bash(grep -E \"\\(commands|skills\\)/\\(.*\\\\.md$\")",
+      "Bash(sed 's|/| |g')",
+      "Read(//tmp/**)"
     ]
   }
 }

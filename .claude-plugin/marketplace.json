@@ -1,34 +1,18 @@
 {
-  "$schema": "https://anthropic.com/claude-code/marketplace.schema.json",
-  "name": "bank-qe",
-  "description": "银行测试自动化工具集 - 包含需求分析、测试左移、手工案例生成、接口用例生成等技能",
-  "owner": {
-    "name": "ZA Bank Test Team",
-    "email": "test-team@za.group"
-  },
+  "name": "alfie-qe",
+  "owner": { "name": "Alfie" },
   "plugins": [
     {
-      "name": "qe-toolkit",
-      "description": "银行测试自动化工具集 - 从需求分析到用例生成的完整测试左移解决方案，包含测试左移分析、需求验证、手工案例生成、API用例生成、需求规范化和设计规范化六大核心能力",
-      "version": "1.2.0",
-      "author": {
-        "name": "ZA Bank Test Team",
-        "email": "test-team@za.group"
-      },
-      "source": "./plugins/qe-toolkit",
-      "category": "testing",
-      "strict": false
+      "name": "za-qe",
+      "source": "./plugins/za-qe",
+      "description": "测试左移工具集：需求分析、手工案例生成、API用例生成等核心能力",
+      "category": "core"
     },
     {
       "name": "claude-statusbar",
-      "description": "Powerline 风格状态栏 + Windows 通知系统：双行布局、进度条箭头、上下文用量、费用、Git 状态、权限请求、危险命令检测",
-      "version": "2.0.0",
-      "author": {
-        "name": "dingzhong.hu"
-      },
       "source": "./plugins/claude-statusbar",
-      "category": "monitoring",
-      "strict": false
+      "description": "Powerline 风格状态栏 + Windows 通知系统",
+      "category": "optional"
     }
   ]
 }

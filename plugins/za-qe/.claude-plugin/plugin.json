@@ -1,0 +1,32 @@
+{
+  "name": "za-qe",
+  "version": "1.3.0",
+  "description": "测试左移工具集：需求分析、测试左移分析、手工案例生成、API用例生成、需求规范化、设计规范化六大核心能力",
+  "author": { "name": "Alfie" },
+  "commands": ["./commands/"],
+  "skills": ["./skills/"],
+  "hooks": {
+    "SessionStart": [
+      {
+        "hooks": [
+          {
+            "type": "command",
+            "command": "node ${CLAUDE_PLUGIN_ROOT}/hooks/session-qe-workflow.js",
+            "timeout": 10
+          }
+        ]
+      }
+    ],
+    "UserPromptSubmit": [
+      {
+        "hooks": [
+          {
+            "type": "command",
+            "command": "python ${CLAUDE_PLUGIN_ROOT}/hooks/prompt-qe-hook.py",
+            "timeout": 30
+          }
+        ]
+      }
+    ]
+  }
+}

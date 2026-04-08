@@ -13,11 +13,11 @@
 if (Test-Path "$env:USERPROFILE\.ssh\id_rsa") { $c="$env:USERPROFILE\.ssh\config"; if ((Test-Path $c) -and (Get-Content $c -ErrorAction SilentlyContinue | Select-String "Host\s+gitlab\.in\.za\b" -Quiet)) { Write-Host "ℹ️ 配置已存在，跳过" } else { "`nHost gitlab.in.za`n    HostName gitlab.in.za`n    User git`n    Port 35001`n    IdentityFile ~/.ssh/id_rsa`n    PreferredAuthentications publickey" | Out-File -Append $c; git config --global url."git@gitlab.in.za:".insteadOf "http://gitlab.in.za/"; Write-Host "✅ 配置完成" } } else { Write-Error "❌ SSH密钥不存在，请先生成 SSH Key" }
 
 # 2. 添加插件市场
-claude plugin marketplace add http://gitlab.in.za/claude/wf/bank-qe.git
+claude plugin marketplace add http://gitlab.in.za/claude/alfie/qe.git
 
 # 3. 安装插件
-claude plugin install qe-toolkit@bank-qe
-claude plugin install claude-statusbar@bank-qe
+claude plugin install za-qe@alfie-qe
+claude plugin install claude-statusbar@alfie-qe
 ```
 
 ### macOS (Terminal)
@@ -27,10 +27,10 @@ claude plugin install claude-statusbar@bank-qe
 if [ -f ~/.ssh/id_rsa ]; then config_file=~/.ssh/config; if grep -q "Host gitlab\.in\.za" "$config_file" 2>/dev/null; then echo "ℹ️ 配置已存在，跳过"; else echo -e "\nHost gitlab.in.za\n    HostName gitlab.in.za\n    User git\n    Port 35001\n    IdentityFile ~/.ssh/id_rsa\n    PreferredAuthentications publickey" >> "$config_file"; git config --global url."git@gitlab.in.za:".insteadOf "https://gitlab.in.za/"; echo "✅ 配置完成"; fi; else echo "❌ SSH密钥不存在，请先生成 SSH Key"; exit 1; fi
 
 # 2. 添加插件市场
-claude plugin marketplace add https://gitlab.in.za/claude/wf/bank-qe.git
+claude plugin marketplace add https://gitlab.in.za/claude/alfie/qe.git
 
 # 3. 安装插件
-claude plugin install qe-toolkit@bank-qe
+claude plugin install za-qe@alfie-qe
 ```
 
 **验证：**
@@ -75,7 +75,7 @@ ssh -T git@gitlab.in.za
 ### 三、添加插件市场
 
 ```bash
-claude plugin marketplace add https://gitlab.in.za/claude/wf/bank-qe.git
+claude plugin marketplace add https://gitlab.in.za/claude/alfie/qe.git
 claude plugin marketplace list  # 确认添加成功
 ```
 
@@ -84,7 +84,7 @@ claude plugin marketplace list  # 确认添加成功
 ### 四、安装插件
 
 ```bash
-claude plugin install qe-toolkit@bank-qe
+claude plugin install za-qe@alfie-qe
 claude plugin list  # 查看已安装的插件
 ```
 
@@ -136,8 +136,8 @@ Host gitlab.in.za
 **插件市场添加失败？**
 
 ```bash
-claude plugin marketplace remove bank-qe        # 先移除
-claude plugin marketplace add https://gitlab.in.za/claude/wf/bank-qe.git  # 重新添加
+claude plugin marketplace remove alfie-qe        # 先移除
+claude plugin marketplace add https://gitlab.in.za/claude/alfie/qe.git  # 重新添加
 ```
 
 ---

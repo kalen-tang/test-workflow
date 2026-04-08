@@ -46,7 +46,7 @@ echo "${CLAUDE_PLUGIN_ROOT}"
 cat ~/.claude/plugins/installed_plugins.json
 ```
 
-从中找到 `claude-statusbar@bank-qe` 的 `installPath`，即为插件根目录。
+从中找到 `claude-statusbar@alfie-qe` 的 `installPath`，即为插件根目录。
 
 ### 第三步：读取当前配置
 
