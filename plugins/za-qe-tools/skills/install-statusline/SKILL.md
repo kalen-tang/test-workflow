@@ -1,6 +1,6 @@
 ---
 name: install-statusline
-description: "安装 claude-statusbar 状态栏：将 statusLine 写入用户的 ~/.claude/settings.json。当用户执行 /claude-statusbar:install-statusline 或明确说'安装状态栏'、'配置 claude-statusbar'、'install statusline'、'statusline 不显示' 时触发。不应被通用的 setup/install 请求触发。"
+description: "安装状态栏：将 statusLine 写入用户的 ~/.claude/settings.json。当用户执行 /za-qe-tools:install-statusline 或明确说'安装状态栏'、'配置状态栏'、'install statusline'、'statusline 不显示' 时触发。不应被通用的 setup/install 请求触发。"
 argument-hint: ""
 allowed-tools:
   - Read
@@ -46,7 +46,7 @@ echo "${CLAUDE_PLUGIN_ROOT}"
 cat ~/.claude/plugins/installed_plugins.json
 ```
 
-从中找到 `claude-statusbar@alfie-qe` 的 `installPath`，即为插件根目录。
+从中找到 `za-qe-tools@alfie-qe` 的 `installPath`，即为插件根目录。
 
 ### 第三步：读取当前配置
 

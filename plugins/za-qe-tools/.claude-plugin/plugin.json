@@ -1,0 +1,11 @@
+{
+  "name": "za-qe-tools",
+  "version": "2.0.0",
+  "description": "QE 通用工具集：Powerline 风格状态栏 + Windows 通知系统",
+  "author": {
+    "name": "Alfie"
+  },
+  "keywords": ["statusbar", "notification", "monitor"],
+  "hooks": "./hooks/hooks.json",
+  "skills": "./skills"
+}

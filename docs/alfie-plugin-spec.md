@@ -8,7 +8,7 @@
 
 - **仓库类型**：插件仓库（存在 `.claude-plugin/marketplace.json`）
 - **Marketplace**：`alfie-qe`
-- **插件数量**：2 个（`za-qe` core + `claude-statusbar` optional）
+- **插件数量**：2 个（`za-qe` core + `za-qe-tools` optional）
 - **安装方式**：`claude plugin marketplace add` + `claude plugin install`
 
 ---

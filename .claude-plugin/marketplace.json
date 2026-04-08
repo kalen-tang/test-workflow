@@ -9,9 +9,9 @@
       "category": "core"
     },
     {
-      "name": "claude-statusbar",
-      "source": "./plugins/claude-statusbar",
-      "description": "Powerline 风格状态栏 + Windows 通知系统",
+      "name": "za-qe-tools",
+      "source": "./plugins/za-qe-tools",
+      "description": "QE 通用工具集：Powerline 风格状态栏 + Windows 通知系统",
       "category": "optional"
     }
   ]

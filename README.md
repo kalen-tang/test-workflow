@@ -30,7 +30,7 @@ claude plugin marketplace add http://gitlab.in.za/claude/alfie/qe.git
 
 ```bash
 claude plugin install za-qe@alfie-qe
-claude plugin install claude-statusbar@alfie-qe
+claude plugin install za-qe-tools@alfie-qe
 ```
 
 **验证：**
