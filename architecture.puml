@@ -1,0 +1,141 @@
+@startuml 测试案例生成与自动化流程
+!theme plain
+skinparam backgroundColor white
+skinparam packageStyle rectangle
+skinparam componentStyle rectangle
+skinparam defaultFontSize 10
+skinparam nodesep 60
+skinparam ranksep 60
+
+title 测试案例生成与自动化流程
+
+package "原始产出物" {
+    component "原始需求文档" as rawReqDoc
+    component "原始设计文档" as rawDesignDoc
+    component "开发代码" as srcCode
+    component "原始历史案例" as rawHistory
+}
+
+package "Tools" {
+    package "Skills" {
+        component "需求文档规范 Skill\n可选:增加可测性检查" as reqDocSkill #B5C9B8
+        component "设计文档规范 Skill" as designDocSkill #B5C9B8
+        component "手工案例 Skill" as manualCaseSkill #A8B5C9
+        component "需求实现检查 Skill" as reqCheckSkill #C9B8A8
+        component "接口自动化 Skill" as apiSkill #A8B5C9
+    }
+
+    package "MCP" {
+        component "CML MCP\n提供CML案例信息\n可选:增加案例质量评分" as cmlMcp #A8B5C9
+        component "Code Diff MCP\n提供代码差异分析\n可选:增加影响范围分析" as diffMcp #C9B8A8
+        component "Udoc2Code MCP\n提供接口代码" as udoc2codeMcp #A8B5C9
+        component "Proxy MCP\n提供抓包信息" as proxyMcp #C9B8A8
+    }
+}
+
+package "规范化产出物" as normalizedOutputs {
+    component "需求文档" as reqDoc
+    component "设计文档" as designDoc
+    component "历史案例" as history
+    component "代码变更分析" as diffReport
+}
+
+component "需求实现检查报告" as reqCheckReport #C9B8A8
+
+package "测试案例生成" {
+    component "手工案例\n(结构化格式)" as manualCases
+    component "自动化案例" as autoCases
+}
+
+component "执行结果分析" as execResult
+
+'=====================================================
+' 第一阶段：原始产出物 -> Tools(Skills/MCP) -> 规范化产出物
+'=====================================================
+
+' 1. 需求文档规范化
+rawReqDoc -down-> reqDocSkill
+reqDocSkill -down-> reqDoc : AI+人工复核(抽检20%)
+
+' 2. 设计文档规范化
+rawDesignDoc -down-> designDocSkill
+designDocSkill -down-> designDoc : AI+人工复核(抽检20%)
+
+' 3. 历史案例梳理
+rawHistory -down-> cmlMcp
+cmlMcp -down-> history : 梳理后历史案例
+
+' 4. 代码差异分析
+srcCode -down-> diffMcp
+diffMcp -down-> diffReport : 增量差异+影响范围
+
+'=====================================================
+' 第二阶段：规范化产出物 -> 需求实现检查报告
+'=====================================================
+
+normalizedOutputs -down-> reqCheckReport : 输入
+reqCheckSkill -right-> reqCheckReport : 检查能力
+
+'=====================================================
+' 第三阶段：规范化产出物 + Tools -> 手工案例
+'=====================================================
+
+normalizedOutputs -down-> manualCases : 全部输入
+manualCaseSkill -right-> manualCases : 智能生成
+
+'=====================================================
+' 第四阶段：手工案例 -> 自动化案例 -> 执行
+'=====================================================
+
+manualCases -down-> autoCases
+autoCases -right-> execResult : 执行
+
+'=====================================================
+' 第五阶段：Tools -> 自动化案例（辅助生成）
+'=====================================================
+
+udoc2codeMcp -right-> autoCases : 生成代码
+proxyMcp -right-> autoCases : 接口逻辑
+apiSkill -right-> autoCases : 执行能力
+
+
+note bottom of manualCases
+  **手工案例生成**
+
+  **输入:**
+  需求文档、设计文档、历史案例、代码变更分析
+
+  **生成方式:**
+  手工案例 Skill 智能生成结构化案例
+end note
+
+note bottom of reqCheckReport
+  **需求实现检查报告**
+
+  **输入:**
+  需求文档、设计文档、代码变更分析
+
+  **输出:**
+  • 文档质量评分 (A/B/C/D)
+  • 需求实现对齐度检查
+  • 测试重点建议
+  • 风险点标注
+end note
+
+note right of execResult
+  **执行结果分析:**
+
+  • 覆盖率统计
+  • 缺陷反馈
+  • 案例优化建议
+end note
+
+package "All" {
+    component "**Q1上半（Q1.1）**\n基础自动化能力\n• 接口自动化 Skill\n• 手工案例 Skill\n• CML MCP\n• Udoc2Code MCP" as q1_1 #A8B5C9
+    component "**Q1下半/Q2上半（Q1.2/Q2.1）**\n文档规范与案例生成\n• 需求文档规范 Skill\n• 设计文档规范 Skill" as q1_2 #B5C9B8
+    component "**Q2下半（Q2.2）**\n质量检查与分析增强\n• 需求实现检查 Skill\n• Code Diff MCP\n• Proxy MCP" as q2_2 #C9B8A8
+
+    q1_1 -[hidden]right- q1_2
+    q1_2 -[hidden]right- q2_2
+}
+@enduml

@@ -1,0 +1,15 @@
+# data/za_zone/entry_page_04_invalid.yaml
+# 异常场景示例: 客户不存在
+# 特点: 不需要env配置,使用固定无效值
+
+# ===== 测试用例部分 =====
+tests:
+  - case: 客户不存在
+    data:
+      - step: 使用不存在的客户编号查询
+        input:
+          user_id: "9999999999999999"           # 固定的无效user_id
+          customer_no: "INVALID_CUST_NOT_EXIST"  # 固定的无效customer_no
+        expected:
+          expected_code: "400011"               # 预期错误码: 客户不存在
+        description: "客户编号不存在时,接口应返回400011错误码"

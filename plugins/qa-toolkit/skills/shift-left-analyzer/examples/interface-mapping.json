@@ -1,0 +1,67 @@
+{
+  "microservices": {
+    "zabank_imc_activity_service": {
+      "name": "zabank_imc_activity_service",
+      "description": "活动服务",
+      "pathPrefix": "/activity",
+      "examples": [
+        "/activity/create",
+        "/activity/list",
+        "/activity/update",
+        "/activity/delete"
+      ]
+    },
+    "zabank_rcs_core": {
+      "name": "zabank_rcs_core",
+      "description": "RCS权益服务",
+      "pathPrefix": "/rc",
+      "examples": [
+        "/rc/points/query",
+        "/rc/benefits/list",
+        "/rc/exchange"
+      ]
+    },
+    "zabank_imc_cubercore_service": {
+      "name": "zabank_imc_cubercore_service",
+      "description": "Cuber核心服务",
+      "pathPrefix": "/cuber",
+      "examples": [
+        "/cuber/config/get",
+        "/cuber/workflow/execute"
+      ]
+    },
+    "zabank_imc_reward_service": {
+      "name": "zabank_imc_reward_service",
+      "description": "奖励服务",
+      "pathPrefix": "/reward",
+      "examples": [
+        "/reward/claim",
+        "/reward/list",
+        "/reward/history"
+      ]
+    },
+    "zabank_act_core_service": {
+      "name": "zabank_act_core_service",
+      "description": "ACT核心服务",
+      "pathPrefix": "/act",
+      "examples": [
+        "/act/transaction/create",
+        "/act/account/query"
+      ]
+    },
+    "zabank_bms_batch_service": {
+      "name": "zabank_bms_batch_service",
+      "description": "批处理服务",
+      "pathPrefix": "/batch",
+      "examples": [
+        "/batch/job/submit",
+        "/batch/task/query"
+      ]
+    }
+  },
+  "gatewayPattern": "dmb",
+  "validationRules": {
+    "containsGateway": "如果路径包含 'dmb'，提示用户替换为微服务接口",
+    "missingMicroservice": "如果路径缺少微服务域名，根据路径前缀自动补充"
+  }
+}
