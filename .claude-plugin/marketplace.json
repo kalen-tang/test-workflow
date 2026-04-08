@@ -1,21 +1,21 @@
 {
   "$schema": "https://anthropic.com/claude-code/marketplace.schema.json",
-  "name": "za-bank-test",
+  "name": "bank-qe",
   "description": "银行测试自动化工具集 - 包含需求分析、测试左移、手工案例生成、接口用例生成等技能",
   "owner": {
     "name": "ZA Bank Test Team",
-    "email": "test-team@example.com"
+    "email": "test-team@za.group"
   },
   "plugins": [
     {
-      "name": "qa-toolkit",
+      "name": "qe-toolkit",
       "description": "银行测试自动化工具集 - 从需求分析到用例生成的完整测试左移解决方案，包含测试左移分析、需求验证、手工案例生成、API用例生成、需求规范化和设计规范化六大核心能力",
       "version": "1.2.0",
       "author": {
         "name": "ZA Bank Test Team",
-        "email": "test-team@example.com"
+        "email": "test-team@za.group"
       },
-      "source": "./plugins/qa-toolkit",
+      "source": "./plugins/qe-toolkit",
       "category": "testing",
       "strict": false
     },

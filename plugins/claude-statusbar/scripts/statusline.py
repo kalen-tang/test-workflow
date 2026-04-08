@@ -3,6 +3,7 @@ import json, sys, subprocess, os, time, tempfile, re
 sys.stdout.reconfigure(encoding='utf-8')
 
 data = json.load(sys.stdin)
+session_id = data.get('session_id', '')
 model = data['model']['display_name']
 directory = os.path.basename(data['workspace']['current_dir'])
 cost = data.get('cost', {}).get('total_cost_usd', 0) or 0
@@ -16,6 +17,8 @@ input_tokens = (
     + (current_usage.get('cache_creation_input_tokens') or 0)
     + (current_usage.get('cache_read_input_tokens') or 0)
 )
+output_tokens = current_usage.get('output_tokens') or 0
+total_tokens = input_tokens + output_tokens
 
 # autocompact 阈值 = context_window_size × CLAUDE_AUTOCOMPACT_PCT_OVERRIDE%
 ctx_window_size = ctx.get('context_window_size') or 200000
@@ -53,6 +56,37 @@ def fmt_duration(ms):
 
 duration_str = fmt_duration(duration_ms)
 api_str = fmt_duration(api_duration_ms)
+
+# Token 速度：基于增量计算，缓存上次值
+TOK_CACHE_FILE = os.path.join(tempfile.gettempdir(), "statusline-tok-cache")
+tok_per_sec = None
+
+try:
+    with open(TOK_CACHE_FILE, encoding='utf-8') as f:
+        cached = json.load(f)
+    if cached.get('session_id') != session_id:
+        cached = None
+except Exception:
+    cached = None
+
+if cached:
+    delta_api_ms = api_duration_ms - cached['api_duration_ms']
+    delta_output = output_tokens - cached['output_tokens']
+    if delta_api_ms > 0 and delta_output > 0:
+        tok_per_sec = delta_output / (delta_api_ms / 1000)
+    else:
+        tok_per_sec = cached.get('last_tok_per_sec')
+
+try:
+    with open(TOK_CACHE_FILE, 'w', encoding='utf-8') as f:
+        json.dump({
+            'session_id': session_id,
+            'api_duration_ms': api_duration_ms,
+            'output_tokens': output_tokens,
+            'last_tok_per_sec': tok_per_sec if tok_per_sec else None,
+        }, f)
+except Exception:
+    pass
 
 # Git info with 5-second cache
 CACHE_FILE = os.path.join(tempfile.gettempdir(), "statusline-git-cache")
@@ -144,7 +178,8 @@ cost_color = RED if cost > 25 else YELLOW if cost > 10 else GREEN
 c3_bot = f"{cost_color}💰 ${cost:.2f}{RESET}"
 
 c4_top = f"{CYAN}({venv_name}){RESET}" if venv_name else ""
-c4_bot = f"⏱️  {duration_str} (api {api_str})"
+tok_per_sec_str = f"⚡ {tok_per_sec:.0f}t/s" if tok_per_sec else ""
+c4_bot = f"⏱️  {duration_str} (api {api_str}){('  ' + tok_per_sec_str) if tok_per_sec_str else ''}"
 
 line1 = (
     f"{rpad(c1_top, col_widths[0])} | "

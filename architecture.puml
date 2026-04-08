@@ -14,19 +14,22 @@ package "原始产出物" {
     component "原始设计文档" as rawDesignDoc
     component "开发代码" as srcCode
     component "原始历史案例" as rawHistory
+    component "飞书知识库" as feishuWiki
 }
 
 package "Tools" {
     package "Skills" {
-        component "需求文档规范 Skill\n可选:增加可测性检查" as reqDocSkill #B5C9B8
-        component "设计文档规范 Skill" as designDocSkill #B5C9B8
-        component "手工案例 Skill" as manualCaseSkill #A8B5C9
-        component "需求实现检查 Skill" as reqCheckSkill #C9B8A8
-        component "接口自动化 Skill" as apiSkill #A8B5C9
+        component "req-parser\n需求文档解析\n可选:增加可测性检查" as reqDocSkill #B5C9B8
+        component "design-parser\n设计文档解析" as designDocSkill #B5C9B8
+        component "case-designer\n手工测试案例设计" as manualCaseSkill #A8B5C9
+        component "doc-reviewer\n需求实现检查" as reqCheckSkill #C9B8A8
+        component "devplan-analyzer\n开发方案分析" as devplanSkill #C9B8A8
+        component "api-generator\n接口自动化测试生成" as apiSkill #A8B5C9
     }
 
     package "MCP" {
         component "CML MCP\n提供CML案例信息\n可选:增加案例质量评分" as cmlMcp #A8B5C9
+        component "Feishu Wiki MCP\n提供飞书知识库内容\n可选:增加文档版本追踪" as feishuMcp #A8B5C9
         component "Code Diff MCP\n提供代码差异分析\n可选:增加影响范围分析" as diffMcp #C9B8A8
         component "Udoc2Code MCP\n提供接口代码" as udoc2codeMcp #A8B5C9
         component "Proxy MCP\n提供抓包信息" as proxyMcp #C9B8A8
@@ -37,6 +40,7 @@ package "规范化产出物" as normalizedOutputs {
     component "需求文档" as reqDoc
     component "设计文档" as designDoc
     component "历史案例" as history
+    component "知识库参考\n(测试分析文档)" as knowledgeBase
     component "代码变更分析" as diffReport
 }
 
@@ -65,7 +69,11 @@ designDocSkill -down-> designDoc : AI+人工复核(抽检20%)
 rawHistory -down-> cmlMcp
 cmlMcp -down-> history : 梳理后历史案例
 
-' 4. 代码差异分析
+' 4. 知识库参考提取
+feishuWiki -down-> feishuMcp
+feishuMcp -down-> knowledgeBase : 测试分析文档知识
+
+' 5. 代码差异分析
 srcCode -down-> diffMcp
 diffMcp -down-> diffReport : 增量差异+影响范围
 
