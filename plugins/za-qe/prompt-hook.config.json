@@ -1,6 +1,0 @@
-{
-  "intercept": {
-    "commands": ["qe-quick", "manual-case", "full-workflow"],
-    "skills": []
-  }
-}

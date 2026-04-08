@@ -2,87 +2,10 @@
   "name": "claude-statusbar",
   "version": "2.0.0",
   "description": "Powerline 风格状态栏 + Windows 通知系统：双行布局、进度条箭头、上下文用量、费用、Git 状态、权限请求、危险命令检测",
-  "author": { "name": "Alfie" },
+  "author": {
+    "name": "Alfie"
+  },
   "keywords": ["statusbar", "notification", "monitor"],
-  "skills": ["./skills/"],
-  "hooks": {
-    "Stop": [
-      {
-        "hooks": [
-          {
-            "type": "command",
-            "command": "uv run ${CLAUDE_PLUGIN_ROOT}/scripts/notify.py",
-            "async": true
-          }
-        ]
-      }
-    ],
-    "PermissionRequest": [
-      {
-        "hooks": [
-          {
-            "type": "command",
-            "command": "uv run ${CLAUDE_PLUGIN_ROOT}/scripts/notify-permission.py",
-            "async": true
-          }
-        ]
-      }
-    ],
-    "PostToolUse": [
-      {
-        "hooks": [
-          {
-            "type": "command",
-            "command": "uv run ${CLAUDE_PLUGIN_ROOT}/scripts/clear-permission-flag.py",
-            "async": true
-          }
-        ]
-      }
-    ],
-    "PostToolUseFailure": [
-      {
-        "hooks": [
-          {
-            "type": "command",
-            "command": "uv run ${CLAUDE_PLUGIN_ROOT}/scripts/clear-permission-flag.py",
-            "async": true
-          }
-        ]
-      }
-    ],
-    "Notification": [
-      {
-        "hooks": [
-          {
-            "type": "command",
-            "command": "uv run ${CLAUDE_PLUGIN_ROOT}/scripts/notify-notification.py",
-            "async": true
-          }
-        ]
-      }
-    ],
-    "PreCompact": [
-      {
-        "hooks": [
-          {
-            "type": "command",
-            "command": "uv run ${CLAUDE_PLUGIN_ROOT}/scripts/notify-precompact.py",
-            "async": true
-          }
-        ]
-      }
-    ],
-    "PreToolUse": [
-      {
-        "matcher": "Bash",
-        "hooks": [
-          {
-            "type": "command",
-            "command": "uv run ${CLAUDE_PLUGIN_ROOT}/scripts/notify-pretooluse.py",
-            "async": true
-          }
-        ]
-      }
-    ]
-  }
+  "hooks": "./hooks/hooks.json",
+  "skills": "./skills"
 }
