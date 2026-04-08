@@ -11,7 +11,6 @@
 #### windows
 
 ```powershell
-# 1. 一键配置 Windows
 if (Test-Path "$env:USERPROFILE\.ssh\id_rsa") { $c="$env:USERPROFILE\.ssh\config"; $newConfig="`nHost gitlab.in.za`n    HostName gitlab.in.za`n    User git`n    Port 35001`n    IdentityFile ~/.ssh/id_rsa`n    PreferredAuthentications publickey"; if ((Test-Path $c) -and (Get-Content $c -ErrorAction SilentlyContinue | Select-String "Host\s+gitlab\.in\.za\b" -Quiet)) { $content = (Get-Content $c -Raw) -replace "(?ms)^Host\s+gitlab\.in\.za\b.*?(?=^Host\s|\z)", $newConfig.TrimStart(); $content | Set-Content $c -NoNewline; Write-Host "✅ 配置已更新" } else { $newConfig | Out-File -Append $c; Write-Host "✅ 配置已添加" }; git config --global url."git@gitlab.in.za:".insteadOf "http://gitlab.in.za/" } else { Write-Error "❌ SSH密钥不存在,请先生成 SSH Key" }
 ```
 
