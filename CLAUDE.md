@@ -45,7 +45,7 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 | `za-qe-tools` | optional | 状态栏 + Windows 通知系统 |
 | `za-ui` | optional | UI自动化测试：Playwright转换、修复、增量更新 |
 | `za-dippy` | optional | Bash命令智能审批：自动放行安全命令，拦截危险操作 |
-| `za-esp` | optional | 会话事件流查看工具：实时追踪、回放 Claude Code 会话 |
+| `za-claude-esp` | optional | 会话事件流查看工具：实时追踪、回放 Claude Code 会话 |
 
 ### 六个核心 Skills
 

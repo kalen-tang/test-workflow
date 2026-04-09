@@ -27,8 +27,8 @@
       "category": "optional"
     },
     {
-      "name": "za-esp",
-      "source": "./plugins/za-esp",
+      "name": "za-claude-esp",
+      "source": "./plugins/za-claude-esp",
       "description": "Claude Code 会话事件流查看工具 — 实时追踪、列举和回放 Claude Code 会话事件（Event Stream Player）",
       "category": "optional"
     }

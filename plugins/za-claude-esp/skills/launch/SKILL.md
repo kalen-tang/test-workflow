@@ -1,12 +1,12 @@
 ---
 name: launch
-description: "在新终端窗口中启动 claude-esp，实时展示 Claude Code 的思考过程。当用户说'显示思考过程'、'打开思考流程'、'启动 esp'、'开启实时思考'、'show thinking'、'launch esp'、'新窗口打开 esp'、'打开esp'、'打开 esp'、'开启esp'、'开启 esp' 时触发。"
+description: "启动新终端窗口运行 claude-esp。当用户说'打开esp'、'启动esp'、'开启esp'、'esp'、'/esp'、'launch esp' 时触发。"
 version: 0.4.4
 allowed-tools:
   - Bash
 ---
 
-# launch — 在新终端中启动 claude-esp
+# /esp — 启动新终端窗口
 
 自动定位 claude-esp 二进制文件，并在新终端窗口中运行，实时展示当前 Claude Code 会话的思考过程。
 

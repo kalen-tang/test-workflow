@@ -328,7 +328,7 @@ allow my_safe_command
 ## 🔗 相关命令
 
 - `/za-dippy:install` — 安装并配置 dippy
-- `/za-esp:launch` — 启动 esp 事件流查看工具
+- `/esp` — 启动 esp 事件流查看工具
 
 ---
 

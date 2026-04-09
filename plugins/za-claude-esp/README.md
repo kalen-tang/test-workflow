@@ -1,8 +1,8 @@
-# za-esp 插件 — Claude Code 会话事件流播放器
+# za-claude-esp 插件 — Claude Code 会话事件流播放器
 
 ## 📌 概述
 
-**za-esp** 是 Claude Code 的**会话事件流播放器**（Event Stream Player），用于实时追踪、列举和回放 Claude Code 会话事件。
+**za-claude-esp** 是 Claude Code 的**会话事件流播放器**（Event Stream Player），用于实时追踪、列举和回放 Claude Code 会话事件。
 
 > **二进制已内置，无需额外安装，开箱即用。**
 
@@ -21,7 +21,7 @@
 
 ### 前置条件
 - Claude Code 已安装
-- za-esp 插件已启用
+- za-claude-esp 插件已启用
 
 ### 基础命令
 
@@ -53,7 +53,7 @@ ${CLAUDE_PLUGIN_ROOT}/bin/claude-esp.exe
 
 ## 📊 事件流信息
 
-通过 za-esp 可以查看的事件包括：
+通过 za-claude-esp 可以查看的事件包括：
 
 | 事件类型 | 说明 |
 |---------|------|
@@ -79,12 +79,16 @@ ${CLAUDE_PLUGIN_ROOT}/bin/claude-esp.exe
 ### 场景 1：调试 Claude Code 执行流程
 ```bash
 # 启动新终端运行 esp
-/za-esp:launch
+/esp
 
 # 在 esp 中实时查看当前会话的所有操作
 ```
 
-### 场景 2：回放过去的会话
+### 场景 2：交互式监听会话
+```bash
+# 交互式选择并监听会话
+/esp -w
+```
 ```bash
 # 列出最近会话
 claude-esp.exe -l
@@ -111,8 +115,8 @@ claude-esp.exe -s <session-id>
 
 ## 🔗 相关命令
 
-- `/za-esp:launch` — 启动 esp（新终端）
-- `/za-esp:watch-session` — 交互式监听会话
+- `/esp` — 启动 esp（新终端）
+- `/esp -w` — 交互式监听会话
 
 ---
 
@@ -131,7 +135,7 @@ A: 默认轮询间隔为 500ms，可通过命令行参数调整。
 
 ## 📝 配置文件路径
 
-- **插件根目录** — `~/.claude/plugins/marketplaces/alfie-qe/plugins/za-esp/`
+- **插件根目录** — `~/.claude/plugins/marketplaces/alfie-qe/plugins/za-claude-esp/`
 - **二进制文件** — `bin/claude-esp.exe`
 - **Skills 定义** — `skills/` 目录
 

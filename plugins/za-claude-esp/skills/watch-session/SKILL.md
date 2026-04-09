@@ -1,12 +1,12 @@
 ---
 name: watch-session
-description: Use this skill when the user asks to watch a Claude Code session, view session history, monitor an active session, or replay session events. Triggers on phrases like "watch session", "list sessions", "active session", "monitor Claude session", "view session", "esp", "展示实时思考流程", "查看会话", "监听会话", "实时思考", "查看思考过程", "显示思考流程", "回放会话", "活跃会话", "会话事件".
+description: "交互式监听 Claude Code 会话事件流。当用户说'查看会话'、'监听会话'、'esp -w'、'/esp -w'、'watch'、'交互式监听' 时触发。"
 version: 0.4.4
 allowed-tools:
   - Bash
 ---
 
-# claude-esp — Claude Code 会话事件流查看工具
+# /esp -w — 交互式监听会话
 
 ## 使用说明
 
