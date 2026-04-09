@@ -69,33 +69,25 @@ ${CLAUDE_PLUGIN_ROOT}/bin/claude-esp.exe
 
 | Skill 名称 | 触发场景 | 功能 |
 |-----------|---------|------|
-| `launch` | 用户说"打开esp"、"启动esp"等 | 在新终端窗口中启动 claude-esp |
-| `watch-session` | 用户要查看、监听会话事件 | 交互式选择并监听会话事件流 |
+| `esp` | 用户说"打开esp"、"启动esp"、"监听会话"等 | 主入口，支持 -w 参数 |
+| `esp_terminal` | 内部调用 | 启动新终端 |
+| `esp_watch` | 内部调用 | 交互式监听 |
 
 ---
 
 ## 💡 使用场景
 
-### 场景 1：调试 Claude Code 执行流程
+### 场景 1：启动新终端调试
 ```bash
-# 启动新终端运行 esp
-./esp
-
-# 在 esp 中实时查看当前会话的所有操作
+/esp
 ```
+在新终端窗口中启动 esp，自动连接最近的活跃会话。
 
 ### 场景 2：交互式监听会话
 ```bash
-# 交互式选择并监听会话
-./esp -w
+/esp -w
 ```
-```bash
-# 列出最近会话
-claude-esp.exe -l
-
-# 查看特定会话的完整事件流
-claude-esp.exe -s <session-id>
-```
+在当前会话中交互式选择并监听会话事件流。
 
 ### 场景 3：性能分析
 通过观察事件流时间戳，分析 Claude 各步骤耗时。
@@ -115,8 +107,8 @@ claude-esp.exe -s <session-id>
 
 ## 🔗 相关命令
 
-- `./esp` — 启动 esp（新终端）
-- .`/esp -w` — 交互式监听会话
+- `/esp` — 启动 esp（新终端）
+- `/esp -w` — 交互式监听会话
 
 ---
 
