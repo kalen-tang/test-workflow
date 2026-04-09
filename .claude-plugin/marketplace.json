@@ -13,6 +13,12 @@
       "source": "./plugins/za-qe-tools",
       "description": "QE 通用工具集：Powerline 风格状态栏 + Windows 通知系统",
       "category": "optional"
+    },
+    {
+      "name": "za-ui",
+      "source": "./plugins/za-ui",
+      "description": "ui自动化测试工具集：playwright代码转换、测试修复、增量更新",
+      "category": "optional"
     }
   ]
 }
