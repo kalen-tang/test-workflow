@@ -145,7 +145,7 @@ plugins/
 }
 ```
 
-也可通过外部文件引用：`"hooks": "./hooks/hooks.json"`
+**注意**：不要同时使用外部文件引用（`"hooks": "./hooks/hooks.json"`）和 `hooks/hooks.json` 文件，官方 CLI 会自动扫描 `hooks/` 目录导致重复加载报错。推荐直接内联到 plugin.json。
 
 ### 添加 MCP 服务器
 
