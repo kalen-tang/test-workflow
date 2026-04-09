@@ -1,6 +1,6 @@
 ---
-name: qe-manual
-description: 从需求文档生成手工测试案例（包含PlantUML流程图、测试功能点MindMap、详细测试案例MindMap）
+name: qe-case
+description: 从需求文档生成场景化测试案例（PlantUML流程图和MindMap测试设计）
 arguments:
   - name: doc_paths
     description: 需求文档路径（支持多个文档，自动合并），支持 .md/.docx/.txt/.pdf 格式
@@ -10,9 +10,9 @@ arguments:
     required: false
 ---
 
-# 手工测试案例生成器
+# 场景测试案例生成器
 
-从需求文档生成可视化的手工测试设计，包括 PlantUML 流程图、测试功能点 MindMap 和详细测试案例 MindMap，适用于测试设计、测试评审和团队协作场景。
+从需求文档生成场景化的测试设计，包括 PlantUML 流程图和 MindMap 测试案例，适用于手工测试设计、测试评审和团队协作场景。
 
 ## 🎯 功能概览
 
@@ -38,13 +38,13 @@ arguments:
 
 ```bash
 # 从单个文档生成
-/za-qe:manual-case ./docs/requirement.md
+/za-qe:qe-case ./docs/requirement.md
 
 # 从多个文档生成（自动合并）
-/za-qe:manual-case ./docs/req1.md ./docs/req2.docx ./docs/req3.txt
+/za-qe:qe-case ./docs/req1.md ./docs/req2.docx ./docs/req3.txt
 
 # 指定输出目录
-/za-qe:manual-case ./docs/requirement.md --output ./review
+/za-qe:qe-case ./docs/requirement.md --output ./review
 ```
 
 ### 支持的文档格式
@@ -112,10 +112,10 @@ PlantUML MindMap，至少四层结构：
 
 ## 📊 输出文件
 
-**文件路径**：`<output_dir>/<项目名>_手工测试案例.md`
+**文件路径**：`<output_dir>/<项目名>_场景测试案例.md`
 
 **默认路径示例**：
-- `./result/requirement_手工测试案例.md`
+- `./result/requirement_场景测试案例.md`
 
 **文件内容**：
 1. 文档信息（生成时间、来源、模式）
@@ -130,11 +130,11 @@ PlantUML MindMap，至少四层结构：
 
 ```bash
 # 产品提供需求文档后立即生成测试设计
-/za-qe:manual-case ./docs/new-feature.md
+/za-qe:qe-case ./docs/new-feature.md
 ```
 
 **预期输出**：
-- `./result/new_feature_手工测试案例.md`
+- `./result/new_feature_场景测试案例.md`
 - 包含流程图、测试功能点、详细测试案例
 
 **适用情况**：
@@ -148,11 +148,11 @@ PlantUML MindMap，至少四层结构：
 
 ```bash
 # 多个需求文档整合为一个测试方案
-/za-qe:manual-case ./docs/req1.md ./docs/req2.md ./docs/req3.docx
+/za-qe:qe-case ./docs/req1.md ./docs/req2.md ./docs/req3.docx
 ```
 
 **预期输出**：
-- `./result/integrated_手工测试案例.md`
+- `./result/integrated_场景测试案例.md`
 - 自动合并所有文档的流程和功能点
 
 **适用情况**：
@@ -166,11 +166,11 @@ PlantUML MindMap，至少四层结构：
 
 ```bash
 # 生成可视化测试用例用于评审
-/za-qe:manual-case ./docs/requirement.docx --output ./review
+/za-qe:qe-case ./docs/requirement.docx --output ./review
 ```
 
 **预期输出**：
-- `./review/requirement_手工测试案例.md`
+- `./review/requirement_场景测试案例.md`
 - 团队可以在线查看 PlantUML 渲染结果
 
 **适用情况**：
@@ -209,7 +209,7 @@ PlantUML MindMap，至少四层结构：
 - 📝 细化测试步骤
 - 📝 添加边界值和异常场景
 
-如需生成自动化测试代码，可将此输出作为参考，结合 `/api-generator` 命令。
+如需生成自动化测试代码，可将此输出作为参考，结合 `/za-qe:qe-workflow` 命令。
 
 ## ⚠️ 注意事项
 
@@ -236,12 +236,10 @@ PlantUML MindMap，至少四层结构：
 
 ## 📚 相关命令
 
-- `/za-qe:qe-quick` - 快速模式工作流（KM 文档 → 接口测试）
-- `/za-qe:full-workflow` - 完整模式工作流（需求 → 手工用例 → 自动化用例）
+- `/za-qe:qe-workflow` - 测试左移工作流（KM 文档 → 接口测试）
+- `/za-qe:qe-help` - 查看帮助信息
 - `/doc-reviewer` - 需求文档验证
 - `/api-generator` - 生成自动化测试代码
-- `/za-qe:qe-status` - 查看工具状态
-- `/za-qe:qe-help` - 查看帮助信息
 
 ## 📖 详细文档
 
@@ -270,15 +268,15 @@ PlantUML MindMap，至少四层结构：
 
 **输入**：
 ```bash
-/za-qe:manual-case ./docs/search-feature.md
+/za-qe:qe-case ./docs/search-feature.md
 ```
 
 **输出**：
 ```
-✅ 手工测试案例生成完成
+✅ 场景测试案例生成完成
 
 📄 输入文档: ./docs/search-feature.md
-📋 输出文件: ./result/search_feature_手工测试案例.md
+📋 输出文件: ./result/search_feature_场景测试案例.md
 
 📊 生成内容:
    - 业务流程图: 1个 (包含主流程、决策分支、异常处理)
@@ -287,7 +285,7 @@ PlantUML MindMap，至少四层结构：
 
 🎯 下一步操作:
    1. 查看生成的测试案例:
-      cat ./result/search_feature_手工测试案例.md
+      cat ./result/search_feature_场景测试案例.md
 
    2. 渲染 PlantUML 图:
       使用 PlantUML Online 或 VS Code 插件
@@ -296,7 +294,7 @@ PlantUML MindMap，至少四层结构：
       分享文件给团队成员进行 Review
 
    4. 生成自动化测试（可选）:
-      /api-generator ./result/search_feature_测试左移分析报告.md
+      /za-qe:qe-workflow ./docs/api-plan.md
 ```
 
 ---
@@ -305,19 +303,19 @@ PlantUML MindMap，至少四层结构：
 
 **输入**：
 ```bash
-/za-qe:manual-case ./docs/ui-requirement.md ./docs/api-requirement.md ./docs/business-rules.docx
+/za-qe:qe-case ./docs/ui-requirement.md ./docs/api-requirement.md ./docs/business-rules.docx
 ```
 
 **输出**：
 ```
-✅ 手工测试案例生成完成
+✅ 场景测试案例生成完成
 
 📄 输入文档:
    - ./docs/ui-requirement.md
    - ./docs/api-requirement.md
    - ./docs/business-rules.docx
 
-📋 输出文件: ./result/integrated_手工测试案例.md
+📋 输出文件: ./result/integrated_场景测试案例.md
 
 📊 生成内容:
    - 业务流程图: 1个 (整合了3个文档的流程)
@@ -392,4 +390,4 @@ PlantUML MindMap，至少四层结构：
 
 ---
 
-**版本**: v1.0.0 | **状态**: 🚧 开发中 | **预计完成**: 2026-04-20
+**版本**: v1.4.0 | **状态**: ✅ 可用

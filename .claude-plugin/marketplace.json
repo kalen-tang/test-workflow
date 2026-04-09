@@ -5,13 +5,13 @@
     {
       "name": "za-qe",
       "source": "./plugins/za-qe",
-      "description": "测试左移工具集：需求分析、手工案例生成、API用例生成等核心能力",
+      "description": "测试左移工具集：需求与设计分析、场景案例生成、API案例生成等核心能力",
       "category": "core"
     },
     {
       "name": "za-qe-tools",
       "source": "./plugins/za-qe-tools",
-      "description": "QE 通用工具集：Powerline 风格状态栏 + Windows 通知系统",
+      "description": "QE通用工具集：Powerline风格状态栏 + Windows通知系统",
       "category": "optional"
     },
     {
