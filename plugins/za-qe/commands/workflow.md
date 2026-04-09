@@ -1,15 +1,15 @@
 ---
-name: qe-quick
-description: 执行快速模式测试左移工作流，自动串联测试左移分析和API用例生成
+name: qe-workflow
+description: 执行测试左移工作流，从开发方案自动生成API自动化测试用例
 arguments:
   - name: doc_path
     description: KM开发方案文档路径或URL
     required: true
 ---
 
-# 快速模式工作流
+# 测试左移工作流
 
-自动执行快速模式测试左移流程，从 KM 开发方案直接生成 API 自动化测试用例，适合接口测试场景。
+自动执行测试左移流程，从 KM 开发方案直接生成 API 自动化测试用例，适合接口测试场景。
 
 ## 🎯 工作流概览
 
@@ -35,10 +35,10 @@ arguments:
 
 ```bash
 # 从本地文档生成
-/za-qe:qe-quick ./docs/za-zone-development.md
+/za-qe:qe-workflow ./docs/za-zone-development.md
 
 # 从网页URL生成（需要Playwright MCP）
-/za-qe:qe-quick https://km.yourcompany.com/doc/12345
+/za-qe:qe-workflow https://km.yourcompany.com/doc/12345
 
 # 等价于手动执行以下命令：
 # /devplan-analyzer ./docs/za-zone-development.md
@@ -86,7 +86,7 @@ arguments:
 ## ✅ 执行成功输出
 
 ```
-🚀 快速模式工作流执行完成
+🚀 测试左移工作流执行完成
 ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
 📊 步骤1: 测试左移分析 ✅
@@ -201,75 +201,40 @@ arguments:
 
 ---
 
-## ⏸️ 中断执行
-
-用户可以在任意步骤按 **Ctrl+C** 中断执行：
-
-```
-⏸️ 工作流已中断
-
-当前进度:
-✅ 步骤1: 测试左移分析 (已完成)
-⏸️ 步骤2: API 用例生成 (已中断)
-
-已生成文件:
-- ./result/za_zone_测试左移分析报告.md
-
-继续执行:
-/api-generator ./result/za_zone_测试左移分析报告.md
-```
-
 ## 💡 使用场景
 
 ### 场景 1: 新接口开发
 
 ```bash
 # 开发团队提供 KM 文档后立即生成测试
-/za-qe:qe-quick ./docs/new-feature-plan.md
+/za-qe:qe-workflow ./docs/new-feature-plan.md
 ```
 
 ### 场景 2: 接口变更
 
 ```bash
 # 接口修改后快速更新测试用例
-/za-qe:qe-quick ./docs/api-update-plan.md
+/za-qe:qe-workflow ./docs/api-update-plan.md
 ```
 
 ### 场景 3: 快速验证
 
 ```bash
 # 从线上 KM 系统直接生成测试
-/za-qe:qe-quick https://km.company.com/doc/feature-123
+/za-qe:qe-workflow https://km.company.com/doc/feature-123
 ```
 
 ## 🎯 适用场景
 
-✅ **适合快速模式**:
+✅ **适合**:
 - 接口测试为主的项目
 - 需要快速迭代的场景
 - 开发文档相对完整
 - 仅有 KM 开发方案
 
-❌ **不适合快速模式**:
-- 需要全面质量保证（使用 `/za-qe:full-workflow`）
-- 需要手工测试用例（使用完整模式）
+❌ **不适合**:
+- 需要手工测试用例（使用 `/za-qe:qe-case`）
 - 需要需求验证（先运行 `/doc-reviewer`）
-
-## 🔧 配置
-
-### 设置输出目录
-
-```bash
-/za-qe:qe-config output_dir ./custom-output
-/za-qe:qe-quick ./docs/plan.md
-```
-
-### 配置测试环境
-
-```bash
-/za-qe:qe-config environments sit,uat,prod
-/za-qe:qe-quick ./docs/plan.md
-```
 
 ## 📊 性能预估
 
@@ -279,31 +244,19 @@ arguments:
 | 10-20个 | 3-5分钟  | 5-8分钟  | 8-13分钟 |
 | 20+个   | 5-8分钟  | 8-12分钟 | 13-20分钟 |
 
-## 🆚 对比手动执行
-
-| 维度 | 手动执行 | /za-qe:qe-quick |
-|------|---------|-----------|
-| 命令数 | 2条 | 1条 |
-| 需要等待 | 是（步骤间） | 否（自动衔接）|
-| 需要复制路径 | 是 | 否（自动检测）|
-| 容易出错 | 中（路径错误） | 低（自动处理）|
-| 学习成本 | 中 | 低 |
-
 ## 📚 相关命令
 
-- `/za-qe:qe-status` - 查看工具状态和最近输出
-- `/za-qe:qe-config` - 配置工作流参数
+- `/za-qe:qe-case` - 生成手工测试案例（PlantUML流程图+MindMap）
 - `/za-qe:qe-help` - 查看详细帮助
-- `/za-qe:full-workflow` - 完整模式工作流（开发中）
 - `/devplan-analyzer` - 独立执行步骤1
 - `/api-generator` - 独立执行步骤2
 
 ## 📖 详细文档
 
-- [快速模式说明](../README.md#快速模式)
 - [devplan-analyzer 文档](../skills/devplan-analyzer/SKILL.md)
 - [api-generator 文档](../skills/api-generator/SKILL.md)
+- [插件 README](../README.md)
 
 ---
 
-**版本**: v1.0.0 | **状态**: ✅ 可用
+**版本**: v1.4.0 | **状态**: ✅ 可用
