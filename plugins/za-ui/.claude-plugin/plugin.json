@@ -4,6 +4,5 @@
   "description": "ui自动化测试工具集",
   "author": { "name": "Alfie" },
   "commands": ["./commands/"],
-  "skills": ["./skills/"],
-  "agents": ["./agents/"]
+  "skills": ["./skills/"]
 }
