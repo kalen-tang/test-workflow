@@ -1,9 +1,12 @@
 ---
 name: esp
-description: 启动 Claude Code 会话事件流查看工具（新终端）
-skills:
-  - launch
-  - watch-session
+description: 启动 Claude Code 会话事件流查看工具
+triggers:
+  - /esp
+  - /esp -w
+execution:
+  type: skill
+  skill: launch
 arguments:
   - name: mode
     description: "可选：'-w' 表示交互式监听模式，缺省为新终端模式"
@@ -14,38 +17,38 @@ arguments:
 
 启动 claude-esp 工具查看 Claude Code 会话事件。
 
-## 用法
+## 使用方法
 
-### /esp
-在新终端窗口中启动 claude-esp（自动进入交互模式）。
-
+### 新终端模式（默认）
 ```bash
 /esp
 ```
+在新终端窗口中启动 claude-esp，自动连接到最近的活跃会话。
 
-### /esp -w
-进入交互式监听模式（在当前会话中交互式选择并监听会话事件流）。
-
+### 交互式监听模式
 ```bash
 /esp -w
 ```
+在当前会话中交互式选择并实时监听会话事件流。
 
-## 功能说明
-
-- **新终端模式** (`/esp`)：在新窗口中启动 esp，自动连接到最近的活跃会话
-- **交互监听模式** (`/esp -w`)：在当前终端中交互式选择会话并实时监听事件流
-
-## 查看的事件类型
+## 可查看的事件类型
 
 | 事件类型 | 说明 |
 |---------|------|
 | **Message** | Claude 的消息或用户输入 |
-| **Tool Call** | Claude 调用的工具（如 Bash、Read、Edit） |
+| **Tool Call** | Claude 调用的工具（Bash、Read、Edit 等） |
 | **Tool Result** | 工具执行结果 |
 | **Thinking** | Claude 的思考过程（Extended Thinking） |
 | **Status** | 会话状态变化 |
 
-## 相关信息
+## 执行步骤
 
-- 完整文档：`./plugins/za-claude-esp/README.md`
-- 项目主页：`./README.md`
+根据参数选择执行模式：
+
+- 若无 `-w` 参数 → 调用 launch Skill（新终端启动）
+- 若有 `-w` 参数 → 调用 watch-session Skill（交互式监听）
+
+## 相关文档
+
+- 完整说明：`./plugins/za-claude-esp/README.md`
+- Skill 实现：`./plugins/za-claude-esp/skills/`
