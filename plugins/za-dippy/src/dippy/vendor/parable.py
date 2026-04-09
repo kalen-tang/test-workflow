@@ -1,7 +1,7 @@
 """
 Parable - A recursive descent parser for bash.
 
-MIT License - https://github.com/ldayton/Parable
+MIT License - http://gitlab.in.za/claude/alfie/qe/-/tree/main/plugins/za-dippy
 
 from parable import parse
 ast = parse("ps aux | grep python | awk '{print $2}'")
