@@ -8,13 +8,13 @@
 
 ### 1. 一键配置 SSH
 
-#### Windows
+#### Windows (PowerShell 7+)
 
 ```powershell
 if (Test-Path "$env:USERPROFILE\.ssh\id_rsa") { $c="$env:USERPROFILE\.ssh\config"; $newConfig="`nHost gitlab.in.za`n    HostName gitlab.in.za`n    User git`n    Port 35001`n    IdentityFile ~/.ssh/id_rsa`n    PreferredAuthentications publickey"; if ((Test-Path $c) -and (Get-Content $c -ErrorAction SilentlyContinue | Select-String "Host\s+gitlab\.in\.za\b" -Quiet)) { $content = (Get-Content $c -Raw) -replace "(?ms)^Host\s+gitlab\.in\.za\b.*?(?=^Host\s|\z)", $newConfig.TrimStart(); $content | Set-Content $c -NoNewline; Write-Host "✅ 配置已更新" } else { $newConfig | Out-File -Append $c; Write-Host "✅ 配置已添加" }; git config --global url."git@gitlab.in.za:".insteadOf "http://gitlab.in.za/" } else { Write-Error "❌ SSH密钥不存在,请先生成 SSH Key" }
 ```
 
-#### Mac/Linux
+#### Mac/Linux (Bash)
 
 ```bash
 if [ -f ~/.ssh/id_rsa ]; then config_file=~/.ssh/config; new_config="\nHost gitlab.in.za\n    HostName gitlab.in.za\n    User git\n    Port 35001\n    IdentityFile ~/.ssh/id_rsa\n    PreferredAuthentications publickey"; if grep -q "Host gitlab\.in\.za" "$config_file" 2>/dev/null; then perl -i.bak -pe 'BEGIN{undef $/;} s/Host\s+gitlab\.in\.za\b.*?(?=\nHost\s|\z)/'"$(echo "$new_config" | sed 's/\\/\\\\/g; s/\//\\\//g; s/&/\\&/g')"'/s' "$config_file"; echo "✅ 配置已更新"; else echo -e "$new_config" >> "$config_file"; echo "✅ 配置已添加"; fi; git config --global url."git@gitlab.in.za:".insteadOf "http://gitlab.in.za/"; else echo "❌ SSH密钥不存在，请先生成 SSH Key"; exit 1; fi
@@ -92,3 +92,11 @@ ssh -Tv git@gitlab.in.za
 ```bash
 claude plugin marketplace remove alfie-qe && claude plugin marketplace add http://gitlab.in.za/claude/alfie/qe.git
 ```
+
+---
+
+**📌 核心提示：** 配置完成后，GitLab 上任何项目的 HTTPS 地址都可以直接 `git clone`，会自动转换为 SSH 协议。
+
+## 系统架构
+
+![测试案例生成与自动化流程](https://plantuml.in.za/svg/jLXRJnj757xVNp5DLGKSsGItgLAaLWAZA9KQDPTMVIXLjR47UsMpwwpN8QIAP21WRC0c8aL9YRY4SaaKcQP96Z26_9VMixj-ob_eNFOoksi75LG_iJDdpcs-yvqpVAIbu0W4sOmeoK8kBSbPKHL7m4qndawgIbvEn9ICeeBHbAH1RZ-BzyKalA6DPI1GOLmJvMI65uWh8rb5XhBMMIG1XyLyHhkaO27fBWIzvxbDMKd07Co2p_b5LPJJrgAWIHhMgx-PDNT_rTTdcaUpniDLVMQXkLSnYyzHUGVDBUblnesTMK6ml0LdK6KLRSyswzkeM3TApyw0NmI0VuwpjaJhIK5_EQ4l5VNrZJD0p67BezVXhK4btbxUh1sPjNMl_23CIKcvtP560LKVD0ysZBLnAfnJup4SRdlLg3ADgd-o26tLbwMSfgXZ_WEjZPNc_fQnkcdkJgFw8fKUXb8kbVz1Ial2FIuHtobA9cU7xwpUI4iPTzcdNOMtmlWQSb0TaldycDiR-ih2a8ogkwr2gGyzNK7bDVo1hqOlREiR1NrrapbE4qXjW8y7BiI-6BZOpaw2viqnnQUMcQBA4dPsZzKN5tCmpCI9FhqqYzvkyhXX5gZM4L7EYvaOFc6fxRz85BTrKuc7LNXRWgDkGb1jnQZyuGqvbeBnjAMDkDZV8UZRk0Jbi2YBcR6xH2D3YRwqZvr4CzDkt5JmM8LYLWed8OvOn4Z1KLSsKNM3AmmIFYiOgXQB1oF6WF70uqhiQWTinAvy0_0kjbDTQ1ujuq-MskQxTNryruSDA-klTrh5ghbx7mT7NOYFPAx4inzA-IMAPK30p5lpmHvDJw7QljycnOzHcj6Vl33V7PfxpxdgECOigKqmA0qFyqPP-QAtDTIOODVZhu33bsXntfoRHCkl-Vl3UgYzpbVtFOPMb1hbxB4Bv4WZJwJYMEeOxw-gofqnZwRo8fgROZT3DMM9XD-dUnwwCBVlaqZcbZZgn2TbHHqHCvYx4z_cjMnUomNvDCYaRMaqGA29ZkpfvyDKUp9qyL2TC0kJGt8N0psx2sQfcof8oyfe1YQIS03NlL-DTS_LHthW6g_3hA9g94-1U7aYqCkRw47PGmVif9DlDy_1TjQcHLaCHeLmMCR1ehvodnJrMWCrgjq-8ii5KksGW9j3CQyfJDWRZLxQDjVdg8KdNFJm3enVXpdSl0NXx9Sd-GbdWV7YHNElq7hqbrvxyxxncwyrW_1NW3QfBjQKUZ22kybY48edTG7xq1i1tbPcwHQSVW_22MLKndQvxYNmdSox3_f0_zVdclKwlY7q-xo-jjUbbmyn4ABdF-ac5gCHuEred4LdOd2KUhkSu6jw0QbZhNyQ0Npzw4zV6GlJWZjHE2eP6GiM9zkhLgbXC-maMgZmweY5poB0LtcOTL1rIN074KUTmxw2oyFsdgSeYS50yJ8pnEQ520ZIiM1DLMwM6FCADWFpwrP1zW7CtRWhCJtdU0e_9T3hSmxGWm0ciEx46oS6Tv2REQJoBDG7pAD5DBKfU8ULi2ebKrexSUQUENc8oikdhV_IXz9oZZ40IG_FUVz3IZYw922OscbDxbXPyO-4JbwyP_J7TPmHnjcdImfQNdQImeTDoS_BtImpXA9Fd1C-2ZiRRZTm_dB3ThcVHCsCdx8s7ZhnElVj2_HzOyOycaBbPop1xnkb4mVicPkSgDn0-u3rZgIC8ZZ3KLjHDfMr2WVcqGF1cQ7RYz9KsLM3iQX1S5FHD6K4ACE-VXqAyHVF_0c51Bh3ODc7Fu6dT_rJ6ESR2_xagHb_1YSPff2fnmyDF3mmjHxKiP1uUBi31oj7A2S02ISGb9SvgB5EDFVVe-iK3j5Gh3CDVnUU0glFSgyDqDNVCz0JwndijaHufz3kVkjm0TMtc7Us4jfzMiLvOs8V7TJDMiq-kb5fFNw6L_MrelvgnvyB2WII2cvYOjVhdwlwM0Q8JdDhsbXUCYf5us0LHsoj6erww_5RL9rlRStONh4tLkCHlWlBAzU-CrFsPp9jXiXGw5flSw-CvikujgxrHdfnJOL2-0spMZVM2qxvCRmEoTISzmt9a65j1H33rfrt8Vdml6le77chz-TUpzibuE0iTh3dMfJtD8g_7NVvAQgvL-4BXXaDZdUyVy5HZEtQtaKz_rZmUXTbtX6def6evG_36SCEzeVTBNaGDkgyFtm1UFBbVMgI9UVzndoA4f_iTmDnYkOm_6DAIYIW_1DZ7kgwlHiDxc8bmhr_0G00)
