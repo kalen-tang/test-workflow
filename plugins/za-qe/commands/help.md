@@ -57,7 +57,7 @@ arguments:
      从 KM 开发方案生成 API 自动化测试用例
      流程：devplan-analyzer → api-generator
 
-  2️⃣ /za-qe:qe-case <文档路径>
+  2️⃣ /za-qe:qe-gencase <文档路径>
      从需求文档生成场景化测试设计
      输出：PlantUML流程图 + MindMap测试案例
 
@@ -82,7 +82,7 @@ arguments:
   /za-qe:qe-workflow ./docs/plan.md
 
   # 生成场景测试案例
-  /za-qe:qe-case ./docs/requirement.md
+  /za-qe:qe-gencase ./docs/requirement.md
 
 📚 获取详细帮助:
   • /za-qe:qe-help skills    - Skills 详细说明

@@ -17,8 +17,8 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 # 一键执行快速模式（最常用）
 /za-qe:qe-quick ./docs/your-plan.md
 
-# 手工案例生成（PlantUML流程图+MindMap）
-/za-qe:manual-case ./docs/requirement.md
+# 场景案例生成（PlantUML流程图+MindMap）
+/za-qe:qe-gencase ./docs/requirement.md
 
 # 需求文档标准化（完整模式第一步）
 /za-qe:req-parser ./docs/requirement.docx
@@ -35,7 +35,7 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 ### 插件系统两级配置
 
 1. **项目级**：`.claude-plugin/marketplace.json` — 定义可用插件（`core`/`optional`）
-2. **插件级**：`plugins/za-qe/.claude-plugin/plugin.json` — 插件元数据（当前 v1.3.0），声明 `commands`/`skills` 路径
+2. **插件级**：`plugins/za-qe/.claude-plugin/plugin.json` — 插件元数据（当前 v1.4.0），声明 `commands`/`skills` 路径
 
 ### 六个核心 Skills
 

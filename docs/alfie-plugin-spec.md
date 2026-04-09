@@ -52,7 +52,7 @@
 
 ### Command 命名
 
-格式：`domain-action`，全小写，连字符分隔。如 `qe-quick`、`manual-case`。
+格式：`domain-action`，全小写，连字符分隔。如 `qe-quick`、`qe-gencase`。
 
 ---
 

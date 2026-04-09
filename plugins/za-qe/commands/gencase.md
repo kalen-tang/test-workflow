@@ -1,5 +1,5 @@
 ---
-name: qe-case
+name: qe-gencase
 description: 从需求文档生成场景化测试案例（PlantUML流程图和MindMap测试设计）
 arguments:
   - name: doc_paths
@@ -38,13 +38,13 @@ arguments:
 
 ```bash
 # 从单个文档生成
-/za-qe:qe-case ./docs/requirement.md
+/za-qe:qe-gencase ./docs/requirement.md
 
 # 从多个文档生成（自动合并）
-/za-qe:qe-case ./docs/req1.md ./docs/req2.docx ./docs/req3.txt
+/za-qe:qe-gencase ./docs/req1.md ./docs/req2.docx ./docs/req3.txt
 
 # 指定输出目录
-/za-qe:qe-case ./docs/requirement.md --output ./review
+/za-qe:qe-gencase ./docs/requirement.md --output ./review
 ```
 
 ### 支持的文档格式
@@ -130,7 +130,7 @@ PlantUML MindMap，至少四层结构：
 
 ```bash
 # 产品提供需求文档后立即生成测试设计
-/za-qe:qe-case ./docs/new-feature.md
+/za-qe:qe-gencase ./docs/new-feature.md
 ```
 
 **预期输出**：
@@ -148,7 +148,7 @@ PlantUML MindMap，至少四层结构：
 
 ```bash
 # 多个需求文档整合为一个测试方案
-/za-qe:qe-case ./docs/req1.md ./docs/req2.md ./docs/req3.docx
+/za-qe:qe-gencase ./docs/req1.md ./docs/req2.md ./docs/req3.docx
 ```
 
 **预期输出**：
@@ -166,7 +166,7 @@ PlantUML MindMap，至少四层结构：
 
 ```bash
 # 生成可视化测试用例用于评审
-/za-qe:qe-case ./docs/requirement.docx --output ./review
+/za-qe:qe-gencase ./docs/requirement.docx --output ./review
 ```
 
 **预期输出**：
@@ -268,7 +268,7 @@ PlantUML MindMap，至少四层结构：
 
 **输入**：
 ```bash
-/za-qe:qe-case ./docs/search-feature.md
+/za-qe:qe-gencase ./docs/search-feature.md
 ```
 
 **输出**：
@@ -303,7 +303,7 @@ PlantUML MindMap，至少四层结构：
 
 **输入**：
 ```bash
-/za-qe:qe-case ./docs/ui-requirement.md ./docs/api-requirement.md ./docs/business-rules.docx
+/za-qe:qe-gencase ./docs/ui-requirement.md ./docs/api-requirement.md ./docs/business-rules.docx
 ```
 
 **输出**：

@@ -233,7 +233,7 @@ arguments:
 - 仅有 KM 开发方案
 
 ❌ **不适合**:
-- 需要手工测试用例（使用 `/za-qe:qe-case`）
+- 需要手工测试用例（使用 `/za-qe:qe-gencase`）
 - 需要需求验证（先运行 `/doc-reviewer`）
 
 ## 📊 性能预估
@@ -246,7 +246,7 @@ arguments:
 
 ## 📚 相关命令
 
-- `/za-qe:qe-case` - 生成手工测试案例（PlantUML流程图+MindMap）
+- `/za-qe:qe-gencase` - 生成场景测试案例（PlantUML流程图+MindMap）
 - `/za-qe:qe-help` - 查看详细帮助
 - `/devplan-analyzer` - 独立执行步骤1
 - `/api-generator` - 独立执行步骤2
