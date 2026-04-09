@@ -7,5 +7,6 @@
     "upstream": "github.com/phiat/claude-esp"
   },
   "keywords": ["session", "monitor", "event-stream", "debug"],
+  "commands": "./commands",
   "skills": "./skills"
 }
