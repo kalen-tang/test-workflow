@@ -17,8 +17,8 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 # 一键执行快速模式（最常用）
 /za-qe:qe-quick ./docs/your-plan.md
 
-# 手工案例生成（PlantUML流程图+MindMap）
-/za-qe:manual-case ./docs/requirement.md
+# 场景案例生成（PlantUML流程图+MindMap）
+/za-qe:qe-gencase ./docs/requirement.md
 
 # 需求文档标准化（完整模式第一步）
 /za-qe:req-parser ./docs/requirement.docx
@@ -35,7 +35,8 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 ### 插件系统两级配置
 
 1. **项目级**：`.claude-plugin/marketplace.json` — 定义可用插件（`core`/`optional`）
-2. **插件级**：`plugins/*/、claude-plugin/plugin.json` — 插件元数据，声明 `commands`/`skills` 路径
+<<<<<<< HEAD
+2. **插件级**：`plugins/za-qe/.claude-plugin/plugin.json` — 插件元数据（当前 v1.4.0），声明 `commands`/`skills` 路径
 
 ### 核心与可选插件
 
@@ -46,8 +47,6 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 | `za-ui` | optional | UI自动化测试：Playwright转换、修复、增量更新 |
 | `za-dippy` | optional | Bash命令智能审批：自动放行安全命令，拦截危险操作 |
 | `za-claude-esp` | optional | 会话事件流查看工具：实时追踪、回放 Claude Code 会话 |
-
-### 六个核心 Skills
 
 所有 Skill 位于 `plugins/za-qe/skills/` 下：
 

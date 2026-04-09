@@ -76,19 +76,19 @@ QA Toolkit 是一个完整的测试左移解决方案，提供从需求分析到
 
 ---
 
-### `/za-qe:manual-case` - 手工测试案例生成
+### `/za-qe:qe-gencase` - 场景测试案例生成
 
 从需求文档生成可视化的手工测试设计（PlantUML流程图 + MindMap）。
 
 ```bash
 # 从单个文档生成
-/za-qe:manual-case ./docs/requirement.md
+/za-qe:qe-gencase ./docs/requirement.md
 
 # 从多个文档生成（自动合并）
-/za-qe:manual-case ./docs/req1.md ./docs/req2.docx ./docs/req3.txt
+/za-qe:qe-gencase ./docs/req1.md ./docs/req2.docx ./docs/req3.txt
 
 # 指定输出目录
-/za-qe:manual-case ./docs/requirement.md --output ./review
+/za-qe:qe-gencase ./docs/requirement.md --output ./review
 ```
 
 **输出**：手工测试案例文档（Markdown格式，包含PlantUML代码）
@@ -115,7 +115,7 @@ QA Toolkit 是一个完整的测试左移解决方案，提供从需求分析到
 **当前替代方案**：
 ```bash
 /doc-reviewer              # 需求检查
-/za-qe:manual-case ./docs/requirement.md    # 手工案例
+/za-qe:qe-gencase ./docs/requirement.md    # 场景案例
 /za-qe:qe-quick ./docs/plan.md            # API 自动化
 ```
 
@@ -139,7 +139,7 @@ QA Toolkit 是一个完整的测试左移解决方案，提供从需求分析到
 ✅ 可用 Skills (6个):
   • /devplan-analyzer - 测试左移分析器
   • /doc-reviewer - 需求验证器
-  • /za-qe:manual-case - 手工测试案例生成器
+  • /za-qe:qe-gencase - 场景测试案例生成器
   • /api-generator - API用例生成器
   • /za-qe:req-parser - 需求文档规范化器
   • /design-parser - 设计文档规范化器 🚧
@@ -273,7 +273,7 @@ QA Toolkit 是一个完整的测试左移解决方案，提供从需求分析到
 - 应用命名规范（去掉"测试"后缀、动作与结果分离）
 
 ```bash
-/za-qe:manual-case ./docs/requirement.md
+/za-qe:qe-gencase ./docs/requirement.md
 ```
 
 **输出**: 手工测试案例文档（Markdown格式，包含PlantUML代码）
@@ -395,7 +395,7 @@ doc-reviewer 需要配置文档目录，可以在 SKILL.md 中修改默认配置
 | 命令 | 文档 | 说明 |
 |------|------|------|
 | `/za-qe:qe-quick` ⭐ | [quick-workflow.md](./commands/quick-workflow.md) | 快速模式工作流 |
-| `/za-qe:manual-case` | [manual-case.md](./commands/manual-case.md) | 手工测试案例生成 |
+| `/za-qe:qe-gencase` | [gencase.md](./commands/gencase.md) | 场景测试案例生成 |
 | `/za-qe:full-workflow` 🚧 | [full-workflow.md](./commands/full-workflow.md) | 完整模式工作流 |
 | `/za-qe:qe-status` | [status.md](./commands/status.md) | 查看工具状态 |
 | `/za-qe:qe-config` | [config.md](./commands/config.md) | 配置工具参数 |
