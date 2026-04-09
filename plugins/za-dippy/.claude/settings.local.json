@@ -1,0 +1,7 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(python3 \"C:\\\\Users\\\\qi.chen\\\\.claude\\\\plugins\\\\marketplaces\\\\alfie-qe\\\\plugins\\\\za-dippy\\\\src\\\\dippy\\\\dippy.py\" config)"
+    ]
+  }
+}

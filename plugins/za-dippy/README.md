@@ -321,7 +321,7 @@ allow my_safe_command
 | **默认配置** | `~/.dippy/config` |
 | **项目配置** | `<项目根>/.dippy` |
 | **日志文件** | `~/.claude/hook-approvals.log` |
-| **源代码** | [Lily Dayton 的 dippy](https://github.com/dayton-dynamodb/dippy) |
+| **源代码** | [Za-Dippy](http://gitlab.in.za/claude/alfie/qe/-/tree/main/plugins/za-dippy) |
 
 ---
 
