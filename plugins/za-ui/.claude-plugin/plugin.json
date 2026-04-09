@@ -1,0 +1,9 @@
+{
+  "name": "za-ui",
+  "version": "1.0.0",
+  "description": "ui自动化测试工具集",
+  "author": { "name": "Alfie" },
+  "commands": ["./commands/"],
+  "skills": ["./skills/"],
+  "agents": ["./agents/"]
+}
