@@ -1,0 +1,113 @@
+#!/usr/bin/env python3
+"""Install Dippy hook into ~/.claude/settings.json and deploy default config."""
+import json
+import sys
+from pathlib import Path
+
+PLUGIN_ROOT = Path(__file__).resolve().parent.parent
+DEFAULT_CONFIG_SRC = PLUGIN_ROOT / "config" / "default.dippy"
+USER_CONFIG_PATH = Path.home() / ".dippy" / "config"
+
+
+def get_hook_command() -> str:
+    hook = PLUGIN_ROOT / "bin" / "dippy-hook"
+    # Normalize to forward slashes so Claude Code (cross-platform) handles it cleanly
+    return hook.as_posix()
+
+
+def load_settings(path: Path) -> dict:
+    if path.exists():
+        try:
+            return json.loads(path.read_text(encoding="utf-8"))
+        except json.JSONDecodeError as e:
+            print(f"Error: {path} contains invalid JSON: {e}", file=sys.stderr)
+            sys.exit(1)
+    return {}
+
+
+def already_installed(settings: dict, hook_command: str) -> bool:
+    for block in settings.get("hooks", {}).get("PreToolUse", []):
+        if block.get("matcher") != "Bash":
+            continue
+        for h in block.get("hooks", []):
+            if h.get("command") == hook_command:
+                return True
+    return False
+
+
+def install_hook(settings: dict, hook_command: str) -> dict:
+    settings.setdefault("hooks", {})
+    pre = settings["hooks"].setdefault("PreToolUse", [])
+    pre.insert(0, {
+        "matcher": "Bash",
+        "hooks": [{"type": "command", "command": hook_command}],
+    })
+    return settings
+
+
+def install_config() -> None:
+    """Write default.dippy to ~/.dippy/config (skip if file already exists)."""
+    if not DEFAULT_CONFIG_SRC.exists():
+        print(f"Warning: default config not found at {DEFAULT_CONFIG_SRC}", file=sys.stderr)
+        return
+
+    if USER_CONFIG_PATH.exists():
+        print(f"Config already exists, skipping: {USER_CONFIG_PATH}")
+        return
+
+    USER_CONFIG_PATH.parent.mkdir(parents=True, exist_ok=True)
+    USER_CONFIG_PATH.write_text(
+        DEFAULT_CONFIG_SRC.read_text(encoding="utf-8"),
+        encoding="utf-8",
+    )
+    print(f"Default config deployed -> {USER_CONFIG_PATH}")
+
+
+def enable_plugin(settings: dict) -> tuple[dict, bool]:
+    """Add dippy@bank-qe to enabledPlugins. Returns (settings, changed)."""
+    plugins = settings.setdefault("enabledPlugins", {})
+    if plugins.get("dippy@bank-qe"):
+        return settings, False
+    plugins["dippy@bank-qe"] = True
+    return settings, True
+
+
+def main():
+    hook_command = get_hook_command()
+    settings_path = Path.home() / ".claude" / "settings.json"
+
+    settings = load_settings(settings_path)
+    changed = False
+
+    # 1. Enable plugin
+    settings, plugin_changed = enable_plugin(settings)
+    if plugin_changed:
+        print("Plugin enabled: dippy@bank-qe")
+        changed = True
+    else:
+        print("Plugin already enabled: dippy@bank-qe")
+
+    # 2. Install PreToolUse hook
+    if already_installed(settings, hook_command):
+        print("Hook already configured:", settings_path)
+    else:
+        settings = install_hook(settings, hook_command)
+        print(f"Hook installed -> {settings_path}")
+        changed = True
+
+    # 3. Save settings if anything changed
+    if changed:
+        settings_path.parent.mkdir(parents=True, exist_ok=True)
+        settings_path.write_text(
+            json.dumps(settings, indent=2, ensure_ascii=False) + "\n",
+            encoding="utf-8",
+        )
+
+    # 4. Deploy default read-allow config
+    install_config()
+
+    print("Restart Claude Code to activate.")
+
+
+if __name__ == "__main__":
+    main()

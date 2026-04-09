@@ -1,0 +1,167 @@
+# Dippy read-only allow rules -- bank-qe default config
+#
+# Most read-only commands (cat, ls, grep, git log, curl GET, docker ps -)
+# are already auto-approved by Dippy's built-in analyzer and SIMPLE_SAFE list.
+# Rules here fill the gaps for tools that have no built-in handler.
+#
+# Format:
+#   allow <prefix>          prefix match -- allows "cmd" and "cmd <any args>"
+#   allow <pattern>|        exact match  -- allows only "cmd" with no args
+#   deny  <prefix> "msg"    block and show msg to Claude
+#
+# Organized by tool family. Add project-specific rules to a .dippy file
+# in your project root (higher priority than this file).
+
+
+# -- Maven --------------------------------------------------------------------
+allow mvn --version
+allow mvn -v
+allow mvn validate
+allow mvn help:describe
+allow mvn help:evaluate
+allow mvn help:effective-pom
+allow mvn help:effective-settings
+allow mvn help:all-profiles
+allow mvn help:system
+allow mvn dependency:list
+allow mvn dependency:tree
+allow mvn dependency:analyze
+allow mvn dependency:resolve
+allow mvn dependency:display-ancestors
+allow mvn versions:display-dependency-updates
+allow mvn versions:display-plugin-updates
+allow mvn versions:display-property-updates
+
+# Maven wrapper (same rules apply)
+allow ./mvnw --version
+allow ./mvnw -v
+allow ./mvnw validate
+allow ./mvnw help:describe
+allow ./mvnw help:evaluate
+allow ./mvnw help:effective-pom
+allow ./mvnw help:effective-settings
+allow ./mvnw help:all-profiles
+allow ./mvnw dependency:list
+allow ./mvnw dependency:tree
+allow ./mvnw dependency:analyze
+allow ./mvnw dependency:resolve
+allow ./mvnw versions:display-dependency-updates
+allow ./mvnw versions:display-plugin-updates
+
+
+# -- Gradle -------------------------------------------------------------------
+allow gradle --version
+allow gradle -v
+allow gradle help
+allow gradle tasks
+allow gradle dependencies
+allow gradle dependencyInsight
+allow gradle properties
+allow gradle projects
+allow gradle components
+allow gradle model
+
+allow ./gradlew --version
+allow ./gradlew -v
+allow ./gradlew help
+allow ./gradlew tasks
+allow ./gradlew dependencies
+allow ./gradlew dependencyInsight
+allow ./gradlew properties
+allow ./gradlew projects
+
+
+# -- Java / JVM tools ---------------------------------------------------------
+allow java -version
+allow java --version
+allow javac -version
+allow javac --version
+allow javap
+allow jar tf
+allow jar tvf
+
+
+# -- Go -----------------------------------------------------------------------
+allow go version
+allow go env
+allow go list
+allow go doc
+allow go help
+
+
+# -- Make (dry-run / help targets only) ---------------------------------------
+allow make help
+allow make -n
+allow make --dry-run
+allow make -q
+
+
+# -- Node / npm runtime info ---------------------------------------------------
+allow node --version
+allow node -v
+allow node -e
+allow npx --version
+allow npx -v
+
+
+# -- Python / uv info ---------------------------------------------------------
+allow python --version
+allow python -V
+allow python -m pip list
+allow python -m pip show
+allow python -m pip check
+allow uv pip list
+allow uv pip show
+allow uv pip check
+allow uv tree
+allow uv lock --check
+
+
+# -- Package / dependency inspection ------------------------------------------
+allow pip list
+allow pip show
+allow pip check
+allow pip index
+
+
+# -- Git extras (already covered by handler, explicit for clarity) -------------
+allow git log
+allow git status
+allow git diff
+allow git show
+allow git blame
+allow git shortlog
+allow git describe
+allow git ls-files
+allow git ls-tree
+allow git rev-parse
+allow git cat-file
+allow git stash list
+allow git tag
+allow git branch
+allow git remote -v
+allow git remote show
+allow git config --list
+allow git config --get
+allow git submodule status
+
+
+# -- HTTP read (already covered by curl handler; wget is covered too) ----------
+allow curl -I
+allow curl --head
+
+
+# -- System / process info ----------------------------------------------------
+allow systemctl status
+allow systemctl list-units
+allow systemctl list-unit-files
+allow journalctl --no-pager
+allow service --status-all
+
+
+# -- Windows compatibility -----------------------------------------------------
+allow where
+allow cmd /c ver
+allow powershell -Command Get-*
+allow powershell -c Get-*
+allow powershell.exe -Command Start-Process powershell.exe*claude-esp*

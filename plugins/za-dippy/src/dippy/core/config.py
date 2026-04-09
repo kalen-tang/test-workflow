@@ -1,0 +1,942 @@
+"""Dippy configuration system v1."""
+
+from __future__ import annotations
+
+import fnmatch
+import os
+import re
+from dataclasses import dataclass, field, replace
+from pathlib import Path
+
+# Cache home directory at module load - fails fast if HOME is unset
+_HOME = Path.home()
+
+USER_CONFIG = _HOME / ".dippy" / "config"
+PROJECT_CONFIG_NAME = ".dippy"
+ENV_CONFIG = "DIPPY_CONFIG"
+
+
+class ConfigError(Exception):
+    """Raised when config loading fails due to I/O or parse errors."""
+
+    pass
+
+
+# Config scopes in priority order (lowest to highest)
+SCOPE_USER = "user"
+SCOPE_PROJECT = "project"
+SCOPE_ENV = "env"
+
+
+@dataclass
+class Rule:
+    """A single config rule with origin tracking."""
+
+    decision: str  # 'allow' | 'ask' | 'deny'
+    pattern: str
+    message: str | None = None
+    source: str | None = None  # file path
+    scope: str | None = None  # user/project/env
+    exact: bool = False  # True when pattern ends with | (exact match only)
+
+
+@dataclass
+class Config:
+    """Parsed configuration."""
+
+    rules: list[Rule] = field(default_factory=list)
+    """Command rules in load order."""
+
+    redirect_rules: list[Rule] = field(default_factory=list)
+    """Redirect rules in load order."""
+
+    after_rules: list[Rule] = field(default_factory=list)
+    """After rules for PostToolUse feedback."""
+
+    mcp_rules: list[Rule] = field(default_factory=list)
+    """MCP tool rules in load order."""
+
+    after_mcp_rules: list[Rule] = field(default_factory=list)
+    """After-MCP rules for PostToolUse feedback on MCP tools."""
+
+    aliases: dict[str, str] = field(default_factory=dict)
+    """Command aliases mapping source to target (e.g., ~/bin/gh -> gh)."""
+
+    default: str = "ask"  # 'allow' | 'ask'
+    log: Path | None = None  # None = no logging
+    log_full: bool = False  # log full command (requires log path)
+
+
+@dataclass
+class Match:
+    """Result of matching against config rules."""
+
+    decision: str  # 'allow' | 'ask' | 'deny'
+    pattern: str  # the glob pattern that matched
+    message: str | None = None  # shown to AI on ask/deny
+    source: str | None = None  # file path where rule was defined
+    scope: str | None = None  # user/project/env
+
+
+@dataclass
+class SimpleCommand:
+    """A simple command extracted from parsed bash.
+
+    This is the intermediate representation passed to the rule engine.
+    Dippy parses raw bash with Parable, walks the AST, and constructs
+    SimpleCommand instances for each command node.
+    """
+
+    words: list[str]
+    """Command words, e.g. ["git", "add", "."]."""
+
+    redirects: list[str] = field(default_factory=list)
+    """Redirect target paths, e.g. ["/tmp/log.txt", "~/.cache/out"]."""
+
+
+# === Config Loading ===
+
+
+def _find_project_config(cwd: Path) -> Path | None:
+    """Walk up from cwd to find .dippy file."""
+    current = cwd.resolve()
+    while True:
+        candidate = current / PROJECT_CONFIG_NAME
+        if candidate.is_file():
+            return candidate
+        parent = current.parent
+        if parent == current:  # reached root
+            return None
+        current = parent
+
+
+def _merge_configs(base: Config, overlay: Config) -> Config:
+    """Merge overlay config into base. Rules accumulate in order, settings override."""
+    return replace(
+        base,
+        # Rules accumulate in load order (like git)
+        rules=base.rules + overlay.rules,
+        redirect_rules=base.redirect_rules + overlay.redirect_rules,
+        after_rules=base.after_rules + overlay.after_rules,
+        mcp_rules=base.mcp_rules + overlay.mcp_rules,
+        after_mcp_rules=base.after_mcp_rules + overlay.after_mcp_rules,
+        # Aliases: overlay wins for conflicting keys
+        aliases={**base.aliases, **overlay.aliases},
+        # Settings: overlay wins if set
+        default=overlay.default if overlay.default != "ask" else base.default,
+        log=overlay.log if overlay.log is not None else base.log,
+        log_full=overlay.log_full if overlay.log_full else base.log_full,
+    )
+
+
+def _tag_rules(config: Config, source: str, scope: str) -> Config:
+    """Tag all rules in config with source file and scope."""
+    return replace(
+        config,
+        rules=[replace(r, source=source, scope=scope) for r in config.rules],
+        redirect_rules=[
+            replace(r, source=source, scope=scope) for r in config.redirect_rules
+        ],
+        after_rules=[
+            replace(r, source=source, scope=scope) for r in config.after_rules
+        ],
+        mcp_rules=[replace(r, source=source, scope=scope) for r in config.mcp_rules],
+        after_mcp_rules=[
+            replace(r, source=source, scope=scope) for r in config.after_mcp_rules
+        ],
+    )
+
+
+def _load_config_file(path: Path) -> Config:
+    """Read and parse a config file. Raises ConfigError on I/O failure."""
+    try:
+        text = path.read_text(encoding="utf-8")
+    except PermissionError:
+        raise ConfigError(f"permission denied reading config: {path}") from None
+    except OSError as e:
+        raise ConfigError(f"cannot read config {path}: {e}") from None
+    return parse_config(text, source=str(path))
+
+
+def load_config(cwd: Path) -> Config:
+    """Load config from ~/.dippy/config, .dippy, and $DIPPY_CONFIG.
+
+    Raises ConfigError if any config file exists but cannot be read or parsed.
+    Missing files are silently skipped.
+    """
+    config = Config()
+
+    # 1. User config (lowest priority)
+    try:
+        if USER_CONFIG.is_file():
+            user_config = _load_config_file(USER_CONFIG)
+            user_config = _tag_rules(user_config, str(USER_CONFIG), SCOPE_USER)
+            config = _merge_configs(config, user_config)
+    except PermissionError:
+        raise ConfigError(f"permission denied accessing {USER_CONFIG}") from None
+
+    # 2. Project config (walk up from cwd)
+    project_path = _find_project_config(cwd)
+    if project_path is not None:
+        project_config = _load_config_file(project_path)
+        project_config = _tag_rules(project_config, str(project_path), SCOPE_PROJECT)
+        config = _merge_configs(config, project_config)
+
+    # 3. Env override (highest priority)
+    env_path = os.environ.get(ENV_CONFIG)
+    if env_path:
+        env_config_path = Path(env_path).expanduser()
+        try:
+            if env_config_path.is_file():
+                env_config = _load_config_file(env_config_path)
+                env_config = _tag_rules(env_config, str(env_config_path), SCOPE_ENV)
+                config = _merge_configs(config, env_config)
+        except PermissionError:
+            raise ConfigError(
+                f"permission denied accessing {env_config_path}"
+            ) from None
+
+    return config
+
+
+def parse_config(text: str, source: str | None = None) -> Config:
+    """Parse config text into Config object. Logs and skips invalid lines."""
+    import logging
+
+    rules: list[Rule] = []
+    redirect_rules: list[Rule] = []
+    after_rules: list[Rule] = []
+    mcp_rules: list[Rule] = []
+    after_mcp_rules: list[Rule] = []
+    aliases: dict[str, str] = {}
+    settings: dict[str, bool | int | str | Path] = {}
+    prefix = f"{source}: " if source else ""
+
+    for lineno, raw_line in enumerate(text.splitlines(), 1):
+        line = raw_line.strip()
+        if not line or line.startswith("#"):
+            continue
+
+        parts = line.split(None, 1)
+        directive = parts[0].lower()
+        rest = parts[1].strip() if len(parts) > 1 else ""
+
+        try:
+            if directive == "allow":
+                if not rest:
+                    raise ValueError("requires a pattern")
+                pattern, is_exact = _strip_exact_anchor(rest)
+                rules.append(
+                    Rule("allow", _expand_pattern_tildes(pattern), exact=is_exact)
+                )
+
+            elif directive == "ask":
+                if not rest:
+                    raise ValueError("requires a pattern")
+                pattern, message = _extract_message(rest)
+                pattern, is_exact = _strip_exact_anchor(pattern)
+                rules.append(
+                    Rule(
+                        "ask",
+                        _expand_pattern_tildes(pattern),
+                        message=message,
+                        exact=is_exact,
+                    )
+                )
+
+            elif directive == "deny":
+                if not rest:
+                    raise ValueError("requires a pattern")
+                pattern, message = _extract_message(rest)
+                pattern, is_exact = _strip_exact_anchor(pattern)
+                rules.append(
+                    Rule(
+                        "deny",
+                        _expand_pattern_tildes(pattern),
+                        message=message,
+                        exact=is_exact,
+                    )
+                )
+
+            elif directive == "allow-redirect":
+                if not rest:
+                    raise ValueError("requires a pattern")
+                redirect_rules.append(Rule("allow", _expand_pattern_tildes(rest)))
+
+            elif directive == "ask-redirect":
+                if not rest:
+                    raise ValueError("requires a pattern")
+                pattern, message = _extract_message(rest)
+                redirect_rules.append(
+                    Rule("ask", _expand_pattern_tildes(pattern), message=message)
+                )
+
+            elif directive == "deny-redirect":
+                if not rest:
+                    raise ValueError("requires a pattern")
+                pattern, message = _extract_message(rest)
+                redirect_rules.append(
+                    Rule("deny", _expand_pattern_tildes(pattern), message=message)
+                )
+
+            elif directive == "after":
+                if not rest:
+                    raise ValueError("requires a pattern")
+                pattern, message = _extract_message(rest)
+                after_rules.append(Rule("after", pattern, message=message))
+
+            elif directive == "allow-mcp":
+                if not rest:
+                    raise ValueError("requires a pattern")
+                mcp_rules.append(Rule("allow", rest))
+
+            elif directive == "ask-mcp":
+                if not rest:
+                    raise ValueError("requires a pattern")
+                pattern, message = _extract_message(rest)
+                mcp_rules.append(Rule("ask", pattern, message=message))
+
+            elif directive == "deny-mcp":
+                if not rest:
+                    raise ValueError("requires a pattern")
+                pattern, message = _extract_message(rest)
+                mcp_rules.append(Rule("deny", pattern, message=message))
+
+            elif directive == "after-mcp":
+                if not rest:
+                    raise ValueError("requires a pattern")
+                pattern, message = _extract_message(rest)
+                after_mcp_rules.append(Rule("after", pattern, message=message))
+
+            elif directive == "alias":
+                parts = rest.split()
+                if len(parts) != 2:
+                    raise ValueError("requires exactly two arguments: source target")
+                alias_source, alias_target = parts
+                expanded_source = _expand_pattern_tildes(alias_source)
+                if expanded_source in aliases:
+                    logging.warning(
+                        f"{prefix}line {lineno}: alias '{alias_source}' redefined, "
+                        "overwriting"
+                    )
+                aliases[expanded_source] = alias_target
+
+            elif directive == "set":
+                _apply_setting(settings, rest)
+
+            else:
+                raise ValueError(f"unknown directive '{directive}'")
+
+        except ValueError as e:
+            logging.warning(f"{prefix}line {lineno}: {e} (skipped)")
+
+    return Config(
+        rules=rules,
+        redirect_rules=redirect_rules,
+        after_rules=after_rules,
+        mcp_rules=mcp_rules,
+        after_mcp_rules=after_mcp_rules,
+        aliases=aliases,
+        default=settings.get("default", "ask"),
+        log=settings.get("log"),
+        log_full=settings.get("log_full", False),
+    )
+
+
+def _strip_exact_anchor(pattern: str) -> tuple[str, bool]:
+    """Strip | anchor from pattern, return (pattern, is_exact)."""
+    if pattern.endswith("|"):
+        return pattern[:-1].rstrip(), True
+    return pattern, False
+
+
+def _unescape(s: str) -> str:
+    """Unescape backslash sequences in a message string."""
+    result = []
+    i = 0
+    while i < len(s):
+        if s[i] == "\\" and i + 1 < len(s):
+            next_char = s[i + 1]
+            if next_char in ('"', "\\"):
+                result.append(next_char)
+                i += 2
+                continue
+        result.append(s[i])
+        i += 1
+    return "".join(result)
+
+
+def _extract_message(s: str) -> tuple[str, str | None]:
+    """Extract pattern and optional quoted message from string.
+
+    Message is extracted only if:
+    - String ends with unescaped "
+    - There's an opening " preceded by whitespace
+
+    Returns (pattern, message) where message may be None.
+    """
+    s = s.rstrip()
+    if not s.endswith('"'):
+        return s, None
+
+    # Count trailing backslashes to check if quote is escaped
+    j = len(s) - 2
+    num_bs = 0
+    while j >= 0 and s[j] == "\\":
+        num_bs += 1
+        j -= 1
+    if num_bs % 2 == 1:
+        return s, None  # Trailing quote is escaped
+
+    # Find opening quote (must be preceded by whitespace)
+    i = len(s) - 2
+    while i >= 0:
+        if s[i] == '"' and (i == 0 or s[i - 1].isspace()):
+            message = _unescape(s[i + 1 : -1])
+            pattern = s[:i].rstrip()
+            if not pattern:
+                raise ValueError("pattern required before message")
+            return pattern, message
+        i -= 1
+
+    return s, None  # No valid opening quote, treat as pattern
+
+
+def _apply_setting(settings: dict[str, bool | int | str | Path], rest: str) -> None:
+    """Parse and apply a 'set' directive. Raises ValueError on invalid setting."""
+    if not rest:
+        raise ValueError("'set' requires a setting name")
+
+    parts = rest.split(None, 1)
+    key = parts[0].lower()
+    value = parts[1] if len(parts) > 1 else None
+    key_normalized = key.replace("-", "_")
+
+    # Boolean settings (no value required)
+    if key_normalized in ("log_full",):
+        if value is not None:
+            raise ValueError(f"'{key}' takes no value")
+        settings[key_normalized] = True
+
+    # Choice settings
+    elif key_normalized == "default":
+        if value not in ("allow", "ask"):
+            raise ValueError(f"'default' must be 'allow' or 'ask', got '{value}'")
+        settings[key_normalized] = value
+
+    # Path settings
+    elif key_normalized == "log":
+        if value is None:
+            raise ValueError("'log' requires a path")
+        settings[key_normalized] = Path(value).expanduser()
+
+    else:
+        raise ValueError(f"unknown setting '{key}'")
+
+
+# === Path Classification & Expansion ===
+
+# Token kinds (order matters for classification precedence)
+_URL = "url"  # https://example.com, ftp://...
+_VARIABLE = "variable"  # $HOME, ${VAR}, $0
+_ABSOLUTE = "absolute"  # /foo/bar
+_HOME = "home"  # ~ or ~/foo
+_USER_HOME = "user_home"  # ~bob or ~bob/foo
+_RELATIVE = "relative"  # ./foo, ../foo, ., .., or contains /
+_BARE = "bare"  # everything else (command names, flags, args)
+
+
+def _classify_token(token: str) -> str:
+    """Classify a token into one of the path kinds.
+
+    Classification is pure - no side effects, no cwd needed.
+    Order matters: earlier checks take precedence.
+    """
+    if "://" in token:
+        return _URL
+    if token.startswith("$"):
+        return _VARIABLE
+    if token.startswith("/"):
+        return _ABSOLUTE
+    if token == "~" or token.startswith("~/"):
+        return _HOME
+    if token.startswith("~"):
+        return _USER_HOME
+    if (
+        token in (".", "..")
+        or token.startswith("./")
+        or token.startswith("../")
+        or "/" in token
+    ):
+        return _RELATIVE
+    return _BARE
+
+
+def _expand_token(token: str, cwd: Path, *, force_path: bool = False) -> str:
+    """Expand a token based on its classification.
+
+    Args:
+        token: The token to expand
+        cwd: Working directory for resolving relative paths
+        force_path: If True, treat BARE tokens as paths (for redirects)
+
+    Returns:
+        Expanded token string
+    """
+    kind = _classify_token(token)
+    home = Path.home()
+    if kind == _URL:
+        return token
+    if kind == _VARIABLE:
+        return token
+    if kind == _ABSOLUTE:
+        return token
+    if kind == _HOME:
+        # ~ → /home/user, ~/foo → /home/user/foo
+        return str(home) + token[1:] if len(token) > 1 else str(home)
+    if kind == _USER_HOME:
+        return token
+    if kind == _RELATIVE:
+        return str((cwd / token).resolve())
+    # BARE
+    if force_path:
+        return str((cwd / token).resolve())
+    return token
+
+
+def _expand_home_only(token: str) -> str:
+    """Expand only HOME kind tokens (~ and ~/...) at parse time.
+
+    Used for pattern tilde expansion to match settings behavior.
+    Other token kinds pass through unchanged.
+    """
+    if _classify_token(token) == _HOME:
+        home = Path.home()
+        return str(home) + token[1:] if len(token) > 1 else str(home)
+    return token
+
+
+def _expand_pattern_tildes(pattern: str) -> str:
+    """Expand tildes in pattern tokens at parse time."""
+    return " ".join(_expand_home_only(t) for t in pattern.split())
+
+
+def _normalize_token(token: str, cwd: Path) -> str:
+    """Normalize a single token in a command."""
+    return _expand_token(token, cwd, force_path=False)
+
+
+def _normalize_words(words: list[str], cwd: Path) -> str:
+    """Normalize paths in command words and join into a string for matching."""
+    return " ".join(_normalize_token(w, cwd) for w in words)
+
+
+def _normalize_pattern(pattern: str, cwd: Path) -> str:
+    """Normalize paths in a pattern against cwd.
+
+    Splits pattern on spaces (preserving glob chars), normalizes path-like
+    tokens, rejoins. This allows patterns like 'node bin/*' to expand to
+    'node /cwd/bin/*'.
+    """
+    tokens = pattern.split()
+    return " ".join(_normalize_token(t, cwd) for t in tokens)
+
+
+def _normalize_path(path: str, cwd: Path) -> str:
+    """Normalize a redirect target path (strip trailing /, force as path)."""
+    return _expand_token(path.rstrip("/"), cwd, force_path=True)
+
+
+def _glob_to_regex(pattern: str) -> re.Pattern:
+    """Convert a glob pattern with ** support to a regex.
+
+    ** matches zero or more path components (including /)
+    * matches anything except /
+    ? matches any single character except /
+    [abc] matches character class
+    """
+    regex = []
+    i = 0
+    n = len(pattern)
+    while i < n:
+        c = pattern[i]
+        if c == "*":
+            if i + 1 < n and pattern[i + 1] == "*":
+                # ** - matches anything including /
+                regex.append(".*")
+                i += 2
+                # Skip trailing / after **
+                if i < n and pattern[i] == "/":
+                    regex.append("/?")
+                    i += 1
+            else:
+                # * - matches anything except /
+                regex.append("[^/]*")
+                i += 1
+        elif c == "?":
+            regex.append("[^/]")
+            i += 1
+        elif c == "[":
+            # Character class - find the closing ]
+            j = i + 1
+            if j < n and pattern[j] == "!":
+                j += 1
+            if j < n and pattern[j] == "]":
+                j += 1
+            while j < n and pattern[j] != "]":
+                j += 1
+            if j >= n:
+                # Unclosed bracket, treat as literal
+                regex.append(re.escape(c))
+                i += 1
+            else:
+                # Convert [!...] to [^...]
+                cls = pattern[i + 1 : j]
+                if cls.startswith("!"):
+                    cls = "^" + cls[1:]
+                regex.append(f"[{cls}]")
+                i = j + 1
+        else:
+            regex.append(re.escape(c))
+            i += 1
+    return re.compile("^" + "".join(regex) + "$")
+
+
+def _glob_match(text: str, pattern: str) -> bool:
+    """Match text against a glob pattern with ** support.
+
+    For patterns without **, uses fnmatch (faster).
+    For patterns with **, converts to regex for proper recursive matching:
+    - ** matches zero or more directories
+    - foo/**/bar matches foo/bar, foo/x/bar, foo/x/y/bar
+    """
+    if "**" not in pattern:
+        return fnmatch.fnmatch(text, pattern)
+    if pattern == "**":
+        return True
+    try:
+        regex = _glob_to_regex(pattern)
+        return regex.match(text) is not None
+    except re.error:
+        return False
+
+
+def _has_glob_chars(pattern: str) -> bool:
+    """Check if pattern contains any fnmatch glob characters."""
+    return any(c in pattern for c in "*?[")
+
+
+def _resolve_alias(word: str, config: Config, cwd: Path) -> str:
+    """Resolve command word through aliases."""
+    normalized_word = _normalize_token(word, cwd)
+    for alias_source, alias_target in config.aliases.items():
+        normalized_source = _normalize_token(alias_source, cwd)
+        if normalized_word == normalized_source:
+            return alias_target
+    return word
+
+
+def _match_words(
+    words: list[str], config: Config, cwd: Path, *, remote: bool = False
+) -> Match | None:
+    """Match command words against rules. Returns last matching rule."""
+    if words and not remote:
+        resolved_first = _resolve_alias(words[0], config, cwd)
+        resolved_words = [resolved_first] + words[1:]
+    else:
+        resolved_words = words
+    # In remote mode, skip path normalization (paths are container-local)
+    if remote:
+        normalized_cmd = " ".join(resolved_words)
+    else:
+        normalized_cmd = _normalize_words(resolved_words, cwd)
+    result: Match | None = None
+    for rule in config.rules:
+        # In remote mode, use pattern as-is without path normalization
+        if remote:
+            normalized_pattern = rule.pattern
+        else:
+            normalized_pattern = _normalize_pattern(rule.pattern, cwd)
+        matched = False
+        # Prefix matching: implicit trailing * unless exact anchor used or has globs
+        if not rule.exact and not _has_glob_chars(normalized_pattern):
+            # Try prefix match first (command with any args)
+            prefix_pattern = normalized_pattern + " *"
+            if fnmatch.fnmatch(normalized_cmd, prefix_pattern):
+                matched = True
+            # Also match exact (bare command case)
+            elif normalized_cmd == normalized_pattern:
+                matched = True
+        else:
+            # Exact matching (has | anchor or glob characters)
+            matched = fnmatch.fnmatch(normalized_cmd, normalized_pattern)
+            # Trailing ' *' also matches bare command (no args)
+            if not matched and normalized_pattern.endswith(" *"):
+                base = normalized_pattern[:-2]
+                if not fnmatch.fnmatch("", base):
+                    matched = fnmatch.fnmatch(normalized_cmd, base)
+        if matched:
+            result = Match(
+                decision=rule.decision,
+                pattern=rule.pattern,
+                message=rule.message,
+                source=rule.source,
+                scope=rule.scope,
+            )
+    return result
+
+
+def _normalize_redirect_pattern(pattern: str, cwd: Path) -> str:
+    """Normalize a redirect pattern, handling ** specially.
+
+    For patterns with **, normalize the prefix before ** and keep the rest.
+    For example: 'src/**' -> '/abs/path/to/src/**'
+    """
+    if "**" not in pattern:
+        return _normalize_path(pattern, cwd)
+    # Split at first **, normalize prefix, rejoin
+    idx = pattern.index("**")
+    prefix = pattern[:idx].rstrip("/")
+    suffix = pattern[idx:]
+    if prefix:
+        normalized_prefix = _normalize_path(prefix, cwd)
+        return f"{normalized_prefix}/{suffix}"
+    # Pattern starts with ** (e.g., "**/foo") - no prefix to normalize
+    return pattern
+
+
+def _match_redirect(target: str, config: Config, cwd: Path) -> Match | None:
+    """Match redirect target against rules. Returns last matching rule."""
+    normalized_target = _normalize_path(target, cwd)
+    result: Match | None = None
+    for rule in config.redirect_rules:
+        normalized_pattern = _normalize_redirect_pattern(rule.pattern, cwd)
+        if _glob_match(normalized_target, normalized_pattern):
+            result = Match(
+                decision=rule.decision,
+                pattern=rule.pattern,
+                message=rule.message,
+                source=rule.source,
+                scope=rule.scope,
+            )
+    return result
+
+
+def match_command(
+    cmd: SimpleCommand, config: Config, cwd: Path, *, remote: bool = False
+) -> Match | None:
+    """Match command and its redirects against config rules.
+
+    Args:
+        cmd: SimpleCommand with words and redirects from parsed bash.
+        config: Loaded configuration.
+        cwd: Current working directory for path resolution.
+        remote: If True, command runs in remote context (container, ssh).
+                Skips path expansion since paths are remote, not local.
+
+    Returns:
+        Match object for the deciding rule, or None if no rules matched.
+        Priority when combining command + redirect matches: deny > ask > allow.
+        Returns the first match of the most restrictive decision type.
+    """
+    matches: list[Match] = []
+
+    # Match command words
+    cmd_match = _match_words(cmd.words, config, cwd, remote=remote)
+    if cmd_match:
+        matches.append(cmd_match)
+
+    # Match each redirect (skip in remote mode - paths are container-local)
+    if not remote:
+        for target in cmd.redirects:
+            redirect_match = _match_redirect(target, config, cwd)
+            if redirect_match:
+                matches.append(redirect_match)
+
+    if not matches:
+        return None
+
+    # Priority: deny > ask > allow (most restrictive wins)
+    for m in matches:
+        if m.decision == "deny":
+            return m
+    for m in matches:
+        if m.decision == "ask":
+            return m
+    return matches[0]
+
+
+def match_redirect(target: str, config: Config, cwd: Path) -> Match | None:
+    """Match a redirect target against redirect rules.
+
+    This is a convenience function for testing and for cases where you
+    need to match a redirect target in isolation. Normally, redirects
+    are matched as part of match_command() via SimpleCommand.redirects.
+
+    Args:
+        target: Redirect target path.
+        config: Loaded configuration.
+        cwd: Current working directory for path resolution.
+
+    Returns:
+        Match object for the last matching rule, or None if no match.
+    """
+    return _match_redirect(target, config, cwd)
+
+
+def match_after(words: list[str], config: Config, cwd: Path) -> str | None:
+    """Match command against after rules for PostToolUse feedback.
+
+    Last matching rule wins. Empty string message means silent (no output).
+
+    Args:
+        words: Command words (e.g., ["git", "push", "origin", "main"]).
+        config: Loaded configuration.
+        cwd: Current working directory for path resolution.
+
+    Returns:
+        Message string if a rule with message matches, empty string if silent
+        rule matches, None if no rule matches.
+    """
+    if words:
+        resolved_first = _resolve_alias(words[0], config, cwd)
+        resolved_words = [resolved_first] + words[1:]
+    else:
+        resolved_words = words
+    normalized_cmd = _normalize_words(resolved_words, cwd)
+    result: str | None = None
+    for rule in config.after_rules:
+        normalized_pattern = _normalize_pattern(rule.pattern, cwd)
+        matched = False
+        # Prefix matching: implicit trailing * unless exact anchor used or has globs
+        if not rule.exact and not _has_glob_chars(normalized_pattern):
+            # Try prefix match first (command with any args)
+            prefix_pattern = normalized_pattern + " *"
+            if fnmatch.fnmatch(normalized_cmd, prefix_pattern):
+                matched = True
+            # Also match exact (bare command case)
+            elif normalized_cmd == normalized_pattern:
+                matched = True
+        else:
+            # Exact matching (has | anchor or glob characters)
+            matched = fnmatch.fnmatch(normalized_cmd, normalized_pattern)
+            # Trailing ' *' also matches bare command (no args)
+            if not matched and normalized_pattern.endswith(" *"):
+                base = normalized_pattern[:-2]
+                if not fnmatch.fnmatch("", base):
+                    matched = fnmatch.fnmatch(normalized_cmd, base)
+        if matched:
+            # message is None for pattern-only rules, "" for explicit empty
+            result = rule.message if rule.message is not None else ""
+    return result
+
+
+def match_mcp(tool_name: str, config: Config) -> Match | None:
+    """Match MCP tool name against mcp rules.
+
+    Simpler than command matching - just fnmatch against tool name.
+    Last match wins.
+
+    Args:
+        tool_name: MCP tool name (e.g., "mcp__github__get_issue").
+        config: Loaded configuration.
+
+    Returns:
+        Match object for the last matching rule, or None if no match.
+    """
+    result: Match | None = None
+    for rule in config.mcp_rules:
+        if fnmatch.fnmatch(tool_name, rule.pattern):
+            result = Match(
+                decision=rule.decision,
+                pattern=rule.pattern,
+                message=rule.message,
+                source=rule.source,
+                scope=rule.scope,
+            )
+    return result
+
+
+def match_after_mcp(tool_name: str, config: Config) -> str | None:
+    """Match MCP tool against after-mcp rules for PostToolUse feedback.
+
+    Last matching rule wins. Empty string message means silent (no output).
+
+    Args:
+        tool_name: MCP tool name (e.g., "mcp__github__create_pr").
+        config: Loaded configuration.
+
+    Returns:
+        Message string if a rule with message matches, empty string if silent
+        rule matches, None if no rule matches.
+    """
+    result: str | None = None
+    for rule in config.after_mcp_rules:
+        if fnmatch.fnmatch(tool_name, rule.pattern):
+            result = rule.message if rule.message is not None else ""
+    return result
+
+
+# === Logging ===
+
+
+@dataclass(frozen=True)
+class _LogConfig:
+    """Internal log configuration."""
+
+    path: Path
+    full: bool = False
+
+
+_log_config: _LogConfig | None = None
+_log_disabled: bool = False  # Set on first failure, prevents repeated attempts
+
+
+def configure_logging(config: Config) -> None:
+    """Configure logging based on config settings. Call once at startup."""
+    global _log_config, _log_disabled
+    _log_disabled = False
+
+    if config.log is None:
+        _log_config = None
+        return
+
+    try:
+        config.log.parent.mkdir(parents=True, exist_ok=True)
+    except OSError:
+        _log_config = None
+        _log_disabled = True
+        return
+
+    _log_config = _LogConfig(path=config.log, full=config.log_full)
+
+
+def log_decision(
+    decision: str,
+    cmd: str,
+    rule: str | None = None,
+    message: str | None = None,
+    command: str | None = None,
+) -> None:
+    """Log a decision. No-op if logging not configured or disabled."""
+    global _log_disabled
+    import json
+    from datetime import datetime, timezone
+
+    if _log_config is None or _log_disabled:
+        return
+
+    entry: dict[str, str | None] = {"decision": decision, "cmd": cmd}
+    if rule is not None:
+        entry["rule"] = rule
+    if message is not None:
+        entry["message"] = message
+    if _log_config.full and command is not None:
+        entry["command"] = command
+    entry["ts"] = datetime.now(timezone.utc).isoformat()
+
+    try:
+        with open(_log_config.path, "a") as f:
+            f.write(json.dumps(entry) + "\n")
+    except OSError:
+        _log_disabled = True

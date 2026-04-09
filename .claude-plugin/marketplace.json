@@ -19,6 +19,18 @@
       "source": "./plugins/za-ui",
       "description": "ui自动化测试工具集：playwright代码转换、测试修复、增量更新",
       "category": "optional"
+    },
+    {
+      "name": "za-dippy",
+      "source": "./plugins/za-dippy",
+      "description": "Bash 命令智能审批 — 自动放行安全命令，拦截危险操作，告别权限确认疲劳",
+      "category": "optional"
+    },
+    {
+      "name": "za-esp",
+      "source": "./plugins/za-esp",
+      "description": "Claude Code 会话事件流查看工具 — 实时追踪、列举和回放 Claude Code 会话事件（Event Stream Player）",
+      "category": "optional"
     }
   ]
 }
