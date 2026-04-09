@@ -6,6 +6,6 @@
     "name": "Lily Dayton"
   },
   "keywords": ["hook", "bash", "permissions", "safety"],
-  "hooks": "./hooks/hooks.json",
-  "skills": "./skills"
+  "hooks": "../hooks/hooks.json",
+  "skills": "../skills"
 }
