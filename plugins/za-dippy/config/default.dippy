@@ -159,6 +159,15 @@ allow journalctl --no-pager
 allow service --status-all
 
 
+# -- Bash (read-only safe commands) -------------------------------------------
+allow bash --version
+allow bash -c
+allow bash -e
+allow bash -n
+allow bash -s
+allow bash --help
+
+
 # -- Windows compatibility -----------------------------------------------------
 allow where
 allow cmd /c ver
