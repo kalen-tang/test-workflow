@@ -79,7 +79,7 @@ ${CLAUDE_PLUGIN_ROOT}/bin/claude-esp.exe
 ### 场景 1：调试 Claude Code 执行流程
 ```bash
 # 启动新终端运行 esp
-/esp
+./esp
 
 # 在 esp 中实时查看当前会话的所有操作
 ```
@@ -87,7 +87,7 @@ ${CLAUDE_PLUGIN_ROOT}/bin/claude-esp.exe
 ### 场景 2：交互式监听会话
 ```bash
 # 交互式选择并监听会话
-/esp -w
+./esp -w
 ```
 ```bash
 # 列出最近会话
@@ -115,8 +115,8 @@ claude-esp.exe -s <session-id>
 
 ## 🔗 相关命令
 
-- `/esp` — 启动 esp（新终端）
-- `/esp -w` — 交互式监听会话
+- `./esp` — 启动 esp（新终端）
+- .`/esp -w` — 交互式监听会话
 
 ---
 

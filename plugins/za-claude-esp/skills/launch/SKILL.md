@@ -1,82 +1,101 @@
 ---
 name: launch
-description: "启动新终端窗口运行 claude-esp。当用户说'打开esp'、'启动esp'、'开启esp'、'esp'、'/esp'、'launch esp' 时触发。"
+description: "启动 claude-esp。当用户说'打开esp'、'启动esp'、'开启esp'、'esp'、'/esp'、'launch esp' 时触发。支持 -w 参数进入交互式监听模式。"
 version: 0.4.4
 allowed-tools:
   - Bash
+arguments:
+  - name: mode
+    description: "可选参数：-w 表示交互式监听，缺省为新终端启动"
+    required: false
 ---
 
-# /esp — 启动新终端窗口
+# /esp — Claude Code 会话事件流查看工具
 
-自动定位 claude-esp 二进制文件，并在新终端窗口中运行，实时展示当前 Claude Code 会话的思考过程。
+启动 claude-esp 工具查看 Claude Code 会话事件。
 
-## 执行步骤
+## 参数说明
 
-### 第一步：定位 claude-esp 二进制文件路径
+- **无参数** (`/esp`)：在新终端窗口中启动 claude-esp
+- **-w 参数** (`/esp -w`)：在当前会话中交互式监听会话事件流
 
-优先使用环境变量：
+## 执行逻辑
 
-```bash
-echo "${CLAUDE_PLUGIN_ROOT}"
-```
+### 第一步：检测参数
 
-若变量为空，则从插件安装记录中查找：
-
-```bash
-cat ~/.claude/plugins/installed_plugins.json
-```
-
-找到 `claude-esp@alfie-qe` 对应的 `installPath`，拼接 `/bin/claude-esp.exe` 即为完整路径。
-
-若上述均不可用，使用已知默认路径：
-
-```
-~/.claude/plugins/marketplaces/alfie-qe/plugins/claude-esp/bin/claude-esp.exe
-```
-
-将路径转换为 Windows 绝对路径（正斜杠转反斜杠），例如：
-
-```
-C:\Users\<用户名>\.claude\plugins\marketplaces\bank-qe\plugins\claude-esp\bin
-```
-
-### 第二步：验证文件存在
+检查是否传入 `-w` 参数：
 
 ```bash
-ls "${CLAUDE_PLUGIN_ROOT}/bin/claude-esp.exe" 2>/dev/null || echo "NOT_FOUND"
+# 从 $1 或命令参数中检取
+if [[ "$1" == "-w" ]] || [[ "$@" == *"-w"* ]]; then
+  # 走交互式监听路径
+  MODE="watch"
+else
+  # 走新终端启动路径
+  MODE="terminal"
+fi
 ```
 
-若文件不存在，告知用户 claude-esp 插件未正确安装，并停止执行。
+### 第二步：路由到对应实现
 
-### 第三步：在新终端窗口中启动
+**模式 A：新终端启动** (MODE=terminal)
 
-将 `<BIN_DIR>` 替换为第一步获取的 bin 目录的 **Windows 绝对路径**（反斜杠）。
-
-**优先尝试 Windows Terminal（更美观）：**
+定位 claude-esp 二进制文件，优先使用环境变量：
 
 ```bash
-powershell.exe -Command "Start-Process wt -ArgumentList 'new-tab', '--title', '\"🧠 claude-esp\"', '--', 'cmd', '/k', 'cd /d <BIN_DIR> && .\\claude-esp.exe'"
+PLUGIN_ROOT="${CLAUDE_PLUGIN_ROOT}"
+if [ -z "$PLUGIN_ROOT" ]; then
+  PLUGIN_ROOT="$HOME/.claude/plugins/marketplaces/alfie-qe/plugins/za-claude-esp"
+fi
+BIN_PATH="$PLUGIN_ROOT/bin/claude-esp.exe"
 ```
 
-**若上述失败，回退到普通 cmd 窗口：**
+验证文件存在：
 
 ```bash
-cmd.exe /c "start \"claude-esp\" cmd /k \"cd /d <BIN_DIR> && .\\claude-esp.exe\""
+if [ ! -f "$BIN_PATH" ]; then
+  echo "❌ claude-esp 二进制文件未找到"
+  echo "预期路径: $BIN_PATH"
+  exit 1
+fi
 ```
 
-实际执行时只需运行其中一条，优先 Windows Terminal，失败后自动回退。
+在新终端中启动（优先 Windows Terminal，回退 cmd）：
 
-### 第四步：确认启动成功
+```bash
+# 将路径转换为 Windows 绝对路径（若需要）
+WIN_BIN_DIR=$(cd "$(dirname "$BIN_PATH")" && pwd -W 2>/dev/null || echo "$BIN_PATH" | sed 's|/|\\|g')
 
-告知用户：
+# 优先尝试 Windows Terminal
+powershell.exe -Command "Start-Process wt -ArgumentList 'new-tab', '--title', '\"🧠 claude-esp\"', '--', 'cmd', '/k', 'cd /d \"$WIN_BIN_DIR\" && .\\claude-esp.exe'" 2>/dev/null
 
-> 已在新终端窗口中启动 claude-esp。
-> claude-esp 会自动连接到当前 Claude Code 会话，实时展示思考过程。
-> 若新窗口未弹出，请检查是否安装了 Windows Terminal，或直接在终端中手动运行：
-> `cd <BIN_DIR> && .\claude-esp.exe`
+if [ $? -ne 0 ]; then
+  # 回退到普通 cmd
+  cmd.exe /c "start \"claude-esp\" cmd /k \"cd /d \"$WIN_BIN_DIR\" && .\\claude-esp.exe\""
+fi
+```
+
+**模式 B：交互式监听** (MODE=watch)
+
+直接运行 watch-session Skill 的逻辑，在当前会话中交互式选择并监听会话事件流。
+
+### 第三步：确认成功
+
+根据模式输出对应消息：
+- 终端模式：提示已启动新窗口
+- 监听模式：显示会话列表和监听界面
+
+## 使用示例
+
+```bash
+# 在新终端启动 esp
+/esp
+
+# 交互式监听会话
+/esp -w
+```
 
 ## 注意事项
 
-- 路径转换：bash 路径（`/c/Users/...`）需转换为 Windows 路径（`C:\Users\...`）再传给 `cmd.exe` 或 `powershell.exe`
-- `.\claude-esp.exe` 无参数运行时进入**交互模式**，会自动选择最近的活跃会话
-- 若需要指定会话，可提示用户先用 `/watch-session` 查询会话 ID，再手动在新窗口中追加 `-s <id>`
+- 交互式模式 (`-w`) 会在当前终端中运行，保持互动性
+- 新终端模式 (`/esp`) 会在独立窗口中运行，便于并行调试
