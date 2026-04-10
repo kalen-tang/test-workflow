@@ -107,14 +107,16 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 ### 关键规范
 
 - Skill 引用 references 文档使用**无 `./` 前缀的相对路径**：`references/01-xxx.md`（不写 `./references/01-xxx.md`）
+- **Skill 不得跨目录引用 `../../references/artifact-schemas/`**：Claude Code 对插件缓存的跨目录读取有额外安全确认，会中断工作流。需要 artifact-schema 的 Skill 应将对应文件**复制到自己的 `references/` 下**，两边保持同步更新
 - 版本号遵循 SemVer：新增 Skill/Command → 次版本升级（`1.3.0 → 1.4.0`）
 - 所有文档中 Skills 数量和版本号必须保持一致
 - `plugin.json` 必须放在 `.claude-plugin/` 子目录下
 
 ### References 两级结构
 
-- **插件级**：`plugins/za-qe/references/` — 公共参考文档（如 `artifact-schemas/`）
+- **插件级**：`plugins/za-qe/references/` — 公共参考文档（如 `artifact-schemas/`），为规范源头
 - **Skill 级**：`plugins/za-qe/skills/<name>/references/` — Skill 专属参考文档（编号前缀 `01-xxx.md`）
+- **同步规则**：在 `artifact-schemas/` 新建或更新规范文件后，必须同步复制到引用该规范的所有 Skill 的 `references/` 目录下
 
 ### 扩展插件时
 

@@ -140,7 +140,7 @@ version: 2.0.0
 1. **Service层信息**
    - 读取 `service/{service_name}/__init__.py` 获取接口映射
    - 解析 mapping 字典获取可用方法和 Model 类
-   - ⚠️ 如Service层缺失: 自动创建或提示用户（参见 `references/02-edge-cases.md`）
+   - ⚠️ 如Service层缺失: 自动创建或提示用户（参见 `references/edge-cases.md`）
 
 2. **Scenario层信息**
    - 根据服务映射定位 scenario 文件
@@ -218,7 +218,7 @@ def imc_activity_sc(env, lock) -> ImcActivityScenario:
     return ImcActivityScenario(env, lock)
 ```
 
-详细设计参见 `references/03-fixture-design.md`。
+详细设计参见 `references/fixture-design.md`。
 
 ### 步骤4: 生成测试代码
 
@@ -290,7 +290,7 @@ class TestAccount:
 - ✅ 调用 `scenario.method(data[index])`（不是手动构造 Model）
 - ✅ 异常测试使用 `data[key]` 访问（不是 `data[index]`）
 
-完整模板参见 `references/01-test-code-template.md`。
+完整模板参见 `references/test-code-template.md`。
 
 ### 步骤5: 生成测试数据 YAML
 
@@ -359,7 +359,7 @@ tests:
                 accountId: ${invalid_account_id}
 ```
 
-详细示例参见 `references/00-yaml-format.md`。
+详细示例参见 `references/yaml-format.md`。
 
 ### 步骤6: 生成执行脚本
 
@@ -481,7 +481,7 @@ test_automation_case/
 📌 请检查生成的代码是否符合接口规范
 ```
 
-参见 `references/02-edge-cases.md` 的自动生成解决方案。
+参见 `references/edge-cases.md` 的自动生成解决方案。
 
 ### 2. 测试数据缺失
 
@@ -498,7 +498,7 @@ test_automation_case/
 3. 替换占位符
 ```
 
-参见 `references/02-edge-cases.md` 的占位符和数据准备策略。
+参见 `references/edge-cases.md` 的占位符和数据准备策略。
 
 ### 3. Fixture命名冲突
 
@@ -571,11 +571,11 @@ test_automation_case/
 ### 参考文件
 
 详细实施指导:
-- **`references/00-yaml-format.md`** - YAML 文件格式详情（variables、tests 结构）
-- **`references/01-test-code-template.md`** - 完整测试代码模板（包含所有模式）
-- **`references/02-edge-cases.md`** - 边界情况处理（Service层缺失、测试数据缺失）
-- **`references/03-fixture-design.md`** - Fixture 设计指南（命名规则、自动检测算法）
-- **`references/04-scenario-design.md`** - Scenario 层设计指南（业务逻辑封装、方法模式、断言处理）
+- **`references/yaml-format.md`** - YAML 文件格式详情（variables、tests 结构）
+- **`references/test-code-template.md`** - 完整测试代码模板（包含所有模式）
+- **`references/edge-cases.md`** - 边界情况处理（Service层缺失、测试数据缺失）
+- **`references/fixture-design.md`** - Fixture 设计指南（命名规则、自动检测算法）
+- **`references/scenario-design.md`** - Scenario 层设计指南（业务逻辑封装、方法模式、断言处理）
 
 ### 示例文件
 

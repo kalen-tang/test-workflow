@@ -83,7 +83,7 @@ stop
 - 仅包含需求明确提及的内容（不添加推测）
 - 复杂步骤添加注释（便于理解）
 
-> 📖 **详细规则**：参见 `references/01-flowchart-generation.md` - PlantUML 流程图生成规则
+> 📖 **详细规则**：参见 `references/flowchart-generation.md` - PlantUML 流程图生成规则
 
 ### 3. 测试功能点 MindMap
 
@@ -135,7 +135,7 @@ left side
 - 避免单独设置"边界值"、"安全"、"性能"一级节点（建议分散到具体功能下）
 - 每个叶子节点应该可测试和可验证
 
-> 📖 **详细规则**：参见 `references/02-test-points-mindmap.md` - 测试功能点 MindMap 生成规则
+> 📖 **详细规则**：参见 `references/test-points-mindmap.md` - 测试功能点 MindMap 生成规则
 
 ### 4. 详细测试案例 MindMap
 
@@ -195,7 +195,7 @@ left side
 - 示例：`用户ID: {{步骤1.返回的userId}}`
 - 便于后续理解测试步骤间的依赖关系
 
-> 📖 **详细规则**：参见 `references/03-test-cases-mindmap.md` - 详细测试案例 MindMap 生成规则
+> 📖 **详细规则**：参见 `references/test-cases-mindmap.md` - 详细测试案例 MindMap 生成规则
 
 ## 工作流程
 
@@ -228,7 +228,7 @@ left side
 
 ### 步骤 6：生成场景案例表
 
-基于步骤 3、4 的测试功能点和详细测试案例，生成结构化的**场景案例表 Markdown**，符合 `../../references/artifact-schemas/09-scenario-table.md` 规范。
+基于步骤 3、4 的测试功能点和详细测试案例，生成结构化的**场景案例表 Markdown**，符合 `references/scenario-table.md` 规范。
 
 **生成内容**：
 - **场景总览表**：场景ID、名称、类型（positive/negative/flow/boundary）、优先级、涉及接口、来源
@@ -244,9 +244,9 @@ left side
 
 **输出文件**：`<输出目录>/<项目名>_场景案例表.md`
 
-> 详细格式参见 `../../references/artifact-schemas/09-scenario-table.md`
-> 场景识别指南参见 `references/05-scenario-identification.md`
-> 用例设计模式参见 `references/06-test-case-patterns.md`
+> 详细格式参见 `references/scenario-table.md`
+> 场景识别指南参见 `references/scenario-identification.md`
+> 用例设计模式参见 `references/test-case-patterns.md`
 
 ### 步骤 7：自动生成 XMind 文件
 ```
@@ -491,13 +491,13 @@ right side
 ### 参考文件
 
 详细的技术参考和规则：
-- **`references/01-flowchart-generation.md`** - PlantUML 流程图生成规则
-- **`references/02-test-points-mindmap.md`** - 测试功能点 MindMap 生成规则
-- **`references/03-test-cases-mindmap.md`** - 详细测试案例 MindMap 生成规则
-- **`references/04-naming-conventions.md`** - 测试案例命名规范详解
-- **`references/05-scenario-identification.md`** - 场景测试用例识别指南
-- **`references/06-test-case-patterns.md`** - 测试用例设计模式
-- **`references/07-requirement-integration.md`** - 需求文档结合分析指南
+- **`references/flowchart-generation.md`** - PlantUML 流程图生成规则
+- **`references/test-points-mindmap.md`** - 测试功能点 MindMap 生成规则
+- **`references/test-cases-mindmap.md`** - 详细测试案例 MindMap 生成规则
+- **`references/naming-conventions.md`** - 测试案例命名规范详解
+- **`references/scenario-identification.md`** - 场景测试用例识别指南
+- **`references/test-case-patterns.md`** - 测试用例设计模式
+- **`references/requirement-integration.md`** - 需求文档结合分析指南
 
 ### 示例文件
 
@@ -512,9 +512,9 @@ right side
 
 ### 相关 Artifact Schemas
 
-- **`../../references/artifact-schemas/09-scenario-table.md`** - 场景案例表格式规范
-- **`../../references/artifact-schemas/08-interface-data-report.md`** - 输入：接口数据报告格式
-- **`../../references/artifact-schemas/01-normalized-requirement-v2.md`** - 输入：标准化需求文档格式
+- **`references/scenario-table.md`** - 场景案例表格式规范
+- **`references/interface-data-report.md`** - 输入：接口数据报告格式
+- **`references/normalized-requirement.md`** - 输入：标准化需求文档格式
 
 ---
 

@@ -12,7 +12,7 @@ status: active
 
 ## 必须章节 vs 按需章节
 
-规范详细定义见 `references/01-devplan-standard.md`。核心要点：
+规范详细定义见 `references/devplan-standard.md`。核心要点：
 
 **必须章节**：第2章（整体概要设计）、第4章（需求模块拆解）、第5章每个模块的 5.x.4 接口报文
 
@@ -32,7 +32,7 @@ status: active
 | `.docx` | 用下方的 Python 脚本一次性提取全部文本和表格，写入临时文件后用 Read 工具读取 |
 | `.pdf` | 使用 Read 工具直接读取（支持 PDF） |
 
-**.docx 标准读取脚本**：见 `references/02-docx-reader.md`，将 `YOUR_DOC_PATH` 替换为实际路径后直接运行。运行后用 Read 工具读取 `result/_tmp_docx.txt`，完成后删除该临时文件。
+**.docx 标准读取脚本**：见 `references/docx-reader.md`，将 `YOUR_DOC_PATH` 替换为实际路径后直接运行。运行后用 Read 工具读取 `result/_tmp_docx.txt`，完成后删除该临时文件。
 
 读取内容后：
 - 识别章节编号和标题
@@ -51,11 +51,11 @@ status: active
 https://udoc.in.za/#/view/xxxxx
 ```
 
-对每个识别到的 UDOC 链接，按照 `references/03-udoc-fetcher.md` 中的方式访问并提取完整接口数据。
+对每个识别到的 UDOC 链接，按照 `references/udoc-fetcher.md` 中的方式访问并提取完整接口数据。
 
 #### UDOC 数据提取流程
 
-详细步骤见 `references/03-udoc-fetcher.md`，核心要点如下：
+详细步骤见 `references/udoc-fetcher.md`，核心要点如下：
 
 1. **尝试直接访问**：使用 WebFetch 工具访问该链接
 2. **若需要登录**：使用账号 `admin` / 密码 `Za123456` 登录后再访问（见参考文档中的登录方案）
@@ -177,5 +177,5 @@ https://udoc.in.za/#/view/xxxxx
 
 ## 额外资源
 
-- **`references/01-devplan-standard.md`**：各章节规范详细定义
-- **`references/03-udoc-fetcher.md`**：UDOC 接口文档抓取方案（登录态处理 + 字段提取）
+- **`references/devplan-standard.md`**：各章节规范详细定义
+- **`references/udoc-fetcher.md`**：UDOC 接口文档抓取方案（登录态处理 + 字段提取）

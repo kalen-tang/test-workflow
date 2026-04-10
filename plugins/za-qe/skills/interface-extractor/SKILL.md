@@ -30,7 +30,7 @@ status: active
 
 ## 输出
 
-**接口数据报告**（Markdown 格式），符合 `../../references/artifact-schemas/08-interface-data-report.md` 规范。
+**接口数据报告**（Markdown 格式），符合 `references/interface-data-report.md` 规范。
 
 输出文件：`<输出目录>/<项目名>_接口数据报告.md`
 
@@ -76,14 +76,14 @@ status: active
 
 2. **微服务识别**：
    - 路径不含 `dmb` → 根据路径前缀识别微服务
-   - 映射规则参见 `references/01-interface-validation.md`
+   - 映射规则参见 `references/interface-validation.md`
 
 3. **完整路径格式**：
    - 标准格式：`微服务域名 + 接口路径`
    - 示例：`zabank_imc_activity_service/activity/list`
    - 如文档只提供接口路径，根据映射规则补充微服务域名
 
-> 详细规则：`references/01-interface-validation.md`
+> 详细规则：`references/interface-validation.md`
 
 ### 步骤 4：接口依赖关系分析
 
@@ -138,8 +138,8 @@ claude mcp add playwright npx @playwright/mcp@latest
 
 ### 参考文件
 
-- **`references/01-interface-validation.md`** - 接口路径校验与微服务映射规则
-- **`references/02-output-format.md`** - 接口数据报告输出格式参考
+- **`references/interface-validation.md`** - 接口路径校验与微服务映射规则
+- **`references/output-format.md`** - 接口数据报告输出格式参考
 
 ### 示例文件
 
@@ -148,8 +148,8 @@ claude mcp add playwright npx @playwright/mcp@latest
 
 ### 相关 Artifact Schemas
 
-- **`../../references/artifact-schemas/08-interface-data-report.md`** - 接口数据报告格式规范
-- **`../../references/artifact-schemas/02-normalized-design.md`** - 输入：标准化设计文档格式
+- **`references/interface-data-report.md`** - 接口数据报告格式规范
+- **`references/normalized-design.md`** - 输入：标准化设计文档格式
 
 ### 下游 Skills
 

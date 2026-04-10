@@ -30,7 +30,7 @@ status: active
 ## 📤 输出
 
 - **主产出物**：标准化需求文档（Markdown 格式）
-  - 符合 [01-normalized-requirement.md](../../references/artifact-schemas/01-normalized-requirement.md) 规范
+  - 符合 [normalized-requirement.md](references/normalized-requirement.md) 规范
   - 包含元数据、功能列表、验收标准、测试场景、业务规则
   - 包含三级一致性检查报告
 
@@ -367,7 +367,7 @@ status: active
 
 ### 核心文档
 
-- [01-normalized-requirement.md](../../references/artifact-schemas/01-normalized-requirement.md) - 标准化需求文档格式规范（完整定义）
+- [normalized-requirement.md](references/normalized-requirement.md) - 标准化需求文档格式规范（完整定义）
 
 ### 使用示例
 
