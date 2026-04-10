@@ -1,5 +1,5 @@
 ---
-name: playwright-test-generate
+name: qe-ui-generate
 description: 将Playwright录制的原生UI自动化代码转换为应用当前项目优化规则的混合架构测试代码。读取testcase-native目录下的原生代码,生成到testcase-optimized目录(与data目录结构1:1对应),支持智能等待、组件驱动、AI上下文增强、混合断言等优化模式。
 ---
 

@@ -1,5 +1,5 @@
 ---
-name: playwright-test-update
+name: qe-ui-update
 description: 已优化测试脚本的增量更新专家。无需重新录制或重新生成，通过自然语言描述直接对testcase-optimized目录下的测试脚本、组件YAML和数据YAML进行精准的增量修改。支持新增步骤、修改步骤、删除步骤、更新组件定义、更新测试数据等场景。
 ---
 
@@ -515,8 +515,8 @@ test.afterAll(async () => {
 | 场景 | 推荐工具 |
 |------|----------|
 | 全新测试用例 | `/playwright-to-optimized` |
-| 已有脚本局部修改 | `/za:playwright-test-update`（本工具）|
-| 执行测试并修复失败 | `playwright-test-execute` skill |
+| 已有脚本局部修改 | `/za-qe-ui:ui-update`（本工具）|
+| 执行测试并修复失败 | `qe-ui-execute` skill |
 | 运行完整工作流 | `playwright-to-optimized` skill |
 
 ---

@@ -1,5 +1,5 @@
 ---
-name: playwright-test-execute
+name: qe-ui-execute
 description: Playwright测试执行和自动修复专家。自动执行优化后的test.ts测试文件，分析测试失败原因，智能修复常见问题(定位器失效、等待超时、数据问题)，支持迭代修复直到测试通过。用于执行playwright测试、调试测试失败、自动修复测试代码。
 ---
 
@@ -524,7 +524,7 @@ await componentClick(helpers, 'SubmitButton');
 ## 📚 相关资源
 
 - **测试框架**: Playwright官方文档
-- **项目架构**: `playwright-test-generate` SKILL
+- **项目架构**: `qe-ui-generate` SKILL
 - **工具方法**: `utils/hybrid-helpers.ts`, `utils/smart-wait-helpers.ts`
 - **组件库**: `component/` 目录
 - **测试数据**: `data/` 目录

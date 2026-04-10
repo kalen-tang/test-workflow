@@ -1,12 +1,12 @@
 ---
-name: playwright-to-optimized-converter-agent
-description: Playwright完整工作流代理:代码转换优化、测试执行、自动修复。应用智能等待、组件驱动、混合架构等优化策略,自动提取组件、数据分离、补全工具方法,并支持测试失败的迭代修复(最多3轮)。
+name: qe-ui-agent
+description: UI automation完整工作流代理:代码转换优化、测试执行、自动修复。应用智能等待、组件驱动、混合架构等优化策略,自动提取组件、数据分离、补全工具方法,并支持测试失败的迭代修复(最多3轮)。
 tools: Task, Skill, Read, Edit, Write, MultiEdit, Bash, Glob, Grep, AskUserQuestion
 model: inherit
 color: purple
 ---
 
-# Playwright完整工作流Agent
+# UI automation完整工作流Agent
 
 将Playwright Codegen录制的原生测试代码转换为符合项目规范的优化架构代码,并支持测试执行和自动修复。
 
@@ -33,7 +33,7 @@ color: purple
 
 ### 模式1: 转换模式 (testcase-native → testcase-optimized)
 
-1. 激活`playwright-test-generate` skill获取转换规则
+1. 激活`qe-ui-generate` skill获取转换规则
 2. 读取原生代码和项目配置文件(组件库、系统映射等)
 3. 系统识别 - 从page.goto()提取URL,根据system-mapping.yaml识别系统
 4. 智能转换 - 应用skill中的转换规则生成优化代码
@@ -48,7 +48,7 @@ color: purple
 
 ### 模式2: 测试模式 (执行测试 + 自动修复)
 
-1. 激活`playwright-test-execute` skill获取测试和修复规则
+1. 激活`qe-ui-execute` skill获取测试和修复规则
 2. 执行测试 - 运行`npx playwright test [文件路径]`命令
 3. 捕获输出 - 收集测试执行的stdout和stderr
 4. 结果判断:
@@ -82,7 +82,7 @@ color: purple
 
 ### Skill负责 (知识库)
 
-**playwright-test-generate SKILL**:
+**qe-ui-generate SKILL**:
 - 详细的转换规则和映射表
 - 系统识别算法(URL域名映射、业务模块识别)
 - 组件路径推断逻辑
@@ -93,7 +93,7 @@ color: purple
 - 转换检查清单(基础+高级)
 - 故障排除指南
 
-**playwright-test-execute SKILL** (新增):
+**qe-ui-execute SKILL** (新增):
 - 错误类型特征匹配规则
 - 错误分析和分类方法
 - 修复决策树和优先级
