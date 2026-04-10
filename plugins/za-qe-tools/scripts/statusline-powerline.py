@@ -37,7 +37,7 @@ def fmt_duration(ms):
         h = mins // 60
         m = mins % 60
         return f"{h}h{m}m"
-    return f"{mins}m {secs}s"
+    return f"{mins}m{secs}s"
 
 duration_str = fmt_duration(duration_ms)
 api_str = fmt_duration(api_duration_ms)
@@ -119,34 +119,34 @@ venv_name = os.path.basename(venv) if venv else ''
 RESET = '\033[0m'
 SEP = '\ue0b0'  # Powerline 箭头
 
-# --- 颜色定义 ---
-# 上下文颜色
+# --- 颜色定义（Nord 配色） ---
+# 上下文颜色（第二行位置1，对应第一行模型67 → 用97紫错开）
 if pct >= 90:
-    ctx_bg = 196  # 红
+    ctx_bg = 131  # Nord11 红
 elif pct >= 70:
-    ctx_bg = 208  # 橙
+    ctx_bg = 173  # Nord12 橙
 else:
-    ctx_bg = 71   # 绿
+    ctx_bg = 24   # Nord9 钢蓝（与剩余17深蓝相近）
 
-# 费用颜色
+# 费用颜色（第二行位置2，对应第一行目录24 → 用非24色）
 if cost > 25:
-    cost_bg = 196
+    cost_bg = 131  # Nord11 红
 elif cost > 10:
-    cost_bg = 208
+    cost_bg = 173  # Nord12 橙
 else:
-    cost_bg = 71
+    cost_bg = 71   # Nord14 绿（错开第一行目录24）
 
-# 分支颜色
-branch_bg = 71 if branch in ('master', 'main') else 208
+# 分支颜色（第一行位置3）
+branch_bg = 71 if branch in ('master', 'main') else 173  # Nord14 绿 / Nord12 橙
 
 # --- segment 渲染 ---
 def segment(text, bg, fg=255, next_bg=None):
     bg_code = f'\033[48;5;{bg}m'
     fg_code = f'\033[38;5;{fg}m'
     if next_bg is not None:
-        sep = f'\033[0m\033[38;5;{bg}m\033[48;5;{next_bg}m{SEP}'
+        sep = f'\033[0m\033[38;5;{bg}m\033[48;5;{next_bg}m{SEP}\033[38;5;{fg}m'
     else:
-        sep = RESET
+        sep = f'\033[0m\033[38;5;{bg}m{SEP}{RESET}'
     return f"{bg_code}{fg_code} {text} {sep}"
 
 def render_line(segments):
@@ -159,44 +159,40 @@ def render_line(segments):
 
 # --- 第一行：模型 → 目录 → 分支 → 虚拟环境 ---
 line1_segs = []
-line1_segs.append((model, 31, 255))
-line1_segs.append((f"📁 {directory}", 240, 255))
+line1_segs.append((model, 67, 255))
+line1_segs.append((f"📁 {directory}", 24, 255))
 if branch:
     line1_segs.append((f"🌿 {branch}{git_dirty}", branch_bg, 255))
 if venv_name:
-    line1_segs.append((f"🐍 {venv_name}", 25, 255))
+    line1_segs.append((f"🐍 {venv_name}", 97, 255))
 
 # --- 第二行：进度条(文字跨双色) → 费用 → 时长 ---
 
 # 进度条区域：文字拆成不可分割 token，按百分比分配到左右区域
 BAR_WIDTH = 20  # 进度条总字符宽度
-empty_bg = 240  # 剩余部分背景色
+empty_bg = 238  # 剩余部分背景色（深炭色）
 
-# 构建 token 列表（每个 token 不可跨区分割）
+# 构建进度条文字（固定 BAR_WIDTH 字符宽）
+# tokens_str 右对齐，百分比左对齐，字符级精确分割
 tokens_str = f'{tokens_used_k}/{tokens_limit_k}k'
 if pct >= 90:
-    tokens = [' ', '[建议压缩]', ' ', f'{pct}%', ' ', tokens_str, ' ']
+    left_label = f' [建议压缩] {pct}% '
 else:
-    tokens = [' ', f'{pct}%', ' ', tokens_str, ' ']
+    left_label = f' {pct}% '
 
-# 总字符宽度，不够则末尾补空格 token
-total_len = sum(len(t) for t in tokens)
-if total_len < BAR_WIDTH:
-    tokens.append(' ' * (BAR_WIDTH - total_len))
-    total_len = BAR_WIDTH
+# 右对齐：右侧固定放 tokens_str + 空格，中间填充
+right_label = f'{tokens_str} '
+pad = max(0, BAR_WIDTH - len(left_label) - len(right_label))
+full_text = left_label + ' ' * pad + right_label
+# 确保总宽度 = BAR_WIDTH
+if len(full_text) < BAR_WIDTH:
+    full_text += ' ' * (BAR_WIDTH - len(full_text))
+total_len = len(full_text)
 
-# 按百分比找分割点：累积宽度超过 split_target 时切
-split_target = max(1, int(total_len * pct / 100))
-acc = 0
-split_idx = len(tokens)  # 默认全部在左边
-for i, t in enumerate(tokens):
-    acc += len(t)
-    if acc >= split_target:
-        split_idx = i + 1
-        break
-
-left_part = ''.join(tokens[:split_idx])
-right_part = ''.join(tokens[split_idx:])
+# 字符级精确分割
+split_pos = max(1, int(total_len * pct / 100))
+left_part = full_text[:split_pos]
+right_part = full_text[split_pos:]
 
 # 手动渲染：左半(ctx_bg) + 箭头 + 右半(empty_bg)
 bar_segment = (
@@ -205,14 +201,14 @@ bar_segment = (
     f'\033[38;5;255m{right_part}'
 )
 # bar_segment 的最终 bg 是 empty_bg，用于下一个箭头衔接
-bar_entry = (bar_segment, empty_bg, 255)  # bg 记录为 empty_bg 给箭头用
+bar_entry = (bar_segment, empty_bg, 255)
 
 line2_segs = []
 line2_segs.append(bar_entry)
 line2_segs.append((f"💰 ${cost:.2f}", cost_bg, 255))
-line2_segs.append((f"⏱️  {duration_str} (api {api_str})", 240, 255))
+line2_segs.append((f"⏱ {duration_str} [api {api_str}]", 24, 255))
 if tok_per_sec:
-    line2_segs.append((f"⚡ {tok_per_sec:.0f}t/s", 240, 255))
+    line2_segs.append((f"⚡ {tok_per_sec:.0f}t/s", 67, 255))
 
 # 第二行需要特殊渲染（第一段已经手动渲染了颜色）
 def render_line2(segments):
@@ -224,7 +220,7 @@ def render_line2(segments):
             if next_bg is not None:
                 sep = f'\033[0m\033[38;5;{bg}m\033[48;5;{next_bg}m{SEP}'
             else:
-                sep = RESET
+                sep = f'\033[0m\033[38;5;{bg}m{SEP}{RESET}'
             output += text + sep
         else:
             output += segment(text, bg, fg, next_bg)
