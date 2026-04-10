@@ -1,6 +1,6 @@
 ---
-allowed-tools: Task(playwright-to-optimized-converter-agent:*), Bash, Read, Skill
-description: Playwright完整工作流：转换优化 + 测试执行 + 自动修复 🎯 一站式解决方案
+allowed-tools: Task(qe-ui-agent:*), Bash, Read, Skill
+description: UI automation完整工作流：转换优化 + 测试执行 + 自动修复 🎯 一站式解决方案
 ---
 
 ## Context
@@ -23,14 +23,14 @@ description: Playwright完整工作流：转换优化 + 测试执行 + 自动修
 ## 执行流程
 
 ### 转换模式
-1. 调用`playwright-to-optimized-converter-agent`转换代码
+1. 调用`qe-ui-agent`转换代码
 2. 生成优化代码、YAML配置、更新组件库
 3. **询问**: "转换完成！是否立即执行测试验证？[Y/N]"
    - Y → 自动进入测试模式
    - N → 结束
 
 ### 测试模式
-1. 激活`playwright-test-execute` SKILL
+1. 激活`qe-ui-execute` SKILL
 2. 执行`npx playwright test [文件路径]`
 3. 测试结果:
    - ✅ 通过 → 显示成功摘要
@@ -81,8 +81,8 @@ description: Playwright完整工作流：转换优化 + 测试执行 + 自动修
 
 ## 相关SKILL
 
-- **playwright-test-generate** - 转换规则和优化策略
-- **playwright-test-execute** - 测试执行和自动修复规则
+- **qe-ui-generate** - 转换规则和优化策略
+- **qe-ui-execute** - 测试执行和自动修复规则
 
 详细规则、错误分析、修复策略参见对应SKILL文档。
 
