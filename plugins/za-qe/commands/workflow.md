@@ -1,6 +1,7 @@
 ---
 name: qe-workflow
 description: 测试左移全流程工作流：自动探测环境、转换文档、串联分析技能，从需求/设计文档生成API自动化测试用例
+argument-hint: [--req_dir dir] [--design_dir dir] [--output_dir dir] [--project_dir dir]
 arguments:
   - name: req_dir
     description: 需求文档目录路径（可选，跳过交互引导直接使用）
@@ -14,6 +15,17 @@ arguments:
   - name: project_dir
     description: 自动化项目目录路径（含 pytest.ini，可选）
     required: false
+allowed-tools:
+  - Read
+  - Write
+  - Edit
+  - Glob
+  - Grep
+  - Skill
+  - Bash(uvx:*)
+  - Bash(python:*)
+  - Bash(mkdir:*)
+  - Bash(ls:*)
 ---
 
 # 测试左移全流程工作流
