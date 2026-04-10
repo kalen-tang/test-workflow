@@ -147,15 +147,16 @@ allowed-tools:
 对需求文档目录中的每个 `.doc`/`.docx` 文件，执行转换：
 
 ```bash
-uvx markitdown '<需求文档路径>' > '<案例输出目录>/<原文件名>.md'
+uvx markitdown '<需求文档绝对路径>' > '<案例输出目录绝对路径>/<原文件名>.md'
 ```
 
 **示例**：
 ```bash
-uvx markitdown './docs/req/ZA Search产品需求-part5.docx' > './result/ZA Search产品需求-part5.md'
+uvx markitdown 'D:/story/2026/BANK-91153/ZA Search产品需求-part5.docx' > 'D:/story/2026/BANK-91153/ZA Search产品需求-part5.md'
 ```
 
 **注意事项**：
+- **始终使用绝对路径**，禁止使用 `cd` 切换目录后再用相对路径（避免反复触发权限确认）
 - 文件名保持与原文件一致，仅将扩展名改为 `.md`
 - 如果文件名包含空格或特殊字符，使用引号包裹路径
 - 逐个文件转换，每个转换完成后检查是否成功（文件是否存在且非空）
@@ -166,19 +167,19 @@ uvx markitdown './docs/req/ZA Search产品需求-part5.docx' > './result/ZA Sear
 如果设计文档目录非空且存在 doc/docx 文件：
 
 ```bash
-uvx markitdown '<设计文档路径>' > '<案例输出目录>/design_<原文件名>.md'
+uvx markitdown '<设计文档绝对路径>' > '<案例输出目录绝对路径>/design_<原文件名>.md'
 ```
 
-**注意**：设计文档输出时添加 `design_` 前缀，避免与需求文档同名冲突。
+**注意**：设计文档输出时添加 `design_` 前缀，避免与需求文档同名冲突。始终使用绝对路径，禁止 `cd`。
 
 **如果设计文档目录与需求文档目录相同**：跳过此步骤（需求文档已在步骤 2.1 中转换）。此时无法区分哪些是需求文档、哪些是设计文档，后续阶段 3 会将所有 md 文件同时作为输入。
 
 ### 步骤 2.3：编码检查与修复
 
-对阶段 2 生成的**所有 md 文件**，调用插件脚本批量检查：
+对阶段 2 生成的**所有 md 文件**，调用插件脚本批量检查（使用绝对路径）：
 
 ```bash
-uv run "${CLAUDE_PLUGIN_ROOT}/scripts/fix_encoding.py" '<md文件路径1>' '<md文件路径2>' ...
+uv run "${CLAUDE_PLUGIN_ROOT}/scripts/fix_encoding.py" '<md绝对路径1>' '<md绝对路径2>' ...
 ```
 
 **编码检测优先级**：`utf-8` → `utf-8-sig`（带BOM） → `gb18030`（覆盖 gbk/gb2312） → `big5` → `utf-16`
