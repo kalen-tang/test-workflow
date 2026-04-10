@@ -22,14 +22,7 @@ allowed-tools:
   - Glob
   - Grep
   - Skill
-  - Bash(cd:*)
-  - Bash(uvx:*)
-  - Bash(uv:*)
-  - Bash(python:*)
-  - Bash(mkdir:*)
-  - Bash(ls:*)
-  - Bash(test:*)
-  - Bash(echo:*)
+  - Bash
 ---
 
 # 测试左移全流程工作流
