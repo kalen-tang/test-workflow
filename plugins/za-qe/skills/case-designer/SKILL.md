@@ -1,13 +1,32 @@
 ---
 name: case-designer
-description: 此技能用于生成手工测试案例和可视化测试设计。当用户说帮我生成测试案例、把需求转成测试用例、生成PlantUML流程图、画一下测试功能点、需要测试MindMap或测试案例可视化时应触发。
+description: 此技能用于生成场景案例和可视化测试设计。当用户说帮我生成测试案例、把需求转成测试用例、生成PlantUML流程图、画一下测试功能点、需要测试MindMap或测试案例可视化、生成场景案例时应触发。
 ---
 
-# 手工测试案例生成器
+# 场景案例设计器
 
 ## 技能目标
 
-基于需求文档生成可视化的测试设计，包括PlantUML 流程图和测试用例 MindMap，帮助测试团队快速设计全面的手工测试方案，适用于需求分析、测试评审和团队协作场景。
+基于需求文档（和可选的接口数据报告）生成可视化的测试设计和结构化的场景案例表，帮助测试团队快速设计全面的测试方案，同时为 `api-generator` 提供可消费的场景数据。
+
+**产出物**：
+1. PlantUML 业务流程图（可视化，给人看）
+2. PlantUML 测试功能点 MindMap（可视化，给人看）
+3. PlantUML 详细测试案例 MindMap（可视化，给人看）
+4. XMind 文件（可视化，给人编辑）
+5. **场景案例表 Markdown**（结构化，给 api-generator 消费）
+
+## 输入
+
+### 必须输入
+
+- **规范化需求文档**（req-parser 产出的 md 文件，**不读取原始 doc/docx**）
+
+### 可选输入
+
+- **接口数据报告**（interface-extractor 产出的 md 文件）
+  - 有接口数据时，场景步骤会关联具体接口（IF-ID、路径、方法）
+  - 无接口数据时，场景步骤的"调用接口"列留空或填写推断的接口描述
 
 ## 核心功能
 
@@ -207,7 +226,29 @@ left side
 整合三个PlantUML 代码块 → 添加测试策略说明 → 输出 Markdown 到指定目录 → 保存 PlantUML 文件
 ```
 
-### 步骤 6：自动生成 XMind 文件
+### 步骤 6：生成场景案例表
+
+基于步骤 3、4 的测试功能点和详细测试案例，生成结构化的**场景案例表 Markdown**，符合 `../../references/artifact-schemas/09-scenario-table.md` 规范。
+
+**生成内容**：
+- **场景总览表**：场景ID、名称、类型（positive/negative/flow/boundary）、优先级、涉及接口、来源
+- **场景详情**：每个场景的前置条件、步骤表（操作/调用接口/请求要点/预期结果）、验证点
+
+**场景来源优先级**：
+1. **从验收标准生成**（最优先）：每个 AC 至少对应一个场景
+2. **从用户故事生成**：构建端到端业务流程场景
+3. **从业务规则生成**：生成边界和异常场景
+4. **从接口依赖推断**：补充接口串联的 flow 场景（需有接口数据报告）
+
+**数据传递标记**：使用 `{{步骤N.字段名}}` 标记步骤间的数据依赖
+
+**输出文件**：`<输出目录>/<项目名>_场景案例表.md`
+
+> 详细格式参见 `../../references/artifact-schemas/09-scenario-table.md`
+> 场景识别指南参见 `references/05-scenario-identification.md`
+> 用例设计模式参见 `references/06-test-case-patterns.md`
+
+### 步骤 7：自动生成 XMind 文件
 ```
 调用 plantuml_to_xmind.py 脚本 → 将测试功能点和测试案例 MindMap 转换为 XMind 格式 → 输出到同目录
 ```
@@ -230,6 +271,7 @@ left side
 - **Markdown 文件**：包含 PlantUML 代码块的完整测试设计文档
 - **PlantUML 文件**：独立的 `.puml` 文件（测试功能点和测试案例）
 - **XMind 文件**：自动转换的 `.xmind` 文件（测试功能点和测试案例）
+- **场景案例表**：结构化的 Markdown 表格，供 api-generator 消费
 
 ### Markdown 文件结构
 
@@ -237,7 +279,7 @@ left side
 
 ### 1. 文档信息
 ```markdown
-# XX项目 手工测试案例
+# XX项目 场景案例
 
 ## 文档信息
 - **生成时间**: 2026-03-17 14:30:00
@@ -359,7 +401,7 @@ right side
 ```
 
 **预期输出**：
-- `./result/new_feature_手工测试案例.md` - Markdown 文档
+- `./result/new_feature_场景案例.md` - Markdown 文档
 - `./result/BANK-XXXX_测试功能点.puml` - 测试功能点 PlantUML 文件
 - `./result/BANK-XXXX_测试案例.puml` - 详细测试案例 PlantUML 文件
 - `./result/BANK-XXXX_测试功能点.xmind` - 测试功能点 XMind 文件（自动生成）
@@ -373,7 +415,7 @@ right side
 ```
 
 **预期输出**：
-- `./result/integrated_手工测试案例.md` - Markdown 文档
+- `./result/integrated_场景案例.md` - Markdown 文档
 - `./result/BANK-XXXX_测试功能点.xmind` - XMind 文件（自动生成）
 - `./result/BANK-XXXX_测试案例.xmind` - XMind 文件（自动生成）
 
@@ -385,7 +427,7 @@ right side
 ```
 
 **预期输出**：
-- `./review/requirement_手工测试案例.md` - Markdown 文档
+- `./review/requirement_场景案例.md` - Markdown 文档
 - `./review/BANK-XXXX_测试功能点.xmind` - XMind 文件（可用 XMind 软件打开编辑）
 - `./review/BANK-XXXX_测试案例.xmind` - XMind 文件（可用 XMind 软件打开编辑）
 
@@ -460,6 +502,9 @@ right side
 - **`references/02-test-points-mindmap.md`** - 测试功能点 MindMap 生成规则
 - **`references/03-test-cases-mindmap.md`** - 详细测试案例 MindMap 生成规则
 - **`references/04-naming-conventions.md`** - 测试案例命名规范详解
+- **`references/05-scenario-identification.md`** - 场景测试用例识别指南
+- **`references/06-test-case-patterns.md`** - 测试用例设计模式
+- **`references/07-requirement-integration.md`** - 需求文档结合分析指南
 
 ### 示例文件
 
@@ -469,7 +514,15 @@ right side
 - **`examples/sample-flowchart.puml`** - 流程图示例
 - **`examples/sample-test-points.puml`** - 测试功能点示例
 - **`examples/sample-test-cases.puml`** - 测试案例示例
+- **`examples/scenario-test-cases.md`** - 场景测试用例设计示例
+- **`examples/sample-with-requirement.md`** - 结合需求文档的场景示例
+
+### 相关 Artifact Schemas
+
+- **`../../references/artifact-schemas/09-scenario-table.md`** - 场景案例表格式规范
+- **`../../references/artifact-schemas/08-interface-data-report.md`** - 输入：接口数据报告格式
+- **`../../references/artifact-schemas/01-normalized-requirement-v2.md`** - 输入：标准化需求文档格式
 
 ---
 
-**状态**: 🚧 开发中（弱标准模式）| **预计完成**: 2026-04-20
+**状态**: ✅ 可用 | **版本**: v2.0.0

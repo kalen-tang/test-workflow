@@ -52,19 +52,19 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 | Skill | 状态 | 用途 |
 |-------|------|------|
-| `devplan-analyzer` | ✅ | 分析 KM 文档，生成测试左移分析报告（快速模式） |
+| `interface-extractor` | ✅ | 从设计文档提取接口数据，生成接口数据报告 |
 | `doc-reviewer` | ✅ | 验证需求实现一致性 |
-| `case-designer` | ✅ | 生成 PlantUML 流程图和测试用例 MindMap |
+| `case-designer` | ✅ | 生成 PlantUML 流程图、测试用例 MindMap 和场景案例表 |
 | `api-generator` | ✅ | 生成 Python pytest 测试代码和 YAML 数据 |
-| `req-parser` | ✅ | 将原始需求文档转为标准化 Markdown（完整模式第一阶段） |
-| `design-parser` | ✅ | 检查开发方案文档是否符合规范（完整模式第一阶段） |
+| `req-parser` | ✅ | 将原始需求文档转为标准化 Markdown |
+| `design-parser` | ✅ | 检查开发方案文档是否符合规范 |
 
 ### 工作流模式
 
 **全流程模式**（`/za-qe:qe-workflow`，✅ 推荐）：
 - 阶段 1：环境探测 + 交互式目录配置（需求文档/设计文档/输出/自动化项目）
 - 阶段 2：`uvx markitdown` docx/doc → md + UTF-8 编码修复
-- 阶段 3：`req-parser` → `design-parser` → `devplan-analyzer` → `api-generator`
+- 阶段 3：`req-parser` → `design-parser` → `interface-extractor` → `case-designer` → `api-generator`
 - 输出：规范化文档 + 测试左移分析报告 + API 自动化测试用例
 
 ### Artifact Schemas（完整模式核心协议）
@@ -126,7 +126,7 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 - 微服务接口格式：`微服务域名/接口路径`，如 `zabank_imc_activity_service/activity/list`
 - 路径包含 `dmb` → 判定为**网关接口**，必须提示用户替换为微服务接口
-- 详细规则：`plugins/za-qe/skills/devplan-analyzer/references/01-interface-validation.md`
+- 详细规则：`plugins/za-qe/skills/interface-extractor/references/01-interface-validation.md`
 
 ### API 测试代码生成规范
 
@@ -150,4 +150,4 @@ claude mcp add playwright npx @playwright/mcp@latest
 | artifact-schemas 总览 | `plugins/za-qe/references/artifact-schemas/00-overview.md` |
 | req-parser Skill | `plugins/za-qe/skills/req-parser/SKILL.md` |
 | api-generator 参考 | `plugins/za-qe/skills/api-generator/references/` |
-| devplan-analyzer 参考 | `plugins/za-qe/skills/devplan-analyzer/references/` |
+| interface-extractor 参考 | `plugins/za-qe/skills/interface-extractor/references/` |

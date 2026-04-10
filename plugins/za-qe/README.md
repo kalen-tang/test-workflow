@@ -66,8 +66,8 @@ flowchart TD
     ReqParser --> HasBoth{有设计文档?}
     DesignParser --> Analyzer
 
-    HasBoth -->|Yes| Analyzer["devplan-analyzer<br/>测试左移分析报告"]
-    HasBoth -->|No| TipOnly["提示可选操作<br/>case-designer / devplan-analyzer"]
+    HasBoth -->|Yes| Extractor["interface-extractor<br/>接口数据报告"]
+    HasBoth -->|No| TipOnly["提示可选操作<br/>case-designer"]
 
     HasDesign -->|No + 无需求| Stop([结束])
 
@@ -88,7 +88,7 @@ flowchart TD
 
 ### `/za-qe:qe-gencase` - 场景测试案例生成
 
-从需求文档生成可视化的手工测试设计（PlantUML流程图 + MindMap）。
+从需求文档生成可视化的场景案例设计（PlantUML流程图 + MindMap）。
 
 ```bash
 # 从单个文档生成
@@ -101,7 +101,7 @@ flowchart TD
 /za-qe:qe-gencase ./docs/requirement.md --output ./review
 ```
 
-**输出**：手工测试案例文档（Markdown格式，包含PlantUML代码）
+**输出**：场景案例文档（Markdown格式，包含PlantUML代码）+ 场景案例表
 
 ---
 
@@ -127,7 +127,7 @@ flowchart TD
 ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
 ✅ 可用 Skills (6个):
-  • /devplan-analyzer - 测试左移分析器
+  • /interface-extractor - 接口数据提取器
   • /doc-reviewer - 需求验证器
   • /za-qe:qe-gencase - 场景测试案例生成器
   • /api-generator - API用例生成器
@@ -212,21 +212,20 @@ flowchart TD
 
 ## 🔬 核心 Skills
 
-### 1. devplan-analyzer（测试左移分析器）
+### 1. interface-extractor（接口数据提取器）
 
-分析开发方案(KM)文档，生成测试左移分析报告。
+从规范化设计文档中提取接口信息，生成接口数据报告。
 
-- 解析 KM 开发方案文档结构
-- 提取关键接口信息和依赖关系
-- 生成单接口测试用例建议
-- 自动识别业务流程场景用例
-- 标注测试重点和风险点
+- 提取接口路径、参数、响应结构
+- 接口路径校验（dmb 网关检测）
+- 微服务识别与映射
+- 接口间依赖关系分析
 
 ```bash
-/devplan-analyzer ./docs/development-plan.md
+/interface-extractor ./result/xxx_规范化开发方案.md
 ```
 
-**输出**: 测试左移分析报告（Markdown 格式），保存到 `./result/`
+**输出**: 接口数据报告（Markdown 格式），保存到 `./result/`
 
 ---
 
@@ -252,21 +251,21 @@ flowchart TD
 
 ---
 
-### 3. case-designer（手工案例生成器）
+### 3. case-designer（场景案例设计器）
 
-从需求文档生成可视化的手工测试设计。
+从需求文档生成可视化的场景案例设计和结构化场景表。
 
-- 解析需求文档（支持 Markdown、Word、PDF、纯文本）
+- 解析需求文档（支持 Markdown）
 - 生成业务流程图（PlantUML Activity Diagram）
 - 生成测试功能点（PlantUML MindMap，三层）
 - 生成详细测试案例（PlantUML MindMap，四层）
-- 应用命名规范（去掉"测试"后缀、动作与结果分离）
+- 生成场景案例表（结构化 Markdown，供 api-generator 消费）
 
 ```bash
 /za-qe:qe-gencase ./docs/requirement.md
 ```
 
-**输出**: 手工测试案例文档（Markdown格式，包含PlantUML代码）
+**输出**: 场景案例文档 + 场景案例表（Markdown格式）
 
 ---
 
@@ -360,7 +359,7 @@ flowchart TD
 
 ### Playwright MCP（可选）
 
-devplan-analyzer 支持从网页提取内容，需要安装 Playwright MCP：
+interface-extractor 支持从网页提取内容，需要安装 Playwright MCP：
 
 ```bash
 claude mcp add playwright npx @playwright/mcp@latest
@@ -395,7 +394,7 @@ doc-reviewer 需要配置文档目录，可以在 SKILL.md 中修改默认配置
 
 | Skill | 文档 | 参考文档 |
 |-------|------|---------|
-| devplan-analyzer | [SKILL.md](./skills/devplan-analyzer/SKILL.md) | [references/](./skills/devplan-analyzer/references/) (4个), [examples/](./skills/devplan-analyzer/examples/) |
+| interface-extractor | [SKILL.md](./skills/interface-extractor/SKILL.md) | [references/](./skills/interface-extractor/references/) (2个), [examples/](./skills/interface-extractor/examples/) |
 | doc-reviewer | [SKILL.md](./skills/doc-reviewer/SKILL.md) | - |
 | case-designer | [SKILL.md](./skills/case-designer/SKILL.md) | [references/](./skills/case-designer/references/) (4个), [examples/](./skills/case-designer/examples/) (5个) |
 | api-generator | [SKILL.md](./skills/api-generator/SKILL.md) | [references/](./skills/api-generator/references/) (6个), [examples/](./skills/api-generator/examples/) |

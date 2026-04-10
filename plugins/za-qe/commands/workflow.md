@@ -35,7 +35,8 @@ arguments:
 阶段3：Skill 串联
   需求 md → req-parser → 规范化需求文档
   设计 md → design-parser → 规范化设计文档
-  → devplan-analyzer → 测试左移分析报告
+  → interface-extractor → 接口数据报告
+  → case-designer → 场景案例 + 场景案例表
   → api-generator → API 自动化测试用例
 ```
 
@@ -215,19 +216,21 @@ except UnicodeDecodeError:
 
 ## 阶段 3：Skill 串联
 
+> **重要原则**：阶段 3 的所有 Skill 一律读取阶段 2 产出的 **md 文件**，**不得直接读取原始 doc/docx 文件**。原始文档仅在阶段 2 由 markitdown 处理。
+
 ### 决策逻辑
 
 根据阶段 2 生成的文件，自动决定调用哪些 Skills：
 
 ```
 有需求 md 且有设计 md？
-  → req-parser → design-parser → devplan-analyzer（完整模式）→ api-generator
+  → req-parser → design-parser → interface-extractor → case-designer → api-generator
 
 仅有设计 md（无需求文档）？
-  → design-parser → devplan-analyzer（基础模式）→ api-generator
+  → design-parser → interface-extractor → api-generator（无场景表，基于接口生成基础用例）
 
 仅有需求 md（无设计文档）？
-  → req-parser → 提示用户可手动调用 case-designer 或 devplan-analyzer
+  → req-parser → case-designer（仅基于需求，无接口数据）
 ```
 
 ### 步骤 3.1：调用 req-parser（如有需求 md）
@@ -260,29 +263,43 @@ except UnicodeDecodeError:
 4. 生成规范化 MD 文档
 5. 输出待补充清单（如有缺失）
 
-### 步骤 3.3：调用 devplan-analyzer
+### 步骤 3.3：调用 interface-extractor（如有设计文档产出）
 
-**触发条件**：步骤 3.1 或 3.2 至少有一个产出
+**触发条件**：步骤 3.2 产出了规范化设计文档
 
-**两种模式**：
+- **输入**：
+  - 规范化设计文档（必须）
+  - 规范化需求文档（可选，用于补充业务上下文）
+- **输出**：`<案例输出目录>/<项目名>_接口数据报告.md`
 
-1. **完整模式**（有需求文档 + 设计文档）：
-   - 输入：规范化需求文档 + 规范化设计文档
-   - 按 devplan-analyzer「模式二」执行
-   - 输出：完整的测试左移分析报告（含场景用例 + 需求覆盖度分析）
+**调用方式**：按照 interface-extractor Skill 的流程执行：
+1. 提取接口信息（路径、参数、响应）
+2. 接口路径校验（dmb 网关检测）
+3. 微服务识别与映射
+4. 接口依赖关系分析
+5. 输出接口数据报告
 
-2. **基础模式**（仅有设计文档）：
-   - 输入：规范化设计文档
-   - 按 devplan-analyzer「模式一」执行
-   - 输出：基础的测试左移分析报告
+### 步骤 3.4：调用 case-designer（如有需求文档产出）
 
-**输出文件**：`<案例输出目录>/<项目名>_测试左移分析报告.md`
+**触发条件**：步骤 3.1 产出了规范化需求文档
 
-### 步骤 3.4：调用 api-generator
+- **输入**：
+  - 规范化需求文档（必须）
+  - 接口数据报告（可选，步骤 3.3 产出）
+- **输出**：
+  - `<案例输出目录>/<项目名>_场景案例.md`（PlantUML 流程图 + MindMap）
+  - `<案例输出目录>/<项目名>_场景案例表.md`（结构化场景表，供 api-generator 消费）
+  - `.puml` 文件和 `.xmind` 文件
 
-**触发条件**：步骤 3.3 产出了测试左移分析报告
+**调用方式**：按照 case-designer Skill 的流程执行
 
-- **输入**：测试左移分析报告路径
+### 步骤 3.5：调用 api-generator
+
+**触发条件**：步骤 3.3 产出了接口数据报告
+
+- **输入**：
+  - 接口数据报告（必须，步骤 3.3 产出）
+  - 场景案例表（可选，步骤 3.4 产出，有则生成场景测试代码）
 - **输出目录**：
   - 如果指定了自动化项目目录 → 测试代码和数据输出到该目录下
   - 否则 → 输出到案例输出目录下
@@ -291,16 +308,20 @@ except UnicodeDecodeError:
 
 ### 仅有需求文档的特殊处理
 
-如果用户仅提供了需求文档（无设计文档），在 req-parser 完成后：
-1. 输出已完成的分析结果
+如果用户仅提供了需求文档（无设计文档），在 req-parser + case-designer 完成后：
+1. 输出已完成的分析结果（规范化需求文档 + 场景案例）
 2. 提示用户后续可选操作：
    ```
-   需求文档分析已完成，由于未提供设计文档，无法自动生成接口测试用例。
+   需求文档分析和场景案例设计已完成。由于未提供设计文档，无法提取接口数据，因此无法自动生成 API 测试代码。
+
+   已生成：
+     - 规范化需求文档
+     - 场景案例（PlantUML 流程图 + MindMap + XMind）
+     - 场景案例表（步骤中的"调用接口"列为空，待补充接口数据）
 
    后续可选操作：
-     1. /za-qe:qe-gencase <规范化需求文档路径>  — 生成手工测试案例（PlantUML流程图 + MindMap）
-     2. 提供设计文档后重新执行 /za-qe:qe-workflow — 生成完整的 API 自动化测试
-     3. /devplan-analyzer <设计文档路径> — 手动分析设计文档
+     1. 提供设计文档后重新执行 /za-qe:qe-workflow — 生成完整的 API 自动化测试
+     2. 手动补充场景案例表中的接口信息后调用 /api-generator
    ```
 
 ---
@@ -317,23 +338,28 @@ except UnicodeDecodeError:
    案例输出目录：./result
    自动化项目目录：./zabank_imc_case
 
-📄 阶段1 - 文档转换 ✅
+📄 文档转换 ✅
    需求文档：3 个已转换
    设计文档：1 个已转换
    编码修复：1 个（gb18030 → UTF-8）
 
-📊 阶段2 - 需求分析 ✅
+📊 需求分析 (req-parser) ✅
    输出：./result/xxx_规范化需求文档.md
 
-🔧 阶段3 - 设计分析 ✅
+🔧 设计分析 (design-parser) ✅
    输出：./result/xxx_规范化开发方案.md
 
-📋 阶段4 - 测试左移分析 ✅
-   输出：./result/xxx_测试左移分析报告.md
+🔌 接口提取 (interface-extractor) ✅
+   输出：./result/xxx_接口数据报告.md
    识别接口：11 个
-   场景用例：5 个
+   接口依赖链：3 条
 
-🧪 阶段5 - API 用例生成 ✅
+📋 场景案例 (case-designer) ✅
+   输出：./result/xxx_场景案例.md
+   输出：./result/xxx_场景案例表.md
+   场景数量：8 个（P0: 3, P1: 3, P2: 2）
+
+🧪 API 用例生成 (api-generator) ✅
    输出目录：./zabank_imc_case/
    测试代码：11 个
    测试数据：33 个
@@ -341,14 +367,14 @@ except UnicodeDecodeError:
 ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
 🎯 下一步操作：
-  1. 查看测试左移分析报告：
-     cat ./result/xxx_测试左移分析报告.md
+  1. 查看接口数据报告：
+     cat ./result/xxx_接口数据报告.md
 
-  2. 执行测试用例：
+  2. 查看场景案例：
+     cat ./result/xxx_场景案例表.md
+
+  3. 执行测试用例：
      cd ./zabank_imc_case && pytest --envId sit
-
-  3. 生成手工测试案例（可选）：
-     /za-qe:qe-gencase ./result/xxx_规范化需求文档.md
 ```
 
 ---
@@ -421,16 +447,18 @@ except UnicodeDecodeError:
 
 ## 相关命令
 
-- `/za-qe:qe-gencase` - 生成场景测试案例（PlantUML流程图 + MindMap）
+- `/za-qe:qe-gencase` - 生成场景案例（PlantUML流程图 + MindMap）
 - `/za-qe:qe-help` - 查看详细帮助
 - `/req-parser` - 独立执行需求文档标准化
 - `/design-parser` - 独立执行设计文档规范化
-- `/devplan-analyzer` - 独立执行测试左移分析
+- `/interface-extractor` - 独立执行接口数据提取
+- `/case-designer` - 独立执行场景案例设计
 - `/api-generator` - 独立执行 API 用例生成
 
 ## 详细文档
 
-- [devplan-analyzer 文档](../skills/devplan-analyzer/SKILL.md)
+- [interface-extractor 文档](../skills/interface-extractor/SKILL.md)
+- [case-designer 文档](../skills/case-designer/SKILL.md)
 - [req-parser 文档](../skills/req-parser/SKILL.md)
 - [design-parser 文档](../skills/design-parser/SKILL.md)
 - [api-generator 文档](../skills/api-generator/SKILL.md)

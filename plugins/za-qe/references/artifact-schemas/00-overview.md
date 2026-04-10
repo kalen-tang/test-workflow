@@ -106,38 +106,30 @@ pain_points:
 
 ## 四阶段工作流
 
-### 完整模式流程（四阶段）
+### 完整模式流程
 
 ```mermaid
 graph LR
-    A[第一阶段<br/>规范化] --> B[第二阶段<br/>需求检查]
-    B --> C[第三阶段<br/>手工案例生成]
-    C --> D[第四阶段<br/>自动化案例生成]
-
     A1[PRD 文档] -->|req-parser| A2[01-normalized-requirement]
     A3[设计文档] -->|design-parser| A4[02-normalized-design]
-    A5[历史案例] -->|case-normalizer| A6[03-normalized-cases]
 
-    A2 --> B
-    A4 --> B
-    B -->|doc-reviewer| B2[05-validation-report]
+    A4 -->|interface-extractor| A8[08-interface-data-report]
+    A2 -.->|可选| A8
 
-    A2 --> C
-    B2 --> C
-    A6 --> C
-    C -->|case-designer| C2[06-manual-test-cases]
+    A2 -->|case-designer| A9[09-scenario-table]
+    A8 -.->|可选| A9
+    A2 -->|case-designer| A6[06-scenario-cases]
+    A8 -.->|可选| A6
 
-    A2 --> D
-    A4 --> D
-    C2 --> D
-    D -->|api-generator| D2[07-api-test-cases]
+    A8 -->|api-generator| A7[07-api-test-cases]
+    A9 -->|api-generator| A7
 ```
 
 ### 快速模式流程
 
 ```mermaid
 graph LR
-    A[PRD/KM文档] -->|devplan-analyzer| B[测试左移分析报告]
+    A[设计文档 md] -->|interface-extractor| B[08-interface-data-report]
     B -->|api-generator| C[07-api-test-cases]
 ```
 
@@ -149,13 +141,15 @@ graph LR
 
 | 编号 | 名称 | 输入源 | 输出工具 | 下游消费者 | 状态 |
 |------|------|--------|---------|-----------|------|
-| 01 | [normalized-requirement](./01-normalized-requirement-v2.md) | PRD 文档 | req-parser | doc-reviewer<br/>case-designer<br/>api-generator | ✅ v2.0 |
-| 02 | [normalized-design](./02-normalized-design.md) | 设计文档 | design-parser | doc-reviewer<br/>api-generator | ✅ v1.0 |
+| 01 | [normalized-requirement](./01-normalized-requirement-v2.md) | PRD 文档 | req-parser | doc-reviewer<br/>case-designer<br/>interface-extractor | ✅ v2.0 |
+| 02 | [normalized-design](./02-normalized-design.md) | 设计文档 | design-parser | interface-extractor | ✅ v1.0 |
 | 03 | normalized-cases | 历史案例 | case-normalizer | case-designer | 📋 计划中 |
 | 04 | code-diff-report | Code Diff | code-diff-mcp | doc-reviewer | 📋 计划中 |
 | 05 | validation-report | 01 + 02 + 04 | doc-reviewer | case-designer | 📋 计划中 |
-| 06 | manual-test-cases | 01 + 03 + 05 | case-designer | 测试执行、api-generator | ✅ v1.0 |
-| 07 | api-test-cases | 01 + 02 + 06 | api-generator | CI/CD 自动化执行 | ✅ v1.0 |
+| 06 | scenario-cases | 01 + 08（可选） | case-designer | 测试执行、人工评审 | ✅ v1.0 |
+| 07 | api-test-cases | 08 + 09 | api-generator | CI/CD 自动化执行 | ✅ v1.0 |
+| 08 | [interface-data-report](./08-interface-data-report.md) | 02（+ 01 可选） | interface-extractor | case-designer<br/>api-generator | ✅ v1.0 |
+| 09 | [scenario-table](./09-scenario-table.md) | 01 + 08（可选） | case-designer | api-generator | ✅ v1.0 |
 
 ### 格式详细说明
 
@@ -336,41 +330,32 @@ sit:
 
 | 下游 Artifact | 依赖的上游 Artifact |
 |--------------|-------------------|
-| 02-normalized-design | 无独立依赖（对应 PRD） |
+| 08-interface-data-report | 02 ✅（+ 01 可选） |
+| 09-scenario-table | 01 ✅（+ 08 可选） |
 | 05-validation-report | 01 ✅ + 02 ✅ + 04 📋 |
-| 06-manual-test-cases | 01 ✅ + 03 📋 + 05 📋 |
-| 07-api-test-cases | 01 ✅ + 02 ✅ + 06 ✅ |
+| 06-scenario-cases | 01 ✅（+ 08 可选） |
+| 07-api-test-cases | 08 ✅ + 09 ✅ |
 
 ### 数据流向图
 
 ```
-PRD 文档 ────────────┐
-                      │
-                      ▼
-          ┌───────────────────────┐
-          │ 01-normalized-requirement │ ◄───── req-parser
-          └───────────────────────┘
-                      │
-                      ├───────────────────────┐
-                      │                       │
-                      ▼                       ▼
-          ┌───────────────────────┐   ┌───────────────────────┐
-          │ 05-validation-report   │   │ 06-manual-test-cases   │
-          └───────────────────────┘   └───────────────────────┘
-                      │                       │
-设计文档 ────────┐   │                       │
-                  │   │                       │
-                  ▼   │                       │
-          ┌───────────────────────┐           │
-          │ 02-normalized-design   │           │
-          └───────────────────────┘           │
-                      │                       │
-                      ├───────────────────────┘
-                      │
-                      ▼
-          ┌───────────────────────┐
-          │ 07-api-test-cases      │
-          └───────────────────────┘
+PRD 文档 ─── req-parser ──→ 01-normalized-requirement
+                                    │
+设计文档 ── design-parser ─→ 02-normalized-design
+                                    │
+                        interface-extractor
+                                    │
+                            08-interface-data-report
+                                    │
+                     ┌──────────────┼──────────────┐
+                     ▼              │              ▼
+              case-designer         │       api-generator
+                     │              │              ▲
+          ┌──────────┤              │              │
+          ▼          ▼              │              │
+  06-scenario   09-scenario ────────┘──────────────┘
+    -cases        -table
+  (PlantUML)   (Markdown)
 ```
 
 ---

@@ -17,7 +17,7 @@ arguments:
 ```
 
 显示所有可用 Skills 的详细说明：
-- devplan-analyzer：测试左移分析器
+- interface-extractor：接口数据提取器
 - doc-reviewer：需求验证器
 - case-designer：场景测试案例生成器
 - api-generator：API用例生成器
@@ -30,7 +30,7 @@ arguments:
 ```
 
 显示工作流程的完整说明：
-- 🔧 测试左移工作流（KM 文档 → API 测试用例）
+- 🔧 测试左移工作流（需求/设计文档 → API 测试用例）
 - 📊 场景测试案例生成（需求文档 → 可视化测试设计）
 
 ### 3. 使用示例
@@ -55,15 +55,15 @@ arguments:
 📌 核心命令:
   1️⃣ /za-qe:qe-workflow
      测试左移全流程工作流（交互式引导）
-     流程：环境探测 → docx 转 md → req-parser → design-parser → devplan-analyzer → api-generator
+     流程：环境探测 → docx 转 md → req-parser → design-parser → interface-extractor → case-designer → api-generator
 
   2️⃣ /za-qe:qe-gencase <文档路径>
      从需求文档生成场景化测试设计
      输出：PlantUML流程图 + MindMap测试案例
 
 📌 核心 Skills:
-  • /devplan-analyzer <文档路径>
-    分析 KM 开发方案，生成测试左移分析报告
+  • /interface-extractor <文档路径>
+    从设计文档提取接口数据，生成接口数据报告
 
   • /doc-reviewer
     验证需求实现完整性，生成质量评分报告
