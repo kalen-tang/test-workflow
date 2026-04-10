@@ -147,47 +147,38 @@ allowed-tools:
 
 ## 阶段 2：文档转换
 
+步骤 2.1、2.2、2.3 统一使用 `convert_docx.py` 脚本完成，转换和编码修复一次完成。
+
 ### 步骤 2.1：转换需求文档
 
-对需求文档目录中的每个 `.doc`/`.docx` 文件，执行转换：
-
 ```bash
-uvx markitdown '<需求文档绝对路径>' > '<案例输出目录绝对路径>/<原文件名>.md'
+uv run "${CLAUDE_PLUGIN_ROOT}/scripts/convert_docx.py" '<需求文档目录绝对路径>' '<案例输出目录绝对路径>'
 ```
 
 **示例**：
 ```bash
-uvx markitdown 'D:/story/2026/BANK-91153/ZA Search产品需求-part5.docx' > 'D:/story/2026/BANK-91153/ZA Search产品需求-part5.md'
+uv run "${CLAUDE_PLUGIN_ROOT}/scripts/convert_docx.py" 'D:/story/2026/BANK-91153' 'D:/story/2026/BANK-91153'
 ```
-
-**注意事项**：
-- **始终使用绝对路径**，禁止使用 `cd` 切换目录
-- **禁止使用 `;` 连接命令**（如 `cmd; echo "EXIT:$?"`），Bash 命令失败时会直接报错，无需手动检查退出码
-- 文件名保持与原文件一致，仅将扩展名改为 `.md`
-- 如果文件名包含空格或特殊字符，使用引号包裹路径
-- 逐个文件转换，转换失败时记录错误并继续处理下一个文件
 
 ### 步骤 2.2：转换设计文档（可选）
 
-如果设计文档目录非空且存在 doc/docx 文件：
+如果设计文档目录非空且与需求文档目录不同：
 
 ```bash
-uvx markitdown '<设计文档绝对路径>' > '<案例输出目录绝对路径>/design_<原文件名>.md'
+uv run "${CLAUDE_PLUGIN_ROOT}/scripts/convert_docx.py" '<设计文档目录绝对路径>' '<案例输出目录绝对路径>' --prefix design_
 ```
 
-**注意**：设计文档输出时添加 `design_` 前缀，避免与需求文档同名冲突。始终使用绝对路径，禁止 `cd`。
+`--prefix design_` 确保输出文件名加 `design_` 前缀，避免与需求文档同名冲突。
 
-**如果设计文档目录与需求文档目录相同**：跳过此步骤（需求文档已在步骤 2.1 中转换）。此时无法区分哪些是需求文档、哪些是设计文档，后续阶段 3 会将所有 md 文件同时作为输入。
+**如果设计文档目录与需求文档目录相同**：跳过此步骤（需求文档已在步骤 2.1 中转换）。
 
 ### 步骤 2.3：编码检查与修复
 
-对阶段 2 生成的**所有 md 文件**，调用插件脚本批量检查（使用绝对路径）：
-
-```bash
-uv run "${CLAUDE_PLUGIN_ROOT}/scripts/fix_encoding.py" '<md绝对路径1>' '<md绝对路径2>' ...
-```
-
-**编码检测优先级**：`utf-8` → `utf-8-sig`（带BOM） → `gb18030`（覆盖 gbk/gb2312） → `big5` → `utf-16`
+已由 `convert_docx.py` 内置处理，无需单独执行。脚本输出：
+- `OK: <path>` — 已是 UTF-8
+- `FIXED: <path> from <enc>` — 已从 enc 转换为 UTF-8
+- `WARN: <path>` — 编码无法识别，需人工检查
+- `ERROR: <path> <msg>` — 转换失败
 
 ### 步骤 2.4：转换结果汇报
 
