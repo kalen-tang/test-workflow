@@ -53,9 +53,9 @@ arguments:
 ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
 📌 核心命令:
-  1️⃣ /za-qe:qe-workflow <文档路径>
-     从 KM 开发方案生成 API 自动化测试用例
-     流程：devplan-analyzer → api-generator
+  1️⃣ /za-qe:qe-workflow
+     测试左移全流程工作流（交互式引导）
+     流程：环境探测 → docx 转 md → req-parser → design-parser → devplan-analyzer → api-generator
 
   2️⃣ /za-qe:qe-gencase <文档路径>
      从需求文档生成场景化测试设计

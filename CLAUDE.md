@@ -14,17 +14,17 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 ## 🚀 常用命令
 
 ```bash
-# 一键执行快速模式（最常用）
-/za-qe:qe-quick ./docs/your-plan.md
+# 全流程测试左移（推荐，交互式引导）
+/za-qe:qe-workflow
+
+# 指定目录直接执行
+/za-qe:qe-workflow --req_dir ./docs/req --design_dir ./docs/design --output_dir ./result
 
 # 场景案例生成（PlantUML流程图+MindMap）
 /za-qe:qe-gencase ./docs/requirement.md
 
-# 需求文档标准化（完整模式第一步）
+# 需求文档标准化
 /za-qe:req-parser ./docs/requirement.docx
-
-# 查看工具状态
-/za-qe:qe-status
 
 # 查看帮助
 /za-qe:qe-help
@@ -61,15 +61,11 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 ### 工作流模式
 
-**快速模式**（`/za-qe:qe-quick ./docs/plan.md`）：
-- `devplan-analyzer` → `api-generator`
-- 输出：`./result/xxx_测试左移分析报告.md` + `./result/xxx/` 测试用例目录
-
-**完整模式**（`/za-qe:full-workflow`，🚧 开发中）：四阶段流程
-1. **规范化**：`req-parser` + `design-parser` + CML MCP + Code Diff MCP
-2. **需求检查**：`doc-reviewer`
-3. **手工案例**：`case-designer`
-4. **自动化案例**：`api-generator`
+**全流程模式**（`/za-qe:qe-workflow`，✅ 推荐）：
+- 阶段 1：环境探测 + 交互式目录配置（需求文档/设计文档/输出/自动化项目）
+- 阶段 2：`uvx markitdown` docx/doc → md + UTF-8 编码修复
+- 阶段 3：`req-parser` → `design-parser` → `devplan-analyzer` → `api-generator`
+- 输出：规范化文档 + 测试左移分析报告 + API 自动化测试用例
 
 ### Artifact Schemas（完整模式核心协议）
 

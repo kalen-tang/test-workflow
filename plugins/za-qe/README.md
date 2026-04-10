@@ -16,10 +16,10 @@ QA Toolkit 是一个完整的测试左移解决方案，提供从需求分析到
 ### 最快上手
 
 ```bash
-/za-qe:qe-quick ./docs/your-plan.md
+/za-qe:qe-workflow
 ```
 
-自动完成：分析 KM 开发方案 → 生成测试左移分析报告 → 生成 API 自动化测试用例
+自动完成：环境探测 → 配置目录 → docx/doc 转 md → 需求分析 → 设计分析 → 测试左移分析 → 生成 API 自动化测试用例
 
 ### 首次使用推荐流程
 
@@ -27,52 +27,62 @@ QA Toolkit 是一个完整的测试左移解决方案，提供从需求分析到
 # 1. 查看帮助信息
 /za-qe:qe-help
 
-# 2. 查看工具状态
-/za-qe:qe-status
+# 2. 一键执行全流程（交互式引导）
+/za-qe:qe-workflow
 
-# 3. 一键执行快速模式
-/za-qe:qe-quick ./docs/your-plan.md
-
-# 4. 查看生成结果
-/za-qe:qe-status
+# 3. 查看生成结果
+ls ./result/
 ```
 
 ---
 
 ## ⚡ 工作流命令
 
-### `/za-qe:qe-quick` - 快速模式工作流 ⭐ 推荐
+### `/za-qe:qe-workflow` - 全流程测试左移工作流 ⭐ 推荐
 
-**一键执行**快速模式测试左移流程，从 KM 开发方案直接生成 API 自动化测试用例。
+从原始文档到 API 自动化测试用例的**一站式全流程**：自动探测环境、交互式目录配置、文档格式转换、串联分析技能。
 
 ```bash
-# 从本地文档生成
-/za-qe:qe-quick ./docs/za-zone-development.md
+# 交互模式（推荐）：自动探测环境后引导配置
+/za-qe:qe-workflow
 
-# 从网页URL生成（需要Playwright MCP）
-/za-qe:qe-quick https://km.company.com/doc/12345
+# 指定参数模式：跳过交互直接执行
+/za-qe:qe-workflow --req_dir ./docs/req --design_dir ./docs/design --output_dir ./result
 ```
 
 **执行流程**：
-```
-📄 KM 开发方案
-    ↓
-📊 devplan-analyzer（步骤1）
-    ↓ 自动检测输出路径
-📋 测试左移分析报告
-    ↓
-🧪 api-generator（步骤2）
-    ↓
-🎯 API 自动化测试用例集
+
+```mermaid
+flowchart TD
+    Start(["/za-qe:qe-workflow"]) --> Detect["阶段1：环境探测<br/>扫描 docx/doc 文件<br/>检测 pytest.ini"]
+    Detect --> Config["交互式目录配置<br/>需求文档目录（必填）<br/>设计文档目录（可选）<br/>案例输出目录<br/>自动化项目目录"]
+    Config --> Convert["阶段2：文档转换<br/>uvx markitdown docx→md<br/>编码检查 → UTF-8 修复"]
+    Convert --> HasReq{有需求文档?}
+    Convert --> HasDesign{有设计文档?}
+
+    HasReq -->|Yes| ReqParser["req-parser<br/>规范化需求文档"]
+    HasDesign -->|Yes| DesignParser["design-parser<br/>规范化设计文档"]
+
+    ReqParser --> HasBoth{有设计文档?}
+    DesignParser --> Analyzer
+
+    HasBoth -->|Yes| Analyzer["devplan-analyzer<br/>测试左移分析报告"]
+    HasBoth -->|No| TipOnly["提示可选操作<br/>case-designer / devplan-analyzer"]
+
+    HasDesign -->|No + 无需求| Stop([结束])
+
+    Analyzer --> ApiGen["api-generator<br/>API 自动化测试用例"]
+    ApiGen --> Done([完成])
 ```
 
-**优势对比**：
+**优势**：
 
-| 维度 | 手动执行 | /za-qe:qe-quick |
-|------|---------|-----------|
-| 命令数 | 2条 | 1条 |
-| 需要复制路径 | 是 | 否 |
-| 容易出错 | 中 | 低 |
+| 维度 | 手动逐步执行 | /za-qe:qe-workflow |
+|------|------------|-----------|
+| 步骤 | 5+ 步 | 1 步启动 |
+| 文档转换 | 手动 markitdown | 自动批量转换 |
+| 编码问题 | 容易遗漏 | 自动检测修复 |
+| Skill 串联 | 手动传路径 | 自动衔接 |
 
 ---
 
@@ -95,31 +105,11 @@ QA Toolkit 是一个完整的测试左移解决方案，提供从需求分析到
 
 ---
 
-### `/za-qe:full-workflow` - 完整模式工作流 🚧
+### `/za-qe:full-workflow` - 完整模式（已合并）
 
-**一键执行**完整模式测试左移流程（四阶段），提供从需求规范化到自动化用例生成的全流程质量保证。
+> **已合并到 `/za-qe:qe-workflow`**。新版 workflow 已包含完整模式的所有功能（需求规范化 → 设计分析 → 测试用例生成），不再需要单独的 full-workflow 命令。
 
-**当前状态**: 🚧 开发中（预计 2026-04-20 完成）
-
-```bash
-# 一键执行完整模式
-/za-qe:full-workflow ./project-root
-
-# 分阶段执行
-/za-qe:full-workflow --stage normalize    # 规范化
-/za-qe:full-workflow --stage validate     # 需求检查
-/za-qe:full-workflow --stage manual-cases # 手工案例
-/za-qe:full-workflow --stage automation   # 自动化
-```
-
-**当前替代方案**：
-```bash
-/doc-reviewer              # 需求检查
-/za-qe:qe-gencase ./docs/requirement.md    # 场景案例
-/za-qe:qe-quick ./docs/plan.md            # API 自动化
-```
-
-> 完整模式四阶段设计详见 [项目主文档](../../README.md#-完整模式四阶段设计)
+**迁移方式**：直接使用 `/za-qe:qe-workflow`
 
 ---
 
@@ -394,9 +384,9 @@ doc-reviewer 需要配置文档目录，可以在 SKILL.md 中修改默认配置
 
 | 命令 | 文档 | 说明 |
 |------|------|------|
-| `/za-qe:qe-quick` ⭐ | [quick-workflow.md](./commands/quick-workflow.md) | 快速模式工作流 |
+| `/za-qe:qe-workflow` ⭐ | [workflow.md](./commands/workflow.md) | 全流程测试左移工作流 |
 | `/za-qe:qe-gencase` | [gencase.md](./commands/gencase.md) | 场景测试案例生成 |
-| `/za-qe:full-workflow` 🚧 | [full-workflow.md](./commands/full-workflow.md) | 完整模式工作流 |
+| `/za-qe:full-workflow` | — | 已合并到 qe-workflow |
 | `/za-qe:qe-status` | [status.md](./commands/status.md) | 查看工具状态 |
 | `/za-qe:qe-config` | [config.md](./commands/config.md) | 配置工具参数 |
 | `/za-qe:qe-help` | [help.md](./commands/help.md) | 显示帮助信息 |
