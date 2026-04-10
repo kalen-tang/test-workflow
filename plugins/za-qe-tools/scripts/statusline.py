@@ -33,15 +33,22 @@ tokens_used_k = f"{input_tokens / 1000:.1f}"
 tokens_limit_k = f"{autocompact_limit / 1000:.0f}"
 tokens_str = f"{tokens_used_k}/{tokens_limit_k}k"
 
-CYAN, GREEN, YELLOW, RED, RESET = '\033[36m', '\033[32m', '\033[33m', '\033[31m', '\033[0m'
+# Nord 配色
+NORD_BLUE   = '\033[38;5;67m'   # Nord10 蓝紫（模型）
+NORD_GREEN  = '\033[38;5;71m'   # Nord14 绿（master/费用正常/进度正常）
+NORD_ORANGE = '\033[38;5;173m'  # Nord12 橙（其他分支/警告）
+NORD_RED    = '\033[38;5;131m'  # Nord11 红（危险）
+NORD_TEAL   = '\033[38;5;24m'   # Nord9 钢蓝（进度条空余）
+RESET = '\033[0m'
 
-bar_color = RED if pct >= 90 else YELLOW if pct >= 70 else GREEN
+bar_color   = NORD_RED if pct >= 90 else NORD_ORANGE if pct >= 70 else NORD_GREEN
+CYAN, GREEN, YELLOW, RED, TEAL = NORD_BLUE, NORD_GREEN, NORD_ORANGE, NORD_RED, NORD_TEAL
 if pct >= 90:
     bar = '[建议压缩]'
     c1_bot_plain = '[建议压缩] {pct}%'
 else:
     filled = pct // 10
-    bar = '█' * filled + '░' * (10 - filled)
+    bar = '█' * filled + f'{TEAL}' + '░' * (10 - filled) + f'{RESET}'
     c1_bot_plain = f"{bar} {pct}%"
 
 def fmt_duration(ms):
@@ -52,7 +59,7 @@ def fmt_duration(ms):
         h = mins // 60
         m = mins % 60
         return f"{h}h{m}m"
-    return f"{mins}m {secs}s"
+    return f"{mins}m{secs}s"
 
 duration_str = fmt_duration(duration_ms)
 api_str = fmt_duration(api_duration_ms)
@@ -156,7 +163,7 @@ c3_bot_plain = f"💰 ${cost:.2f}"
 venv = os.environ.get('VIRTUAL_ENV') or os.environ.get('CONDA_DEFAULT_ENV') or ''
 venv_name = os.path.basename(venv) if venv else ''
 c4_top_plain = f"({venv_name})" if venv_name else ""
-c4_bot_plain = f"⏱️  {duration_str} (api {api_str})"
+c4_bot_plain = f"⏱️  {duration_str} [api {api_str}]"
 
 # 每列宽度 = max(top, bot) 内容宽度，设最小宽度
 col_widths = [
@@ -179,7 +186,7 @@ c3_bot = f"{cost_color}💰 ${cost:.2f}{RESET}"
 
 c4_top = f"{CYAN}({venv_name}){RESET}" if venv_name else ""
 tok_per_sec_str = f"⚡ {tok_per_sec:.0f}t/s" if tok_per_sec else ""
-c4_bot = f"⏱️  {duration_str} (api {api_str}){('  ' + tok_per_sec_str) if tok_per_sec_str else ''}"
+c4_bot = f"⏱️  {duration_str} [api {api_str}]{('  ' + tok_per_sec_str) if tok_per_sec_str else ''}"
 
 line1 = (
     f"{rpad(c1_top, col_widths[0])} | "
