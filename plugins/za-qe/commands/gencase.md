@@ -16,8 +16,12 @@ allowed-tools:
   - Glob
   - Grep
   - Skill
+  - Bash(cd:*)
+  - Bash(uv:*)
   - Bash(mkdir:*)
   - Bash(ls:*)
+  - Bash(test:*)
+  - Bash(echo:*)
 ---
 
 # 场景测试案例生成器
