@@ -1,5 +1,4 @@
 ---
-name: qe-workflow
 description: 测试左移全流程工作流：自动探测环境、转换文档、串联分析技能，从需求/设计文档生成API自动化测试用例
 argument-hint: [req_dir] [design_dir] [output_dir] [project_dir]
 allowed-tools: Read, Write, Grep, Glob, Bash(uv run:*), Bash, TodoWrite, AskUserQuestion, Skill(za-qe:doc-converter), Skill, Task
@@ -11,7 +10,6 @@ allowed-tools: Read, Write, Grep, Glob, Bash(uv run:*), Bash, TodoWrite, AskUser
 > - 所有 Bash 命令必须使用**绝对路径**，禁止 `cd` 切换目录
 > - **禁止使用分号 `;` 连接命令**，包括 `; echo "Exit code: $?"`、`; echo "EXIT:$?"`、`|| echo "失败"` 等任何退出码检查形式
 > - 命令失败时 Bash 会直接报错，无需手动检查退出码；需要顺序执行时改用 `&&`
-> - **更新文件时使用 Read + Write 替代 Edit 工具**，减少会话内的权限确认次数
 
 自动完成从原始文档到 API 自动化测试用例的全流程：环境探测 → 目录配置 → docx/doc 转 md → 编码修复 → 需求/设计分析 → API 用例生成。
 

@@ -1,5 +1,4 @@
 ---
-name: qe-gencase
 description: 从需求文档生成场景化测试案例（PlantUML流程图和MindMap测试设计）
 argument-hint: [doc_paths] [--output dir]
 arguments:

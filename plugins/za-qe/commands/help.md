@@ -1,5 +1,4 @@
 ---
-name: qe-help
 description: 显示 za-qe 工具集的帮助信息和使用指南
 argument-hint: [topic]
 ---
