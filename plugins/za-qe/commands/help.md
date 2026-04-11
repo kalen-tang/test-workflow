@@ -1,10 +1,7 @@
 ---
 name: qe-help
 description: 显示 za-qe 工具集的帮助信息和使用指南
-arguments:
-  - name: topic
-    description: 帮助主题（可选：skills/workflow/examples）
-    required: false
+argument-hint: [topic]
 ---
 
 显示 za-qe 测试自动化工具集的帮助信息。

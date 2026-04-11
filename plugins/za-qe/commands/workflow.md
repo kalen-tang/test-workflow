@@ -1,29 +1,8 @@
 ---
 name: qe-workflow
 description: 测试左移全流程工作流：自动探测环境、转换文档、串联分析技能，从需求/设计文档生成API自动化测试用例
-argument-hint: [--req_dir dir] [--design_dir dir] [--output_dir dir] [--project_dir dir]
-arguments:
-  - name: req_dir
-    description: 需求文档目录路径（可选，跳过交互引导直接使用）
-    required: false
-  - name: design_dir
-    description: 设计文档目录路径（可选，默认同需求文档目录，传 "none" 表示无设计文档）
-    required: false
-  - name: output_dir
-    description: 案例输出目录路径（可选，默认同需求文档目录）
-    required: false
-  - name: project_dir
-    description: 自动化项目目录路径（含 pytest.ini，可选）
-    required: false
-allowed-tools:
-  - Read
-  - Write
-  - Edit
-  - Glob
-  - Grep
-  - Skill
-  - Bash(uv *)
-  - Bash(uv run *)
+argument-hint: [req_dir] [design_dir] [output_dir] [project_dir]
+allowed-tools: ["Read", "Write", "Grep", "Glob", "Bash(uv run:*)", "Bash", "TodoWrite", "AskUserQuestion", "Skill", "Task"]
 ---
 
 # 测试左移全流程工作流
@@ -168,38 +147,21 @@ allowed-tools:
 
 ## 阶段 2：文档转换
 
-步骤 2.1、2.2、2.3 统一使用 `convert_docx.py` 脚本完成，转换和编码修复一次完成。
+调用 `doc-converter` Skill 完成 docx/doc → Markdown 转换和编码修复。
 
 ### 步骤 2.1：转换需求文档
 
-```bash
-uv run "${CLAUDE_PLUGIN_ROOT}/scripts/convert_docx.py" '<需求文档目录绝对路径>' '<案例输出目录绝对路径>'
-```
-
-**示例**：
-```bash
-uv run "${CLAUDE_PLUGIN_ROOT}/scripts/convert_docx.py" 'D:/story/2026/BANK-91153' 'D:/story/2026/BANK-91153'
-```
+调用 `doc-converter` Skill，传入需求文档目录和输出目录。
 
 ### 步骤 2.2：转换设计文档（可选）
 
-如果设计文档目录非空且与需求文档目录不同：
-
-```bash
-uv run "${CLAUDE_PLUGIN_ROOT}/scripts/convert_docx.py" '<设计文档目录绝对路径>' '<案例输出目录绝对路径>' --prefix design_
-```
-
-`--prefix design_` 确保输出文件名加 `design_` 前缀，避免与需求文档同名冲突。
+如果设计文档目录非空且与需求文档目录不同，再次调用 `doc-converter` Skill，传入设计文档目录、输出目录和 `--prefix design_` 参数。
 
 **如果设计文档目录与需求文档目录相同**：跳过此步骤（需求文档已在步骤 2.1 中转换）。
 
 ### 步骤 2.3：编码检查与修复
 
-已由 `convert_docx.py` 内置处理，无需单独执行。脚本输出：
-- `OK: <path>` — 已是 UTF-8
-- `FIXED: <path> from <enc>` — 已从 enc 转换为 UTF-8
-- `WARN: <path>` — 编码无法识别，需人工检查
-- `ERROR: <path> <msg>` — 转换失败
+已由 `doc-converter` 内置处理，无需单独执行。
 
 ### 步骤 2.4：转换结果汇报
 
