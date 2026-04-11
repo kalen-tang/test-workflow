@@ -26,7 +26,10 @@
       "Bash(mv design-parser/references/02-docx-reader.md design-parser/references/docx-reader.md)",
       "Bash(mv design-parser/references/03-udoc-fetcher.md design-parser/references/udoc-fetcher.md)",
       "Bash(mv interface-extractor/references/01-interface-validation.md interface-extractor/references/interface-validation.md)",
-      "Bash(mv interface-extractor/references/02-output-format.md interface-extractor/references/output-format.md)"
+      "Bash(mv interface-extractor/references/02-output-format.md interface-extractor/references/output-format.md)",
+      "Bash(npm test *)",
+      "Bash(gh pr view *)",
+      "Bash(gh pr diff *)"
     ]
   }
 }
