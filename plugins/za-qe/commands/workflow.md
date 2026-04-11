@@ -138,7 +138,8 @@ allowed-tools:
    - 扫描 `.doc`/`.docx` 文件列表
 
 3. **案例输出目录**：
-   - 如果不存在，使用 `mkdir -p` 创建
+   - 如果不存在，使用 `uv run mkdir -p` 创建（或通过 Glob 检测后用 Write 工具写入占位）
+   - 目录确认后，立即使用 Write 工具在输出目录下写入 `.workflow_session` 文件（内容为当前时间戳），**触发一次文件写入权限确认**，让用户选择 "Yes, allow all edits during this session"，后续所有文件写入不再逐个询问
 
 4. **自动化项目目录验证**（如果非空）：
    - 必须存在 `pytest.ini` 文件
