@@ -138,8 +138,27 @@ allowed-tools:
    - 扫描 `.doc`/`.docx` 文件列表
 
 3. **案例输出目录**：
-   - 如果不存在，使用 `uv run mkdir -p` 创建（或通过 Glob 检测后用 Write 工具写入占位）
-   - 目录确认后，立即使用 Write 工具在输出目录下写入 `.workflow_session` 文件（内容为当前时间戳），**触发一次文件写入权限确认**，让用户选择 "Yes, allow all edits during this session"，后续所有文件写入不再逐个询问
+   - 如果不存在，使用 `uv run -m mkdir` 或直接用 Write 工具创建
+   - 目录确认后，立即用 Write 工具在输出目录下创建 `_workflow_progress.md`，内容为当前配置和进度占位。**这一步的目的是触发一次文件写入授权**，让用户选择 "Yes, allow all edits during this session"，后续所有文件写入（规范化文档、接口报告、测试代码等）不再逐个询问
+   - 在后续每个步骤完成后，用 Edit 工具追加进度到 `_workflow_progress.md`（如 `✅ req-parser 完成`）
+   - 全流程结束后保留该文件作为执行摘要，或提示用户可删除
+
+`_workflow_progress.md` 初始内容模板：
+```
+# 测试左移工作流进度
+
+**开始时间**：{当前时间}
+**需求文档目录**：{req_dir}
+**案例输出目录**：{output_dir}
+
+## 执行进度
+- [ ] 阶段2：文档转换
+- [ ] 阶段3：req-parser
+- [ ] 阶段3：design-parser（如有）
+- [ ] 阶段3：interface-extractor（如有）
+- [ ] 阶段3：case-designer
+- [ ] 阶段3：api-generator（如有）
+```
 
 4. **自动化项目目录验证**（如果非空）：
    - 必须存在 `pytest.ini` 文件
