@@ -1,8 +1,9 @@
 # /// script
-# dependencies = ["winotify"]
+# dependencies = ["winotify", "chardet"]
 # ///
 import json, sys, os, glob
 from datetime import datetime
+import chardet
 from winotify import Notification
 
 sys.stdout.reconfigure(encoding='utf-8')
@@ -13,7 +14,13 @@ cost = 0
 duration_ms = 0
 
 try:
-    raw = sys.stdin.read().strip()
+    raw_bytes = sys.stdin.buffer.read().strip()
+    try:
+        raw = raw_bytes.decode('utf-8')
+    except UnicodeDecodeError:
+        detected = chardet.detect(raw_bytes)
+        enc = detected.get('encoding', 'utf-8') or 'utf-8'
+        raw = raw_bytes.decode(enc, errors='replace')
     if raw:
         data = json.loads(raw)
         cwd = data.get('cwd', '')
@@ -39,16 +46,19 @@ mins, secs = duration_ms // 60000, (duration_ms % 60000) // 1000
 
 parts = []
 if model:
-    parts.append(f"[{model}]")
+    parts.append(f"模型: {model}")
 if cost:
-    parts.append(f"${cost:.2f}")
+    parts.append(f"费用: ${cost:.2f}")
 if duration_ms:
-    parts.append(f"⏱️ {mins}m {secs}s")
+    parts.append(f"耗时: {mins}分{secs}秒")
 msg = "  ".join(parts)
+
+now = datetime.now().strftime('%H:%M:%S')
+title = f"✅ 会话结束 · {project}  {now}" if project else f"✅ 会话结束  {now}"
 
 toast = Notification(
     app_id="Claude Code",
-    title=f"✅ 已完成  {project}  {datetime.now().strftime('%H:%M:%S')}" if project else f"✅ 已完成  {datetime.now().strftime('%H:%M:%S')}",
+    title=title,
     msg=msg,
     duration="short",
 )

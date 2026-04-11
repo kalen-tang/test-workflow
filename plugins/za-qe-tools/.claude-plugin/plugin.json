@@ -1,6 +1,6 @@
 {
   "name": "za-qe-tools",
-  "version": "2.1.0",
+  "version": "2.2.0",
   "description": "QE通用工具集：Powerline风格状态栏 + Windows通知系统",
   "author": {
     "name": "Alfie"
@@ -57,40 +57,6 @@
           {
             "type": "command",
             "command": "uv run ${CLAUDE_PLUGIN_ROOT}/scripts/clear-permission-flag.py",
-            "async": true
-          }
-        ]
-      }
-    ],
-    "Notification": [
-      {
-        "hooks": [
-          {
-            "type": "command",
-            "command": "uv run ${CLAUDE_PLUGIN_ROOT}/scripts/notify-notification.py",
-            "async": true
-          }
-        ]
-      }
-    ],
-    "PreCompact": [
-      {
-        "hooks": [
-          {
-            "type": "command",
-            "command": "uv run ${CLAUDE_PLUGIN_ROOT}/scripts/notify-precompact.py",
-            "async": true
-          }
-        ]
-      }
-    ],
-    "PreToolUse": [
-      {
-        "matcher": "Bash",
-        "hooks": [
-          {
-            "type": "command",
-            "command": "uv run ${CLAUDE_PLUGIN_ROOT}/scripts/notify-pretooluse.py",
             "async": true
           }
         ]
