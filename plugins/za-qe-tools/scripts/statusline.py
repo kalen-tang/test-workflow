@@ -104,14 +104,11 @@ else:
     c1_bot_plain = f"{'█' * filled}{'░' * (10 - filled)} {pct}%"
 
 def fmt_duration(ms):
-    total_secs = ms // 1000
-    mins = total_secs // 60
-    secs = total_secs % 60
-    if mins >= 60:
-        h = mins // 60
-        m = mins % 60
-        return f"{h}h{m}m"
-    return f"{mins}m{secs}s"
+    total_secs = int(ms / 1000)
+    h = total_secs // 3600
+    m = (total_secs % 3600) // 60
+    s = total_secs % 60
+    return f"{h}:{m:02d}:{s:02d}"
 
 duration_str = fmt_duration(duration_ms)
 api_str = fmt_duration(api_duration_ms)
@@ -251,7 +248,7 @@ elif venv_name:
     c4_top_plain = f"({venv_name})"
 else:
     c4_top_plain = ""
-c4_bot_plain = f"⏱️  {duration_str} [api {api_str}]"
+c4_bot_plain = f"⏱️ {duration_str} [api {api_str}]"
 
 # 每列宽度 = max(top, bot) 内容宽度，设最小宽度
 col_widths = [
@@ -284,7 +281,7 @@ elif tok_per_sec:
     tok_per_sec_str = f"⚡ {tok_per_sec:.1f} t/s"
 else:
     tok_per_sec_str = ""
-c4_bot = f"⏱️  {duration_str} [api {api_str}]{('  ' + tok_per_sec_str) if tok_per_sec_str else ''}"
+c4_bot = f"⏱️ {duration_str} [api {api_str}]{('  ' + tok_per_sec_str) if tok_per_sec_str else ''}"
 
 line1 = (
     f"{rpad(c1_top, col_widths[0])} | "

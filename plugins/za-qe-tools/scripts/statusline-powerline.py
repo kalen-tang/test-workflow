@@ -80,14 +80,11 @@ tokens_used_k = f"{used_tokens / 1000:.1f}"
 tokens_limit_k = f"{ctx_window_size / 1000:.0f}"
 
 def fmt_duration(ms):
-    total_secs = ms // 1000
-    mins = total_secs // 60
-    secs = total_secs % 60
-    if mins >= 60:
-        h = mins // 60
-        m = mins % 60
-        return f"{h}h{m}m"
-    return f"{mins}m{secs}s"
+    total_secs = int(ms / 1000)
+    h = total_secs // 3600
+    m = (total_secs % 3600) // 60
+    s = total_secs % 60
+    return f"{h}:{m:02d}:{s:02d}"
 
 duration_str = fmt_duration(duration_ms)
 api_str = fmt_duration(api_duration_ms)
@@ -331,7 +328,7 @@ else:
 line2_segs = []
 line2_segs.append(bar_entry)
 line2_segs.append((f"💰 ${cost:.2f}", cost_color, C_POLAR0))
-line2_segs.append((f"⏱ {duration_str} [api {api_str}]", C_OCEAN, C_SNOW1))
+line2_segs.append((f"⏱️ {duration_str} [api {api_str}]", C_OCEAN, C_SNOW1))
 if tok_per_sec_str:
     line2_segs.append((tok_per_sec_str, C_POLAR1, C_SNOW1))
 
