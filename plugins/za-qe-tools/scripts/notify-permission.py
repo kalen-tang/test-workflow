@@ -1,30 +1,40 @@
 # /// script
-# dependencies = ["winotify", "chardet"]
+# dependencies = [
+#   "winotify; sys_platform == 'win32'",
+#   "chardet",
+# ]
 # ///
-import json, sys, time, tempfile
+import json, sys, time, tempfile, subprocess
 from pathlib import Path
 sys.stdout.reconfigure(encoding='utf-8')
 import chardet
-from winotify import Notification
+
+
+def notify(title: str, msg: str, duration: str = "short") -> None:
+    """跨平台弹出系统通知。"""
+    if sys.platform == "win32":
+        from winotify import Notification
+        Notification(app_id="Claude Code", title=title, msg=msg, duration=duration).show()
+    elif sys.platform == "darwin":
+        t = title.replace('"', '\\"')
+        m = msg.replace('"', '\\"')
+        subprocess.run(["osascript", "-e", f'display notification "{m}" with title "{t}"'], capture_output=True, timeout=5)
 
 
 def fix_encoding(text: str) -> str:
-    """检测并修复可能的编码问题，确保文本可在 Windows Toast 中正确显示。"""
+    """检测并修复可能的编码问题。"""
     try:
         raw_bytes = text.encode('utf-8')
         detected = chardet.detect(raw_bytes)
         enc = detected.get('encoding', 'utf-8') or 'utf-8'
-        # 如果检测结果不是 utf-8 兼容编码，尝试用检测到的编码重新解码
         if enc.lower().replace('-', '') not in ('utf8', 'ascii'):
             return raw_bytes.decode(enc, errors='replace')
-        # 尝试 latin1 回退：UTF-8 字节被误读为 latin1 的情况
         try:
             repaired = raw_bytes.decode('utf-8').encode('latin1').decode('utf-8')
             if repaired != text:
                 return repaired
         except (UnicodeDecodeError, UnicodeEncodeError):
             pass
-        # 尝试 GBK 回退：Windows 中文环境常见
         try:
             repaired = raw_bytes.decode('utf-8').encode('latin1').decode('gbk')
             if repaired != text:
@@ -38,7 +48,6 @@ def fix_encoding(text: str) -> str:
 
 try:
     raw = sys.stdin.buffer.read()
-    # 优先 UTF-8 解码，失败则用 chardet 检测
     try:
         text = raw.decode('utf-8')
     except UnicodeDecodeError:
@@ -52,7 +61,6 @@ try:
     project = Path(cwd).name if cwd else ''
     tool_input = data.get('tool_input', {})
 
-    # 工具名中文映射
     tool_names = {
         'Bash': '执行',
         'Read': '读取',
@@ -100,10 +108,4 @@ for _ in range(15):
 if FLAG_FILE.exists():
     FLAG_FILE.unlink(missing_ok=True)
     title = f"⏳ 等待确认 · {project}" if project else "⏳ 等待确认"
-    toast = Notification(
-        app_id="Claude Code",
-        title=title,
-        msg=msg,
-        duration="long",
-    )
-    toast.show()
+    notify(title, msg, duration="long")
