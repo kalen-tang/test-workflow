@@ -22,7 +22,7 @@ allowed-tools:
   - Glob
   - Grep
   - Skill
-  - Bash
+  - Bash(uv:*)
 ---
 
 # 测试左移全流程工作流
