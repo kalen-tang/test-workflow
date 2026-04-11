@@ -17,6 +17,7 @@ allowed-tools:
   - Grep
   - Skill
   - Bash(uv *)
+  - Bash(uv run *)
 ---
 
 # 场景测试案例生成器

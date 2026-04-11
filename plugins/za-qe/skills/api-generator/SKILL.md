@@ -2,6 +2,7 @@
 name: api-generator
 description: 此技能应在用户询问"生成API测试用例"、"生成接口测试代码"、"根据接口文档生成自动化测试"、"生成API自动化测试"、"创建接口测试用例"或"为API端点生成测试数据"时使用。基于银行标准测试框架（pytest_zabank系列插件）生成标准化测试代码和YAML数据。
 version: 2.0.0
+allowed-tools: Read Write Edit Glob Grep
 ---
 
 # 银行标准测试框架 - API测试用例生成器

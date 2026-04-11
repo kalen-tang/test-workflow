@@ -23,6 +23,7 @@ allowed-tools:
   - Grep
   - Skill
   - Bash(uv *)
+  - Bash(uv run *)
 ---
 
 # 测试左移全流程工作流

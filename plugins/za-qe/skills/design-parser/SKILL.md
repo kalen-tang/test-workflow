@@ -2,6 +2,7 @@
 name: design-parser
 description: 此技能用于检查开发方案文档（设计文档）是否符合规范，并产出规范化后的 MD 文件供后续接口自动化生成使用。当用户说"检查开发方案"、"规范化设计文档"、"开发方案转 MD"、"解析开发方案"、"分析开发方案完整性"、"开发文档规范检查"、"检查接口是否完整"、"设计文档评审"时应触发。
 status: active
+allowed-tools: Read Write Edit Glob Grep
 ---
 
 # 开发方案文档规范化器

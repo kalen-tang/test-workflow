@@ -1,6 +1,7 @@
 ---
 name: case-designer
 description: 此技能用于生成场景案例和可视化测试设计。当用户说帮我生成测试案例、把需求转成测试用例、生成PlantUML流程图、画一下测试功能点、需要测试MindMap或测试案例可视化、生成场景案例时应触发。
+allowed-tools: Read Write Edit Glob Grep Bash(uv *) Bash(uv run *)
 ---
 
 # 场景案例设计器
