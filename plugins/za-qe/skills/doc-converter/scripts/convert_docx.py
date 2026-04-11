@@ -95,6 +95,15 @@ def convert(input_dir: str, output_dir: str, prefix: str = "") -> int:
 
 
 if __name__ == "__main__":
+    import io
+    import os
+
+    # Windows 终端默认 GBK，Python stdout 默认 UTF-8 会导致中文路径乱码
+    # Linux/Mac 通常是 UTF-8 无需处理
+    if os.name == "nt" and hasattr(sys.stdout, "buffer"):
+        sys.stdout = io.TextIOWrapper(sys.stdout.buffer, encoding=sys.getdefaultencoding(), errors="replace")
+        sys.stderr = io.TextIOWrapper(sys.stderr.buffer, encoding=sys.getdefaultencoding(), errors="replace")
+
     parser = argparse.ArgumentParser(description=__doc__, formatter_class=argparse.RawDescriptionHelpFormatter)
     parser.add_argument("input_dir", help="包含 docx/doc 文件的输入目录")
     parser.add_argument("output_dir", help="Markdown 输出目录")
