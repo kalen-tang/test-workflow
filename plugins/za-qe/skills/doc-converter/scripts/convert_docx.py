@@ -3,6 +3,7 @@
 # requires-python = ">=3.10"
 # dependencies = [
 #     "markitdown[docx]>=0.1.0",
+#     "chardet>=5.0",
 # ]
 # ///
 """
@@ -31,6 +32,7 @@ import argparse
 import pathlib
 import sys
 
+import chardet
 from markitdown import MarkItDown
 
 ENCODINGS = ["utf-8-sig", "gb18030", "big5", "utf-16"]
@@ -44,6 +46,19 @@ def fix_encoding(path: pathlib.Path) -> str:
         return "ok"
     except UnicodeDecodeError:
         pass
+
+    # 先用 chardet 检测编码
+    detected = chardet.detect(raw)
+    det_enc = detected.get("encoding")
+    if det_enc:
+        try:
+            text = raw.decode(det_enc)
+            path.write_text(text, encoding="utf-8")
+            return f"fixed:{det_enc}"
+        except (UnicodeDecodeError, UnicodeError, LookupError):
+            pass
+
+    # chardet 失败时回退到手动尝试
     for enc in ENCODINGS:
         try:
             text = raw.decode(enc)
