@@ -288,18 +288,18 @@ flowchart TD
 
 ### 5. req-parser（需求文档规范化器）✅
 
-将原始需求文档转为标准化 YAML 格式，是完整模式第一阶段的核心组件。
+将原始需求文档按 ZA Bank PRD 模板 7 章结构输出规范化 Markdown 文档。
 
 - 解析原始需求文档（Word/Markdown/PDF）
-- 提取业务场景、功能需求、验收标准
-- 生成标准化 YAML 输出（遵循 [normalized-requirement v2.0](./references/artifact-schemas/01-normalized-requirement-v2.md) 格式）
-- 支持 ZA Bank PRD 模板
+- 提取业务痛点、功能需求、验收标准（给定-当-则格式）
+- 输出 PRD 模板 7 章结构的规范化文档
+- 大文档自动分段生成，避免超时
 
 ```bash
 /za-qe:req-parser ./docs/requirement.docx
 ```
 
-**输出**: 标准化需求文档（YAML 格式）
+**输出**: 规范化需求文档（Markdown，7 章结构）
 
 ---
 
@@ -309,7 +309,7 @@ flowchart TD
 
 - 解析原始设计文档
 - 提取接口设计、数据库设计、系统交互
-- 生成标准化 YAML 输出（遵循 [normalized-design v1.0](./references/artifact-schemas/02-normalized-design.md) 格式）
+- 生成标准化输出（遵循 normalized-design 格式，详见 skills/design-parser/references/）
 
 **当前状态**: 🚧 开发中
 
@@ -319,21 +319,19 @@ flowchart TD
 
 ---
 
-## 📦 Artifact Schemas
+## 📦 Skill 输入输出
 
-完整模式各 Skill 之间通过标准化 YAML 格式通信。每个 Skill 的输入输出格式都有严格定义，确保组件间无缝协作。
-
-> 详细规范见 [Artifact Schemas 总览](./references/artifact-schemas/00-overview.md)
+各 Skill 之间通过标准化 Markdown 文档通信。每个 Skill 的参考文档位于 `skills/<name>/references/` 目录下。
 
 ### Skill 输入输出映射
 
 | Skill | 输入格式 | 输出格式 |
 |-------|---------|---------|
-| req-parser | 原始需求文档 | 01-normalized-requirement |
-| design-parser | 原始设计文档 | 02-normalized-design |
-| doc-reviewer | 01 + 02 + 04 | 05-validation-report |
-| case-designer | 01 + 02 + 03 + 04 | 06-manual-test-cases |
-| api-generator | 06 + 01~04 | 07-api-test-cases |
+| req-parser | 原始需求文档 | 规范化需求文档（PRD 7 章结构） |
+| design-parser | 原始设计文档 | 规范化设计文档 |
+| doc-reviewer | 规范化需求 + 规范化设计 | 验证报告 |
+| case-designer | 规范化需求 + 接口数据 | 场景案例 + 场景案例表 |
+| api-generator | 场景案例表 + 接口数据 | API 测试代码 |
 
 ---
 
@@ -398,22 +396,9 @@ doc-reviewer 需要配置文档目录，可以在 SKILL.md 中修改默认配置
 | doc-reviewer | [SKILL.md](./skills/doc-reviewer/SKILL.md) | - |
 | case-designer | [SKILL.md](./skills/case-designer/SKILL.md) | [references/](./skills/case-designer/references/) (4个), [examples/](./skills/case-designer/examples/) (5个) |
 | api-generator | [SKILL.md](./skills/api-generator/SKILL.md) | [references/](./skills/api-generator/references/) (6个), [examples/](./skills/api-generator/examples/) |
-| req-parser | [SKILL.md](./skills/za-qe:req-parser/SKILL.md) | [references/](./skills/za-qe:req-parser/references/), [examples/](./skills/za-qe:req-parser/examples/) |
+| req-parser | [SKILL.md](./skills/req-parser/SKILL.md) | [references/](./skills/req-parser/references/), [examples/](./skills/req-parser/examples/) |
 | design-parser | [SKILL.md](./skills/design-parser/SKILL.md) | [references/](./skills/design-parser/references/) |
-
-### Artifact Schemas 文档
-
-| 编号 | 文档 |
-|------|------|
-| 00 | [总览](./references/artifact-schemas/00-overview.md) |
-| 01 | [normalized-requirement v2.0](./references/artifact-schemas/01-normalized-requirement-v2.md) |
-| 02 | [normalized-design](./references/artifact-schemas/02-normalized-design.md) |
-| 03 | [normalized-cases](./references/artifact-schemas/03-normalized-cases.md) |
-| 04 | [code-diff-report](./references/artifact-schemas/04-code-diff-report.md) |
-| 05 | [validation-report](./references/artifact-schemas/05-validation-report.md) |
-| 06 | [manual-test-cases](./references/artifact-schemas/06-manual-test-cases.md) |
-| 07 | [api-test-cases](./references/artifact-schemas/07-api-test-cases.md) |
 
 ---
 
-**版本**: v1.2.0 | [项目主文档](../../README.md) | ZA Bank Test Team
+**版本**: v1.3.0 | [项目主文档](../../README.md) | ZA Bank Test Team

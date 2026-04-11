@@ -258,10 +258,10 @@ PlantUML MindMap，至少四层结构：
 
 ### 参考文档
 
-- [PlantUML 流程图生成规则](../skills/case-designer/references/01-flowchart-generation.md)
-- [测试功能点 MindMap 生成规则](../skills/case-designer/references/02-test-points-mindmap.md)
-- [详细测试案例 MindMap 生成规则](../skills/case-designer/references/03-test-cases-mindmap.md)
-- [测试案例命名规范详解](../skills/case-designer/references/04-naming-conventions.md)
+- [PlantUML 流程图生成规则](../skills/case-designer/references/flowchart-generation.md)
+- [测试功能点 MindMap 生成规则](../skills/case-designer/references/test-points-mindmap.md)
+- [详细测试案例 MindMap 生成规则](../skills/case-designer/references/test-cases-mindmap.md)
+- [测试案例命名规范详解](../skills/case-designer/references/naming-conventions.md)
 
 ### 示例文件
 

@@ -35,8 +35,7 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 ### 插件系统两级配置
 
 1. **项目级**：`.claude-plugin/marketplace.json` — 定义可用插件（`core`/`optional`）
-<<<<<<< HEAD
-2. **插件级**：`plugins/za-qe/.claude-plugin/plugin.json` — 插件元数据（当前 v1.4.0），声明 `commands`/`skills` 路径
+2. **插件级**：`plugins/za-qe/.claude-plugin/plugin.json` — 插件元数据（当前 v2.2.0），声明 `commands`/`skills` 路径
 
 ### 核心与可选插件
 
@@ -67,22 +66,6 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 - 阶段 3：`req-parser` → `design-parser` → `interface-extractor` → `case-designer` → `api-generator`
 - 输出：规范化文档 + 测试左移分析报告 + API 自动化测试用例
 
-### Artifact Schemas（完整模式核心协议）
-
-完整模式各 Skill 之间通过标准化 YAML 格式通信，定义在 `plugins/za-qe/references/artifact-schemas/`：
-
-| 编号 | 格式 | 产出工具 | 状态 |
-|------|------|---------|------|
-| 01 | normalized-requirement | req-parser | ✅ v2.0 |
-| 02 | normalized-design | design-parser | ✅ v1.0 |
-| 03 | normalized-cases | case-normalizer | 📋 计划中 |
-| 04 | code-diff-report | code-diff-mcp | 📋 计划中 |
-| 05 | validation-report | doc-reviewer | ✅ v1.0 |
-| 06 | manual-test-cases | case-designer | ✅ v1.0 |
-| 07 | api-test-cases | api-generator | ✅ v1.0 |
-
-**总览文档**：`plugins/za-qe/references/artifact-schemas/00-overview.md`
-
 ## 📝 开发规范
 
 ### 命名规范
@@ -106,17 +89,16 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 ### 关键规范
 
-- Skill 引用 references 文档使用**无 `./` 前缀的相对路径**：`references/01-xxx.md`（不写 `./references/01-xxx.md`）
-- **Skill 不得跨目录引用 `../../references/artifact-schemas/`**：Claude Code 对插件缓存的跨目录读取有额外安全确认，会中断工作流。需要 artifact-schema 的 Skill 应将对应文件**复制到自己的 `references/` 下**，两边保持同步更新
+- Skill 引用 references 文档使用**无 `./` 前缀的相对路径**：`references/xxx.md`（不写 `./references/xxx.md`）
 - 版本号遵循 SemVer：新增 Skill/Command → 次版本升级（`1.3.0 → 1.4.0`）
 - 所有文档中 Skills 数量和版本号必须保持一致
 - `plugin.json` 必须放在 `.claude-plugin/` 子目录下
 
-### References 两级结构
+### References 结构
 
-- **插件级**：`plugins/za-qe/references/` — 公共参考文档（如 `artifact-schemas/`），为规范源头
-- **Skill 级**：`plugins/za-qe/skills/<name>/references/` — Skill 专属参考文档（编号前缀 `01-xxx.md`）
-- **同步规则**：在 `artifact-schemas/` 新建或更新规范文件后，必须同步复制到引用该规范的所有 Skill 的 `references/` 目录下
+- 参考文档统一放在 `plugins/za-qe/skills/<name>/references/` 下（Skill 专属）
+- 无插件级 references 目录（已移除 `plugins/za-qe/references/`）
+- 多个 Skill 共享的文档各自维护一份副本
 
 ### 扩展插件时
 
@@ -149,7 +131,7 @@ claude mcp add playwright npx @playwright/mcp@latest
 |------|------|
 | 插件规范（扩展参考） | `docs/alfie-plugin-spec.md` |
 | 系统架构图 | `architecture.puml` |
-| artifact-schemas 总览 | `plugins/za-qe/references/artifact-schemas/00-overview.md` |
 | req-parser Skill | `plugins/za-qe/skills/req-parser/SKILL.md` |
+| PRD 模板 | `plugins/za-qe/skills/req-parser/references/prd-template.md` |
 | api-generator 参考 | `plugins/za-qe/skills/api-generator/references/` |
 | interface-extractor 参考 | `plugins/za-qe/skills/interface-extractor/references/` |
