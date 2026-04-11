@@ -2,7 +2,7 @@
 name: req-parser
 description: 需求文档标准化器，将原始需求文档（Word/PDF/Markdown）转换为结构化 Markdown 格式，支持繁简识别转换、功能提取、验收标准识别、测试场景生成、三级质量检查，供后续 doc-reviewer、case-designer、api-generator 技能使用。当用户说"解析需求文档"、"规范化需求文档"、"需求文档转MD"、"整理需求文档"、"标准化需求"、"分析PRD文档"、"生成标准需求规格说明"时应触发。
 status: active
-allowed-tools: Read Write Edit Glob Grep
+allowed-tools: Read, Write, Edit, Glob, Grep
 ---
 
 # req-parser - 需求文档标准化器

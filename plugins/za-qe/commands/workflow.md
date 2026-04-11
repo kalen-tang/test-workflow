@@ -1,7 +1,7 @@
 ---
 description: 测试左移全流程工作流：自动探测环境、转换文档、串联分析技能，从需求/设计文档生成API自动化测试用例
 argument-hint: [req_dir] [design_dir] [output_dir] [project_dir]
-allowed-tools: Read, Write, Grep, Glob, Bash(uv run:*), Bash, TodoWrite, AskUserQuestion, Skill(za-qe:doc-converter), Skill, Task
+allowed-tools: Read, Write, Edit, Grep, Glob, Bash(uv run:*), Bash, TodoWrite, AskUserQuestion, Skill(za-qe:doc-converter), Skill(za-qe:req-parser), Skill, Task
 ---
 
 # 测试左移全流程工作流
