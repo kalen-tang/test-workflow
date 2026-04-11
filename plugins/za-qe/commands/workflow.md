@@ -184,7 +184,11 @@ allowed-tools: Read, Write, Edit, Grep, Glob, Bash(uv run:*), Bash, TodoWrite, A
 
 ## 阶段 3：Skill 串联
 
-> **重要原则**：阶段 3 的所有 Skill 一律读取阶段 2 产出的 **md 文件**，**不得直接读取原始 doc/docx 文件**。原始文档仅在阶段 2 由 markitdown 处理。
+> **重要原则**：
+> - 阶段 3 的所有 Skill 一律读取阶段 2 产出的 **md 文件**，**不得直接读取原始 doc/docx 文件**
+> - **每个 Skill 执行完成后，必须立即继续执行下一个 Skill，不得停下等待用户指令**
+> - 所有 Skill 按决策逻辑确定的顺序串行执行，直到全部完成
+> - 每完成一个 Skill，更新 `_workflow_progress.md` 进度后立即进入下一步
 
 ### 决策逻辑
 
@@ -216,6 +220,8 @@ allowed-tools: Read, Write, Edit, Grep, Glob, Bash(uv run:*), Bash, TodoWrite, A
 3. 生成 given-when-then 测试场景
 4. 执行三级一致性检查
 5. 输出规范化需求文档
+
+**完成后**：更新进度，立即进入下一步（design-parser 或 case-designer）。
 
 ### 步骤 3.2：调用 design-parser（如有设计 md）
 
@@ -267,6 +273,8 @@ uv run "${CLAUDE_PLUGIN_ROOT}/scripts/plantuml_to_xmind.py" '<场景案例.md绝
 
 **调用方式**：按照 case-designer Skill 的流程执行
 
+**完成后**：更新进度，如有接口数据报告则继续 api-generator，否则输出最终汇总。
+
 ### 步骤 3.5：调用 api-generator
 
 **触发条件**：步骤 3.3 产出了接口数据报告
@@ -279,6 +287,8 @@ uv run "${CLAUDE_PLUGIN_ROOT}/scripts/plantuml_to_xmind.py" '<场景案例.md绝
   - 否则 → 输出到案例输出目录下
 
 **调用方式**：按照 api-generator Skill 的流程执行
+
+**完成后**：更新进度，输出最终汇总。
 
 ### 仅有需求文档的执行结果
 
