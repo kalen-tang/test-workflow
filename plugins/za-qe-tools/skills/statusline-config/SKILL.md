@@ -48,7 +48,7 @@ cat ~/.claude/plugins/installed_plugins.json
 
 ### 3. 读取当前配置
 
-读取 `~/.claude/settings.json`。
+读取 `~/.claude/settings.json` 和 `~/.claude/za-qe-tools.json`。
 
 ### 4. 修改配置
 
@@ -77,6 +77,28 @@ cat ~/.claude/plugins/installed_plugins.json
 
 将 `<插件绝对路径>` 替换为第 2 步检测到的实际路径，路径统一使用正斜杠。
 
+### 4.5 同步模块配置
+
+读取 `~/.claude/za-qe-tools.json`，更新 `statusline` 字段：
+
+**powerline 模式：**
+```json
+"statusline": { "enabled": true, "mode": "powerline" }
+```
+
+**standard 模式：**
+```json
+"statusline": { "enabled": true, "mode": "standard" }
+```
+
+**off 模式：**
+```json
+"statusline": { "enabled": false, "mode": "powerline" }
+```
+
+使用 Edit 工具修改 `za-qe-tools.json`（仅修改 `statusline` 字段，不影响其他模块配置）。
+如果文件不存在，创建默认配置后再修改。
+
 ### 5. 写入并确认
 
 使用 Edit 工具修改 `settings.json`（仅修改 `statusLine` 字段，不影响其他配置）。
@@ -88,3 +110,4 @@ cat ~/.claude/plugins/installed_plugins.json
 - `${CLAUDE_PLUGIN_ROOT}` 在 hooks 中可用，但在 `statusLine.command` 运行时不可用，路径必须是绝对路径
 - 路径统一使用正斜杠（`/`），兼容跨平台
 - **仅操作 `statusLine` 字段**，不覆盖其他配置
+- 同时更新 `~/.claude/za-qe-tools.json` 中的 `statusline` 配置，保持模块开关状态一致

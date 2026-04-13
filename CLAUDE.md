@@ -42,10 +42,8 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 | 插件 | 类型 | 用途 |
 |------|------|------|
 | `za-qe` | core | 测试左移工具集：需求分析、场景案例、API用例生成 |
-| `za-qe-tools` | optional | 状态栏 + Windows 通知系统 |
+| `za-qe-tools` | optional | 通用工具集：状态栏 + 系统通知 + 命令审批(Dippy) + 事件流查看(ESP) |
 | `za-ui` | optional | UI自动化测试：Playwright转换、修复、增量更新 |
-| `za-dippy` | optional | Bash命令智能审批：自动放行安全命令，拦截危险操作 |
-| `za-claude-esp` | optional | 会话事件流查看工具：实时追踪、回放 Claude Code 会话 |
 
 所有 Skill 位于 `plugins/za-qe/skills/` 下：
 
