@@ -1,11 +1,12 @@
 {
   "name": "za-qe-tools",
-  "version": "2.2.0",
-  "description": "QE通用工具集：Powerline风格状态栏 + Windows通知系统",
+  "version": "3.0.0",
+  "description": "QE 通用工具集：Powerline 状态栏、系统通知、Bash 命令审批（Dippy）、会话事件流查看（ESP）",
   "author": {
     "name": "Alfie"
   },
-  "keywords": ["statusbar", "notification", "monitor"],
+  "keywords": ["statusbar", "notification", "monitor", "hook", "bash", "permissions", "session", "event-stream"],
+  "commands": "./commands",
   "hooks": {
     "SessionStart": [
       {
@@ -18,12 +19,23 @@
         ]
       }
     ],
+    "PreToolUse": [
+      {
+        "matcher": "Bash",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "uv run ${CLAUDE_PLUGIN_ROOT}/scripts/hook-router.py --event PreToolUse"
+          }
+        ]
+      }
+    ],
     "Stop": [
       {
         "hooks": [
           {
             "type": "command",
-            "command": "uv run ${CLAUDE_PLUGIN_ROOT}/scripts/notify.py",
+            "command": "uv run ${CLAUDE_PLUGIN_ROOT}/scripts/hook-router.py --event Stop",
             "async": true
           }
         ]
@@ -34,7 +46,7 @@
         "hooks": [
           {
             "type": "command",
-            "command": "uv run ${CLAUDE_PLUGIN_ROOT}/scripts/notify-permission.py",
+            "command": "uv run ${CLAUDE_PLUGIN_ROOT}/scripts/hook-router.py --event PermissionRequest",
             "async": true
           }
         ]
@@ -45,7 +57,7 @@
         "hooks": [
           {
             "type": "command",
-            "command": "uv run ${CLAUDE_PLUGIN_ROOT}/scripts/clear-permission-flag.py",
+            "command": "uv run ${CLAUDE_PLUGIN_ROOT}/scripts/hook-router.py --event PostToolUse",
             "async": true
           }
         ]
@@ -56,7 +68,7 @@
         "hooks": [
           {
             "type": "command",
-            "command": "uv run ${CLAUDE_PLUGIN_ROOT}/scripts/clear-permission-flag.py",
+            "command": "uv run ${CLAUDE_PLUGIN_ROOT}/scripts/hook-router.py --event PostToolUseFailure",
             "async": true
           }
         ]
