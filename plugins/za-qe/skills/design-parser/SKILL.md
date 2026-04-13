@@ -2,7 +2,7 @@
 name: design-parser
 description: 此技能用于检查开发方案文档（设计文档）是否符合规范，并产出规范化后的 MD 文件供后续接口自动化生成使用。当用户说"检查开发方案"、"规范化设计文档"、"开发方案转 MD"、"解析开发方案"、"分析开发方案完整性"、"开发文档规范检查"、"检查接口是否完整"、"设计文档评审"时应触发。
 status: active
-allowed-tools: Read Write Edit Glob Grep
+allowed-tools: Read Write Edit Glob Grep Bash
 ---
 
 # 开发方案文档规范化器
@@ -40,42 +40,45 @@ allowed-tools: Read Write Edit Glob Grep
 - 提取所有接口信息（URL、入参、出参、UDOC 链接）
 - 提取第4章模块列表，用于对照第5章完整性
 
-### 第二步：提取 UDOC 链接中的接口数据
+### 第二步：通过 UDOC OpenAPI 补全接口数据
 
-**在检查内容之前，先处理文档中出现的所有 UDOC 链接。**
+**在检查内容之前，先通过 UDOC sync 接口拉取每个接口的完整参数数据。**
 
-#### UDOC 链接识别
+#### 接口信息收集
 
-扫描全文，找出所有符合以下格式的 UDOC 链接：
-
-```
-https://udoc.in.za/#/view/xxxxx
-```
-
-对每个识别到的 UDOC 链接，按照 `references/udoc-fetcher.md` 中的方式访问并提取完整接口数据。
+扫描全文，收集所有接口的以下信息：
+- **微服务名**（原文标注的，下划线格式转连字符，如 `zabank_imc_cubercore_service` → `zabank-imc-cubercore-service`）
+- **接口路径**（如 `/cubercore/approval/add`）
+- **UDOC 链接**（若有，格式 `https://udoc.in.za/#/view/xxxxx`，辅助确认接口归属）
 
 #### UDOC 数据提取流程
 
 详细步骤见 `references/udoc-fetcher.md`，核心要点如下：
 
-1. **尝试直接访问**：使用 WebFetch 工具访问该链接
-2. **若需要登录**：使用账号 `admin` / 密码 `Za123456` 登录后再访问（见参考文档中的登录方案）
-3. **提取以下字段**：
+1. **无需登录**，直接调用 sync 接口，按微服务名 + 接口路径查询：
 
-| 字段 | 说明 |
-|------|------|
-| 接口所属微服务 | 服务名，如 `zabank_imc_activity_service` |
-| 接口路径 | 如 `/activity/list` |
-| 请求方法 | GET / POST / PUT / DELETE |
-| Content-Type | 如 `application/json`、`application/x-www-form-urlencoded`，UDOC 未提供时根据请求方法推断默认值 |
-| 功能描述 | 接口说明文字 |
-| 请求参数 | 字段名、类型、是否必填、说明（完整列表） |
-| 响应参数 | 字段名、类型、说明（完整列表，含嵌套结构） |
+```bash
+curl --ssl-revoke-best-effort --location --request POST \
+  'https://udoc.in.za/sync/doc?moduleName={微服务名连字符格式}&url={接口路径URL编码}' \
+  --max-time 15 -o result/_tmp_udoc_{接口标识}.json
+```
 
-4. **用提取到的数据替换/补全**原文该接口的对应信息：
+2. **提取以下字段**（响应结构为 `data.data`）：
+
+| 字段 | UDOC 路径 | 说明 |
+|------|-----------|------|
+| 接口名称 | `data.data.name` | — |
+| 功能描述 | `data.data.description` | — |
+| 接口路径 | `data.data.url` | — |
+| 请求方法 | `data.data.httpMethod` | GET / POST / PUT / DELETE |
+| Content-Type | `data.data.contentType` | 为空时按方法推断 |
+| 请求参数 | `data.data.queryParams`（GET）/ `data.data.requestParams`（POST） | 含 name/type/required/description/children |
+| 响应参数 | `data.data.responseParams` | 含 name/type/description/children 嵌套结构 |
+
+3. **用提取到的数据替换/补全**原文该接口的对应信息：
    - 若原文接口信息不完整（入参/出参缺失或字段不全），**以 UDOC 数据为准**覆盖补全
-   - 若原文与 UDOC 存在冲突（如 URL 不同），以UDOC为准 
-   - 若 UDOC 链接无法访问（网络不通、链接失效等），在接口下方标注 `> ⚠️ UDOC 链接无法访问，接口信息需人工确认`
+   - 若原文与 UDOC 存在冲突（如路径不同），以 UDOC 为准
+   - 若 sync 接口返回空数据或请求失败，在接口下方标注 `> ⚠️ UDOC 未找到该接口，接口信息需人工确认`
 
 ### 第三步：检查并补全内容
 
@@ -179,4 +182,4 @@ https://udoc.in.za/#/view/xxxxx
 ## 额外资源
 
 - **`references/devplan-standard.md`**：各章节规范详细定义
-- **`references/udoc-fetcher.md`**：UDOC 接口文档抓取方案（登录态处理 + 字段提取）
+- **`references/udoc-fetcher.md`**：UDOC 接口文档抓取方案（OpenAPI sync 接口 + 字段提取）

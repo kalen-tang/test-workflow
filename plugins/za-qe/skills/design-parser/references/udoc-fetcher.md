@@ -1,128 +1,162 @@
 # UDOC 接口文档抓取方案
 
-本文档说明如何从 `udoc.in.za` 提取完整的接口数据，供 design-parser 技能在规范化开发方案文档时使用。
+本文档说明如何从 `udoc.in.za` 通过 OpenAPI 同步接口提取完整接口数据，供 design-parser 技能在规范化开发方案文档时使用。
 
 ---
 
-## UDOC 链接格式
+## 抓取方式：OpenAPI sync 接口
+
+**无需登录**，直接使用以下接口按微服务名 + 接口路径查询：
 
 ```
-https://udoc.in.za/#/view/{docId}
+POST https://udoc.in.za/sync/doc?moduleName={微服务名}&url={接口路径（URL编码）}
 ```
 
-`docId` 即链接 `#/view/` 后面的字符串，例如 `2kqePaEX`。这是文档ID，需要通过详情接口再换取实际的 `spaceId` 才能查询接口数据。
+| 参数 | 说明 | 示例 |
+|------|------|------|
+| `moduleName` | 微服务名，连字符格式 | `zabank-mbs-statistics-service` |
+| `url` | 接口路径，需 URL 编码 | `/static/statistic/inner0/user/identity/query` → `%2Fstatic%2Fstatistic%2Finner0%2Fuser%2Fidentity%2Fquery` |
+
+**curl 示例**：
+```bash
+curl --ssl-revoke-best-effort --location --request POST \
+  'https://udoc.in.za/sync/doc?moduleName=zabank-mbs-statistics-service&url=%2Fstatic%2Fstatistic%2Finner0%2Fuser%2Fidentity%2Fquery' \
+  --max-time 15 \
+  -o result/_tmp_udoc.json
+```
 
 ---
 
 ## 抓取流程
 
-### 第一步：登录获取 Token
+### 第一步：从开发方案文档提取接口信息
 
-UDOC 登录接口使用 RSA 加密密码，**密码密文固定**，直接使用以下 curl 命令登录并提取 token：
-页面有多个接口，设计多个udoc链接的时候，只需要登录一次，拿到token就行了，其他接口可以共用一个token
+扫描原文，收集每个接口的：
+- **微服务名**（下划线格式，如 `zabank_mbs_statistics_service`）→ 转为连字符格式（`zabank-mbs-statistics-service`）
+- **接口路径**（如 `/static/statistic/inner0/user/identity/query`）→ URL 编码
 
-```bash
-TOKEN=$(curl -s -X POST 'https://udoc.in.za/system/login' \
-  -H 'accept: application/json, text/plain, */*' \
-  -H 'authorization: Bearer' \
-  -H 'content-type: application/json;charset=UTF-8' \
-  -H 'origin: https://udoc.in.za' \
-  -H 'referer: https://udoc.in.za/' \
-  -H 'user-agent: Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36' \
-  --data-raw '{"username":"admin","password":"eMQEfDC0SC8qst/5Q0YCY1snO8K+Vvi1RKzAst0c43B/szl9E4D8edFnHm8ThCnseaJtc6gbq3abjNTN9ApJvgJNRhey7op17vWOf28IfBYzaS5XKI4kYH/jtl2WzNEm9waM8idR3EsJ73YRKyR5Duu+lyYeO0DXAAEuE8QvXwc=","source":"register"}' \
-  | python -c "import sys,json; d=json.load(sys.stdin); print(d.get('data',{}).get('token',''))")
+**微服务名格式转换规则**：下划线 `_` → 连字符 `-`，例如：
+- `zabank_imc_cubercore_service` → `zabank-imc-cubercore-service`
+- `zabank_mbs_statistics_service` → `zabank-mbs-statistics-service`
 
-echo "Token: $TOKEN"
-```
-
-Token 格式示例：`pqXbE8vD:eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...`
+**若原文中仅有 UDOC 链接（`https://udoc.in.za/#/view/xxxxx`）而无微服务名**，则先用 docId 查询详情获取接口路径，再结合文档上下文判断所属微服务。
 
 ---
 
-### 第二步：用 docId 查询文档详情，获取 spaceId
+### 第二步：调用 sync 接口获取数据
 
-从 UDOC 链接中提取 `docId`（`#/view/` 后的部分），请求文档详情接口，从响应中取出 `spaceId`：
+对文档中每个接口执行一次请求，将结果保存为临时文件：
 
 ```bash
-DOC_ID="{从链接提取的docId}"
+# URL 编码接口路径（Python 方式）
+ENCODED_URL=$(python -c "import urllib.parse; print(urllib.parse.quote('/your/api/path'))")
 
-SPACE_ID=$(curl -s "https://udoc.in.za/doc/view/detail?id=${DOC_ID}" \
-  -H 'accept: application/json, text/plain, */*' \
-  -H 'cache-control: no-cache' \
-  -H 'pragma: no-cache' \
-  -H "authorization: Bearer ${TOKEN}" \
-  -H 'referer: https://udoc.in.za/' \
-  -H 'user-agent: Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36' \
-  | python -c "import sys,json; d=json.load(sys.stdin); print(d.get('data',{}).get('spaceId',''))")
+curl --ssl-revoke-best-effort --location --request POST \
+  "https://udoc.in.za/sync/doc?moduleName={微服务名}&url=${ENCODED_URL}" \
+  --max-time 15 \
+  -o result/_tmp_udoc_{接口标识}.json
 
-echo "spaceId: $SPACE_ID"
+echo "HTTP code: $?"
 ```
 
 ---
 
-### 第三步：用 spaceId 获取完整接口数据
+### 第三步：从响应中提取字段
 
-```bash
-curl -s "https://udoc.in.za/doc/view/data?spaceId=${SPACE_ID}" \
-  -H 'accept: application/json, text/plain, */*' \
-  -H 'cache-control: no-cache' \
-  -H 'pragma: no-cache' \
-  -H "authorization: Bearer ${TOKEN}" \
-  -H 'referer: https://udoc.in.za/' \
-  -H 'user-agent: Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36' \
-  > result/_tmp_udoc_${DOC_ID}.json
+响应结构：`data.data` 下包含完整接口信息。
+
+```python
+import json, re
+
+with open('result/_tmp_udoc_{接口标识}.json', encoding='utf-8') as f:
+    d = json.load(f)
+
+api = d.get('data', {}).get('data', {})  # 注意是两层 data
+
+name        = api.get('name', '')               # 接口名称
+description = api.get('description', '')        # 功能描述
+url         = api.get('url', '')                # 接口路径
+method      = api.get('httpMethod', '')         # 请求方法
+content_type = api.get('contentType', '')       # Content-Type
+
+# 请求参数：GET 用 queryParams，POST 用 requestParams（若空则回退 queryParams）
+req_params = api.get('queryParams', []) if method == 'GET' \
+             else (api.get('requestParams', []) or api.get('queryParams', []))
+res_params = api.get('responseParams', [])
 ```
 
-用 Read 工具读取 `result/_tmp_udoc_${DOC_ID}.json` 进行后续分析。
+**字段映射**：
+
+| 目标字段 | UDOC 字段路径 | 说明 |
+|---------|-------------|------|
+| 接口名称 | `data.data.name` | — |
+| 功能描述 | `data.data.description` | — |
+| 接口路径 | `data.data.url` | — |
+| 请求方法 | `data.data.httpMethod` | GET / POST / PUT / DELETE |
+| Content-Type | `data.data.contentType` | 若为空则按方法推断：POST → `application/json`，GET → 无 |
+| 请求参数 | `data.data.queryParams`（GET）/ `data.data.requestParams`（POST） | 含 name / type / required / description |
+| 响应参数 | `data.data.responseParams` | 含 name / type / required / description，注意 children 嵌套 |
+
+**参数字段说明**：
+
+| 参数字段 | 说明 |
+|---------|------|
+| `name` | 参数名 |
+| `type` | 数据类型（string / int64 / boolean / object / array / enum / map / file[] 等） |
+| `required` | `1` 或 `true` 表示必填 |
+| `description` | 参数说明（可能含 HTML 标签，需清理） |
+| `children` | 子字段列表（object 类型时存在），递归处理 |
+
+**嵌套结构处理**：若参数 `children` 非空，子字段名用 `└─` 标注，序号用 `父序号.子序号` 格式（如 `9.1`）。
 
 ---
 
-### 第四步：从响应中提取字段
-
-对返回的 JSON 按以下映射提取数据：
-
-| 目标字段 | UDOC 字段路径（常见） | 说明 |
-|---------|---------------------|------|
-| 接口所属微服务 | `serviceName` / `module` / URL 前缀 | 如 `zabank_imc_activity_service` |
-| 接口路径 | `path` / `url` | 如 `/activity/list` |
-| 请求方法 | `method` | GET / POST / PUT / DELETE |
-| Content-Type | `contentType` / `reqBodyType` / `content_type` | 如 `application/json`、`application/x-www-form-urlencoded`；若未找到则按请求方法推断默认值（POST → `application/json`，GET → 无） |
-| 功能描述 | `title` / `description` / `name` | 接口说明文字 |
-| 请求参数 | `req_params` / `requestParams` / `params` | 含字段名、类型、是否必填、说明 |
-| 响应参数 | `res_params` / `responseParams` / `response` | 含字段名、类型、说明，注意嵌套结构 |
-
-**嵌套结构处理**：响应参数若有 `children` / `subParams` 嵌套字段，展开为多行，子字段名用 `└─` 标注。
-
----
-
-### 第五步：写入规范化文档
+### 第四步：写入规范化文档
 
 将提取到的数据按以下格式回填到规范化 MD 文档中对应接口节点：
 
 ```markdown
-##### 接口N：[功能描述]
+##### 接口N：[name]
 
-- **所属微服务**：`[微服务名，如 zabank-imc-cubercore-service]`
-- **接口路径**：`[接口路径，如 /cubercore/approval/add]`
-- **请求方法**：[GET/POST/...]
-- **Content-Type**：[application/json / application/x-www-form-urlencoded / ...]
-- **UDOC**：[原始链接]
-- **功能描述**：[从UDOC提取的description]
+- **所属微服务**：`[微服务名，下划线格式，如 zabank_imc_cubercore_service]`
+- **接口路径**：`[url]`
+- **请求方法**：[httpMethod]
+- **Content-Type**：[contentType]
+- **UDOC**：[原始链接，若无则"—"]
+- **功能描述**：[description]
 
 **请求参数**
 
 | 序号 | 参数名 | 类型 | 必填 | 说明 |
 |------|--------|------|------|------|
-| 1    | xxx    | String | 是  | xxx  |
+| 1    | userId | int64 | 是 | 用户ID |
 
 **响应参数**
 
 | 序号 | 字段名 | 类型 | 说明 |
 |------|--------|------|------|
-| 1    | code   | Integer | 响应码 |
-| 2    | data   | Object  | 响应数据 |
-| 2.1  | └─ id  | Long    | 记录ID |
+| 1    | code   | string | 响应码 |
+| 9    | value  | object | 数据DTO |
+| 9.1  | └─ maGameId | string | MA游戏ID |
 ```
+
+---
+
+## 微服务名不确定时的处理
+
+当原文只有 UDOC 链接（`#/view/xxxxx`），没有明确标注微服务名时：
+
+1. 先根据文档上下文（接口路径前缀、模块名）推断微服务名
+2. 尝试调用 sync 接口：若返回 `code: 0` 且数据非空，说明推断正确
+3. 若返回空数据或报错，调整微服务名重试（常见服务名见下表）
+
+**常见微服务名参考**：
+
+| 路径前缀 | 微服务名 |
+|---------|---------|
+| `/static/statistic/` | `zabank-mbs-statistics-service` |
+| `/cubercore/` | `zabank-imc-cubercore-service` |
+| `/activity/` | `zabank-imc-activity-service` |
 
 ---
 
@@ -130,15 +164,16 @@ curl -s "https://udoc.in.za/doc/view/data?spaceId=${SPACE_ID}" \
 
 | 异常情况 | 处理方式 |
 |---------|---------|
-| 登录接口返回错误（非200或token为空） | 在接口下方标注 `> ⚠️ UDOC 登录失败，请联系管理员确认账号权限` |
-| Token 有效但文档详情接口返回空数据 | 说明 docId 已失效，标注 `> ⚠️ UDOC 文档不存在或已删除（docId：xxx）` |
-| 网络不通（curl 超时/连接拒绝） | 标注 `> ⚠️ UDOC 服务不可达，接口信息需人工确认` |
-| 返回数据字段不完整（部分为空） | 已提取的字段正常填入，缺失字段用 `—` 占位，并标注 `> ℹ️ 以下字段从 UDOC 未获取到，已用原文内容填充` |
+| HTTP 非200 或 `code` 非 `"0"` | 标注 `> ⚠️ UDOC sync 接口请求失败（moduleName 或 url 可能不正确），接口信息需人工确认` |
+| `data.data` 为 null 或空 | 标注 `> ⚠️ UDOC 未找到该接口（moduleName: xxx, url: xxx），请确认微服务名和路径` |
+| 网络不通（curl 超时） | 标注 `> ⚠️ UDOC 服务不可达，接口信息需人工确认` |
+| 部分字段为空 | 已提取的字段正常填入，缺失字段用 `—` 占位，标注 `> ℹ️ 以下字段从 UDOC 未获取到，已用原文内容填充` |
 
 ---
 
 ## 注意事项
 
-1. 每个 UDOC 链接独立处理，抓取失败不影响其他链接的处理
-2. 抓取完成后删除临时文件 `result/_tmp_udoc_*.json`
-3. 同一文档中多个接口若指向同一 docId，只需抓取一次，复用结果
+1. **无需登录**，直接调用 sync 接口即可，无 token 要求
+2. 每个接口单独请求，失败不影响其他接口
+3. 抓取完成后删除临时文件 `result/_tmp_udoc_*.json`
+4. `--ssl-revoke-best-effort` 参数用于跳过 SSL 证书吊销检查（内网自签证书环境）
