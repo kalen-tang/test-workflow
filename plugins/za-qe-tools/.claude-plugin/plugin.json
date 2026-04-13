@@ -12,7 +12,7 @@
         "hooks": [
           {
             "type": "command",
-            "command": "node ${CLAUDE_PLUGIN_ROOT}/scripts/auto-setup-statusline.js",
+            "command": "node ${CLAUDE_PLUGIN_ROOT}/scripts/auto-setup.js",
             "timeout": 10
           }
         ]
