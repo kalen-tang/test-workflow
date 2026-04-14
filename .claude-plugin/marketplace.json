@@ -15,7 +15,7 @@
       "category": "optional"
     },
     {
-      "name": "za-ui",
+      "name": "za-qe-ui",
       "source": "./plugins/za-ui",
       "description": "ui自动化测试工具集：playwright代码转换、测试修复、增量更新",
       "category": "optional"
