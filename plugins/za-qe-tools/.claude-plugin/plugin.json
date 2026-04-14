@@ -1,6 +1,6 @@
 {
   "name": "za-qe-tools",
-  "version": "3.0.0",
+  "version": "3.1.0",
   "description": "QE 通用工具集：Powerline 状态栏、系统通知、Bash 命令审批（Dippy）、会话事件流查看（ESP）",
   "author": {
     "name": "Alfie"
@@ -13,7 +13,7 @@
         "hooks": [
           {
             "type": "command",
-            "command": "node ${CLAUDE_PLUGIN_ROOT}/scripts/auto-setup.js",
+            "command": "uv run ${CLAUDE_PLUGIN_ROOT}/scripts/auto-setup.py",
             "timeout": 10
           }
         ]
@@ -83,6 +83,5 @@
         ]
       }
     ]
-  },
-  "skills": "./skills"
+  }
 }

@@ -48,23 +48,20 @@ QE 通用工具集插件，提供 4 个可独立启停的功能模块。
 
 ## 架构
 
-所有 Hook 通过统一入口 `scripts/hook-router.py` 分发：
-- 模块开启 → 执行对应逻辑
-- 模块关闭 → 静默放行/跳过
-
 ```
-SessionStart → auto-setup.js → 初始化配置 + statusline + dippy config
-PreToolUse   → hook-router.py → dippy 命令审批（开关控制）
+SessionStart → auto-setup.py → 初始化配置 + statusline
+PreToolUse   → uvx claude-dippy → 命令审批（独立包，开关控制）
 Stop         → hook-router.py → 会话结束通知（开关控制）
 Permission   → hook-router.py → 权限等待通知（开关控制）
-PostToolUse  → hook-router.py → 清除权限标记（开关控制）
+PostToolUse  → uvx claude-dippy + hook-router.py → 命令反馈 + 清除权限标记
 ```
 
 ## Dippy 命令审批
 
-基于 AST 分析的 Bash 命令审批系统，支持 100+ 工具的安全判断。
+已独立为 `claude-dippy` 包（内部镜像源），插件通过 `uvx claude-dippy` 调用。
 
-- 默认规则：`~/.dippy/config`（首次开启时自动部署）
+- 安装/更新：`uvx claude-dippy --version`
+- 默认规则：`~/.dippy/config`（首次启用时由 dippy 自动写入）
 - 项目级规则：项目根目录 `.dippy` 文件
 - 日志：`~/.claude/hook-approvals.log`
 
@@ -74,5 +71,6 @@ PostToolUse  → hook-router.py → 清除权限标记（开关控制）
 
 ## 版本
 
+- v3.1.0 — dippy 独立为 claude-dippy 包，auto-setup 转 Python，ESP skill 合并
 - v3.0.0 — 合并 za-dippy (v0.2.7) 和 za-claude-esp (v0.4.4)，统一模块配置
 - v2.2.0 — Powerline 状态栏 + Windows 通知系统
