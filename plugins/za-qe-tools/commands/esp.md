@@ -1,5 +1,4 @@
 ---
-name: esp
 description: "启动 Claude Code 会话事件流查看工具。当用户说'打开esp'、'启动esp'、'开启esp'、'esp'、'/esp'、'launch esp'、'监听会话'、'查看会话'、'交互式监听' 时触发。支持 -w 参数。"
 allowed-tools:
   - Bash
