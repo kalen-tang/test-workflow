@@ -34,18 +34,10 @@ arguments:
 /za-qe-tools:config statusline off
 ```
 
-## 配置文件
+## 配置存储
 
-配置存储在 `~/.claude/za-qe-tools.json`：
-
-```json
-{
-  "statusline": { "enabled": true, "mode": "powerline" },
-  "notify": { "enabled": false },
-  "dippy": { "enabled": false },
-  "esp": { "enabled": false }
-}
-```
+- **dippy/notify/esp** 开关：`~/.claude/za-qe-tools.json`
+- **statusline**：`~/.claude/settings.json` 的 `statusLine` 字段（由 auto-setup.py 管理）
 
 ## 可配置模块
 
@@ -60,11 +52,21 @@ arguments:
 
 ### 第一步：读取当前配置
 
+读取两个配置文件：
+
 ```bash
-cat ~/.claude/za-qe-tools.json 2>/dev/null || echo "not found"
+cat ~/.claude/za-qe-tools.json 2>/dev/null || echo '{}'
 ```
 
-如果配置文件不存在，使用默认值创建。
+```bash
+cat ~/.claude/settings.json 2>/dev/null | grep -o '"statusline[^}]*}'
+```
+
+从 `za-qe-tools.json` 获取 dippy/notify/esp 状态。
+从 `settings.json` 的 `statusLine` 字段判断当前 statusline 模式：
+- 含 `statusline-powerline.py` → powerline
+- 含 `statusline.py` → standard
+- 无 `statusLine` 字段 → off
 
 ### 第二步：解析参数
 
@@ -126,52 +128,17 @@ questions:
 
 ### 第四步：更新配置文件
 
-将用户选择写入 `~/.claude/za-qe-tools.json`。
+将 dippy/notify/esp 的用户选择写入 `~/.claude/za-qe-tools.json`。
 
-### 第五步：处理 statusline 特殊逻辑
+### 第五步：处理 statusline
 
-如果 statusline 配置发生变化，需要同步修改 `~/.claude/settings.json`：
+如果用户选择了 statusline 模式（非"不配置"），调用 auto-setup.py 完成切换：
 
-先检测插件路径：
 ```bash
-echo "${CLAUDE_PLUGIN_ROOT}"
+uv run ${CLAUDE_PLUGIN_ROOT}/scripts/auto-setup.py <powerline|standard|off>
 ```
 
-如果变量不可用，查询：
-```bash
-cat ~/.claude/plugins/installed_plugins.json
-```
-从中找到 `za-qe-tools@alfie-qe` 的 `installPath`。
-
-根据目标模式修改 `settings.json` 的 `statusLine` 字段：
-
-**powerline 模式：**
-```json
-"statusLine": {
-  "type": "command",
-  "command": "uv run <插件绝对路径>/scripts/statusline-powerline.py",
-  "padding": 2
-}
-```
-
-**standard 模式：**
-```json
-"statusLine": {
-  "type": "command",
-  "command": "uv run <插件绝对路径>/scripts/statusline.py",
-  "padding": 2
-}
-```
-
-**off 模式：**
-删除 `settings.json` 中的 `statusLine` 字段。
-
-将 `<插件绝对路径>` 替换为检测到的实际路径，路径统一使用正斜杠。
-
-同步更新 `za-qe-tools.json` 中的 `statusline` 字段：
-- powerline → `{ "enabled": true, "mode": "powerline" }`
-- standard → `{ "enabled": true, "mode": "standard" }`
-- off → `{ "enabled": false, "mode": "powerline" }`
+auto-setup.py 会自动修改 `~/.claude/settings.json` 中的 `statusLine` 字段。
 
 ### 第六步：确认结果
 
@@ -181,8 +148,7 @@ cat ~/.claude/plugins/installed_plugins.json
 
 ## 注意事项
 
-- 仅修改 `~/.claude/za-qe-tools.json`（和 statusline 的 `settings.json`），不修改 `plugin.json`
-- `${CLAUDE_PLUGIN_ROOT}` 在 hooks 中可用，但 `statusLine.command` 运行时不可用，路径必须是绝对路径
-- 路径统一使用正斜杠，兼容跨平台
-- dippy 已独立为 `claude-dippy` 包，通过 `uvx claude-dippy` 调用，启停由本配置控制
+- dippy/notify/esp 开关存储在 `~/.claude/za-qe-tools.json`，由 hook-router.py 统一读取
+- statusline 通过 auto-setup.py 直接修改 `~/.claude/settings.json`
+- dippy 已独立为 `claude-dippy` 包，通过 `uvx --from claude-dippy dippy` 调用，启停由 hook-router 控制
 - esp 无 Hook，命令内部检查开关

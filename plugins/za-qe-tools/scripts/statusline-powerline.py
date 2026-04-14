@@ -265,13 +265,13 @@ if thinking_effort:
     model_label += f" [{thinking_effort}]"
 line1_segs = []
 line1_segs.append((model_label, C_FROST, C_POLAR0))
-line1_segs.append((f"📁 {directory}", C_GRAY, C_SNOW1))
+line1_segs.append((f"\ue5ff {directory}", C_GRAY, C_SNOW1))
 if branch:
-    line1_segs.append((f"🌿 {branch}{git_dirty}", branch_color, C_POLAR0))
+    line1_segs.append((f"\ue0a0 {branch}{git_dirty}", branch_color, C_POLAR0))
 if wt_name:
-    line1_segs.append((f"🌲 {wt_name}", C_OCEAN, C_SNOW1))
+    line1_segs.append((f"\ue728 {wt_name}", C_OCEAN, C_SNOW1))
 elif venv_name:
-    line1_segs.append((f"🐍 {venv_name}", C_PURPLE, C_SNOW1))
+    line1_segs.append((f"\ue73c {venv_name}", C_PURPLE, C_SNOW1))
 
 # --- 第二行：进度条(文字跨三色) → 费用 → 时长 → 速度 ---
 BAR_WIDTH = 20
@@ -319,16 +319,16 @@ bar_entry = (bar_parts, empty_color, C_SNOW1)
 
 # 速度格式化
 if tok_per_sec and tok_per_sec >= 1000:
-    tok_per_sec_str = f"⚡ {tok_per_sec / 1000:.1f}k t/s"
+    tok_per_sec_str = f"\uf0e7 {tok_per_sec / 1000:.1f}k t/s"
 elif tok_per_sec:
-    tok_per_sec_str = f"⚡ {tok_per_sec:.1f} t/s"
+    tok_per_sec_str = f"\uf0e7 {tok_per_sec:.1f} t/s"
 else:
     tok_per_sec_str = ""
 
 line2_segs = []
 line2_segs.append(bar_entry)
-line2_segs.append((f"💰 ${cost:.2f}", cost_color, C_POLAR0))
-line2_segs.append((f"⏱️ {duration_str} [api {api_str}]", C_OCEAN, C_SNOW1))
+line2_segs.append((f"\uf155{cost:.2f}", cost_color, C_POLAR0))
+line2_segs.append((f"\uf017 {duration_str} \uf362 {api_str}", C_OCEAN, C_SNOW1))
 if tok_per_sec_str:
     line2_segs.append((tok_per_sec_str, C_POLAR1, C_SNOW1))
 

@@ -28,7 +28,6 @@ sys.stdout.reconfigure(encoding='utf-8')
 CONFIG_PATH = Path.home() / ".claude" / "za-qe-tools.json"
 
 DEFAULT_CONFIG = {
-    "statusline": {"enabled": True, "mode": "powerline"},
     "notify": {"enabled": False},
     "dippy": {"enabled": False},
     "esp": {"enabled": False},
@@ -61,6 +60,20 @@ def is_enabled(config: dict, module: str) -> bool:
     return config.get(module, {}).get("enabled", False)
 
 
+def handle_pre_tool_use(config: dict) -> None:
+    """PreToolUse 事件：dippy 命令审批。"""
+    if not is_enabled(config, "dippy"):
+        print(json.dumps({}))
+        return
+    stdin_data = sys.stdin.buffer.read()
+    result = subprocess.run(
+        ["uvx", "--from", "claude-dippy", "dippy", "--claude", "--force"],
+        input=stdin_data,
+        capture_output=True,
+    )
+    sys.stdout.buffer.write(result.stdout)
+
+
 def handle_stop(config: dict) -> None:
     """Stop 事件：会话结束通知。"""
     if not is_enabled(config, "notify"):
@@ -86,15 +99,25 @@ def handle_permission_request(config: dict) -> None:
 
 
 def handle_post_tool_use(config: dict) -> None:
-    """PostToolUse / PostToolUseFailure 事件：清除权限标记。"""
-    if not is_enabled(config, "notify"):
-        return
-    script = PLUGIN_ROOT / "scripts" / "clear-permission-flag.py"
-    subprocess.run(
-        ["uv", "run", str(script)],
-        input=sys.stdin.buffer.read(),
-        capture_output=True,
-    )
+    """PostToolUse / PostToolUseFailure 事件：dippy 反馈 + 清除权限标记。"""
+    stdin_data = sys.stdin.buffer.read()
+
+    # dippy after 规则反馈
+    if is_enabled(config, "dippy"):
+        subprocess.run(
+            ["uvx", "--from", "claude-dippy", "dippy", "--claude", "--force"],
+            input=stdin_data,
+            capture_output=True,
+        )
+
+    # notify 权限标记清除
+    if is_enabled(config, "notify"):
+        script = PLUGIN_ROOT / "scripts" / "clear-permission-flag.py"
+        subprocess.run(
+            ["uv", "run", str(script)],
+            input=stdin_data,
+            capture_output=True,
+        )
 
 
 def main() -> None:
@@ -108,6 +131,7 @@ def main() -> None:
     config = load_config()
 
     handlers = {
+        "PreToolUse": handle_pre_tool_use,
         "Stop": handle_stop,
         "PermissionRequest": handle_permission_request,
         "PostToolUse": handle_post_tool_use,
