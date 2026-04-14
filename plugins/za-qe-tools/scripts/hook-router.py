@@ -61,19 +61,6 @@ def is_enabled(config: dict, module: str) -> bool:
     return config.get(module, {}).get("enabled", False)
 
 
-def handle_pre_tool_use(config: dict) -> None:
-    """PreToolUse 事件：dippy 命令审批。"""
-    if not is_enabled(config, "dippy"):
-        # dippy 关闭 → 空 JSON 放行
-        print(json.dumps({}))
-        return
-
-    # dippy 开启 → 调用 dippy 主逻辑
-    sys.path.insert(0, str(PLUGIN_ROOT / "modules"))
-    from dippy.dippy import main as dippy_main
-    dippy_main()
-
-
 def handle_stop(config: dict) -> None:
     """Stop 事件：会话结束通知。"""
     if not is_enabled(config, "notify"):
@@ -121,7 +108,6 @@ def main() -> None:
     config = load_config()
 
     handlers = {
-        "PreToolUse": handle_pre_tool_use,
         "Stop": handle_stop,
         "PermissionRequest": handle_permission_request,
         "PostToolUse": handle_post_tool_use,

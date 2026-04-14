@@ -25,7 +25,7 @@
         "hooks": [
           {
             "type": "command",
-            "command": "uv run ${CLAUDE_PLUGIN_ROOT}/scripts/hook-router.py --event PreToolUse"
+            "command": "uvx claude-dippy --claude"
           }
         ]
       }
@@ -53,6 +53,15 @@
       }
     ],
     "PostToolUse": [
+      {
+        "hooks": [
+          {
+            "type": "command",
+            "command": "uvx claude-dippy --claude",
+            "async": true
+          }
+        ]
+      },
       {
         "hooks": [
           {
