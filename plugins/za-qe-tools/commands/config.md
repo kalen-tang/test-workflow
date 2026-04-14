@@ -76,49 +76,54 @@ cat ~/.claude/za-qe-tools.json 2>/dev/null || echo "not found"
 
 ### 第三步：交互式配置（无参数时）
 
-使用 AskUserQuestion 展示两个问题：
-
-**问题 1：选择要配置的模块**（单选）
+使用 AskUserQuestion 一次展示四个问题（每个模块一个），所有模块平铺让用户一次配完：
 
 ```
-header: "模块"
-question: "选择要配置的模块："
-options:
-  - label: "statusline"
-    description: "状态栏 — 当前：powerline"
-  - label: "dippy"
-    description: "Bash 命令审批 — 当前：关闭"
-  - label: "notify"
-    description: "系统通知 — 当前：关闭"
-  - label: "esp"
-    description: "事件流查看 — 当前：关闭"
+questions:
+  - header: "statusline"
+    question: "状态栏模式（当前：<从配置读取>）："
+    multiSelect: false
+    options:
+      - label: "powerline"
+        description: "Powerline 箭头风格（需 Nerd 字体）"
+      - label: "standard"
+        description: "标准 ASCII，无需特殊字体"
+      - label: "不配置"
+        description: "保持当前设置不变"
+  - header: "notify"
+    question: "系统通知（当前：<开启/关闭>）："
+    multiSelect: false
+    options:
+      - label: "on"
+        description: "启用会话结束 + 权限等待通知"
+      - label: "off"
+        description: "禁用"
+      - label: "不配置"
+        description: "保持当前设置不变"
+  - header: "dippy"
+    question: "命令审批（当前：<开启/关闭>）："
+    multiSelect: false
+    options:
+      - label: "on"
+        description: "启用 Bash 命令智能审批"
+      - label: "off"
+        description: "禁用"
+      - label: "不配置"
+        description: "保持当前设置不变"
+  - header: "esp"
+    question: "事件流查看（当前：<开启/关闭>）："
+    multiSelect: false
+    options:
+      - label: "on"
+        description: "启用事件流查看"
+      - label: "off"
+        description: "禁用"
+      - label: "不配置"
+        description: "保持当前设置不变"
 ```
 
-**问题 2：根据选中模块展示对应选项**
-
-如果选了 `statusline`：
-```
-header: "模式"
-question: "选择状态栏模式："
-options:
-  - label: "powerline"
-    description: "Powerline 箭头风格（需 Nerd 字体）"
-  - label: "standard"
-    description: "标准 ASCII，无需特殊字体"
-  - label: "off"
-    description: "关闭状态栏"
-```
-
-如果选了 `dippy`/`notify`/`esp`：
-```
-header: "状态"
-question: "设置 <模块名> 状态："
-options:
-  - label: "on"
-    description: "启用"
-  - label: "off"
-    description: "禁用"
-```
+将 `<从配置读取>` 和 `<开启/关闭>` 替换为第一步读取到的实际值。
+用户选择"不配置"的模块跳过，不修改。
 
 ### 第四步：更新配置文件
 
