@@ -53,22 +53,22 @@ Skill: qe-ui-update
 
 ```bash
 # 在登录后新增弹窗关闭步骤
-/za-qe-ui:ui-update 在登录按钮点击后，新增关闭"我知道了"弹窗的步骤
+/za:playwright-test-update 在登录按钮点击后，新增关闭"我知道了"弹窗的步骤
 
 # 指定文件并描述改动
-/za-qe-ui:ui-update testcase-optimized/bib/withdrawal/cross-border-ecommerce-revolving.test.ts 新增填写备注字段
+/za:playwright-test-update testcase-optimized/bib/withdrawal/cross-border-ecommerce-revolving.test.ts 新增填写备注字段
 
 # 修改测试数据
-/za-qe-ui:ui-update 将提款金额从 13000 改为 20000
+/za:playwright-test-update 将提款金额从 13000 改为 20000
 
 # 新增断言
-/za-qe-ui:ui-update 在提交按钮点击后，验证页面出现"申請成功"文字
+/za:playwright-test-update 在提交按钮点击后，验证页面出现"申請成功"文字
 
 # 更新组件选择器
-/za-qe-ui:ui-update 登录按钮文字从"登入"改成了"登錄"，需要更新选择器
+/za:playwright-test-update 登录按钮文字从"登入"改成了"登錄"，需要更新选择器
 
 # 删除过时步骤
-/za-qe-ui:ui-update 删除 Auth-otp-obsoletePopup 的点击步骤
+/za:playwright-test-update 删除 Auth-otp-obsoletePopup 的点击步骤
 ```
 
 ## 适用场景
