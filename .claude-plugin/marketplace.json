@@ -16,8 +16,8 @@
     },
     {
       "name": "za-qe-ui",
-      "source": "./plugins/za-ui",
-      "description": "ui自动化测试工具集：playwright代码转换、测试修复、增量更新",
+      "source": "./plugins/za-qe-ui",
+      "description": "ui自动化测试工具集：playwright录制代码转项目级代码、测试修复、增量更新",
       "category": "optional"
     }
   ]
