@@ -11,25 +11,13 @@
     {
       "name": "za-qe-tools",
       "source": "./plugins/za-qe-tools",
-      "description": "QE通用工具集：Powerline风格状态栏 + Windows通知系统",
+      "description": "QE 通用工具集：状态栏、系统通知、命令审批（Dippy）、事件流查看（ESP）",
       "category": "optional"
     },
     {
-      "name": "za-ui",
-      "source": "./plugins/za-ui",
-      "description": "ui自动化测试工具集：playwright代码转换、测试修复、增量更新",
-      "category": "optional"
-    },
-    {
-      "name": "za-dippy",
-      "source": "./plugins/za-dippy",
-      "description": "Bash 命令智能审批 — 自动放行安全命令，拦截危险操作，告别权限确认疲劳",
-      "category": "optional"
-    },
-    {
-      "name": "za-claude-esp",
-      "source": "./plugins/za-claude-esp",
-      "description": "Claude Code 会话事件流查看工具 — 实时追踪、列举和回放 Claude Code 会话事件（Event Stream Player）",
+      "name": "za-qe-ui",
+      "source": "./plugins/za-qe-ui",
+      "description": "ui自动化测试工具集：playwright录制代码转项目级代码、测试修复、增量更新",
       "category": "optional"
     }
   ]

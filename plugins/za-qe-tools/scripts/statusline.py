@@ -232,23 +232,23 @@ if thinking_effort:
     model_label += f" [{thinking_effort}]"
 c1_top_plain = f"[{model_label}]"
 
-c2_top_plain = f"📁 {directory}"
-c2_bot_plain = f"📊 {tokens_str}"
+c2_top_plain = f"> {directory}"
+c2_bot_plain = f"# {tokens_str}"
 
 lines_info = f' +{lines_added}/-{lines_removed}' if (lines_added > 0 or lines_removed > 0) else ''
-c3_top_plain = f"🌿 {branch}{' +'+staged if int(staged)>0 else ''}{' ~'+modified if int(modified)>0 else ''}{' ?'+untracked if int(untracked)>0 else ''}{lines_info}" if branch else ""
-c3_bot_plain = f"💰 ${cost:.2f}"
+c3_top_plain = f"@ {branch}{' +'+staged if int(staged)>0 else ''}{' ~'+modified if int(modified)>0 else ''}{' ?'+untracked if int(untracked)>0 else ''}{lines_info}" if branch else ""
+c3_bot_plain = f"${cost:.2f}"
 
 # 虚拟环境 / Worktree
 venv = os.environ.get('VIRTUAL_ENV') or os.environ.get('CONDA_DEFAULT_ENV') or ''
 venv_name = os.path.basename(venv) if venv else ''
 if wt_name:
-    c4_top_plain = f"🌲 {wt_name}"
+    c4_top_plain = f"wt:{wt_name}"
 elif venv_name:
     c4_top_plain = f"({venv_name})"
 else:
     c4_top_plain = ""
-c4_bot_plain = f"⏱️ {duration_str} [api {api_str}]"
+c4_bot_plain = f"T {duration_str} <> {api_str}"
 
 # 每列宽度 = max(top, bot) 内容宽度，设最小宽度
 col_widths = [
@@ -261,27 +261,27 @@ col_widths = [
 c1_top = f"{CYAN}[{model_label}]{RESET}"
 c1_bot = f"{bar_color}{bar}{RESET} {pct}%"
 
-c2_top = f"📁 {directory}"
-c2_bot = f"📊 {bar_color}{tokens_str}{RESET}"
+c2_top = f"> {directory}"
+c2_bot = f"# {bar_color}{tokens_str}{RESET}"
 
 branch_color = GREEN if branch in ('master', 'main') else YELLOW
-c3_top = f"🌿 {branch_color}{branch}{RESET}{git_changes}" if branch else ""
+c3_top = f"@ {branch_color}{branch}{RESET}{git_changes}" if branch else ""
 cost_color = RED if cost > 25 else NORD_PURPLE if cost > 10 else GREEN
-c3_bot = f"{cost_color}💰 ${cost:.2f}{RESET}"
+c3_bot = f"{cost_color}${cost:.2f}{RESET}"
 
 if wt_name:
-    c4_top = f"{CYAN}🌲 {wt_name}{RESET}"
+    c4_top = f"{CYAN}wt:{wt_name}{RESET}"
 elif venv_name:
     c4_top = f"{CYAN}({venv_name}){RESET}"
 else:
     c4_top = ""
 if tok_per_sec and tok_per_sec >= 1000:
-    tok_per_sec_str = f"⚡ {tok_per_sec / 1000:.1f}k t/s"
+    tok_per_sec_str = f"^ {tok_per_sec / 1000:.1f}k t/s"
 elif tok_per_sec:
-    tok_per_sec_str = f"⚡ {tok_per_sec:.1f} t/s"
+    tok_per_sec_str = f"^ {tok_per_sec:.1f} t/s"
 else:
     tok_per_sec_str = ""
-c4_bot = f"⏱️ {duration_str} [api {api_str}]{('  ' + tok_per_sec_str) if tok_per_sec_str else ''}"
+c4_bot = f"T {duration_str} <> {api_str}{('  ' + tok_per_sec_str) if tok_per_sec_str else ''}"
 
 line1 = (
     f"{rpad(c1_top, col_widths[0])} | "
