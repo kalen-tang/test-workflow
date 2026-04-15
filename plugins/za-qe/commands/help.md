@@ -19,6 +19,7 @@ argument-hint: [topic]
 - api-generator：API用例生成器
 - req-parser：需求文档规范化器
 - design-parser：开发方案文档规范检查器
+- code-diff-analysis：代码变更分析器
 
 ### 2. 工作流帮助
 ```bash

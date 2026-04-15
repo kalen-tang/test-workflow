@@ -398,7 +398,8 @@ doc-reviewer 需要配置文档目录，可以在 SKILL.md 中修改默认配置
 | api-generator | [SKILL.md](./skills/api-generator/SKILL.md) | [references/](./skills/api-generator/references/) (6个), [examples/](./skills/api-generator/examples/) |
 | req-parser | [SKILL.md](./skills/req-parser/SKILL.md) | [references/](./skills/req-parser/references/), [examples/](./skills/req-parser/examples/) |
 | design-parser | [SKILL.md](./skills/design-parser/SKILL.md) | [references/](./skills/design-parser/references/) |
+| code-diff-analysis | [SKILL.md](./skills/code-diff-analysis/SKILL.md) | [references/](./skills/code-diff-analysis/references/) (3个) |
 
 ---
 
-**版本**: v1.3.0 | [项目主文档](../../README.md) | ZA Bank Test Team
+**版本**: v1.4.0 | [项目主文档](../../README.md) | ZA Bank Test Team
