@@ -32,7 +32,10 @@
       "Bash(gh pr diff *)",
       "Bash(python -c \"import py_compile; py_compile.compile\\('D:/ai/qe/plugins/za-qe-tools/scripts/statusline.py', doraise=True\\)\")",
       "Bash(cp \"D:/ai/qe/plugins/za-qe-tools/scripts/statusline-powerline.py\" \"C:/Users/dingzhong.hu/.claude/plugins/marketplaces/alfie-qe/plugins/za-qe-tools/scripts/statusline-powerline.py\")",
-      "Bash(cp \"D:/ai/qe/plugins/za-qe-tools/scripts/statusline.py\" \"C:/Users/dingzhong.hu/.claude/plugins/marketplaces/alfie-qe/plugins/za-qe-tools/scripts/statusline.py\")"
+      "Bash(cp \"D:/ai/qe/plugins/za-qe-tools/scripts/statusline.py\" \"C:/Users/dingzhong.hu/.claude/plugins/marketplaces/alfie-qe/plugins/za-qe-tools/scripts/statusline.py\")",
+      "Bash(python:*)",
+      "Bash(curl:*)",
+      "Bash(git:*)"
     ]
   }
 }
