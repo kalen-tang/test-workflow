@@ -23,6 +23,7 @@ PLUGIN_ROOT = os.environ.get("CLAUDE_PLUGIN_ROOT", "")
 
 SCRIPT_MAP = {
     "powerline": "statusline-powerline.py",
+    "powerline-nf": "statusline-powerline.py --icon-mode=nerdfont",
     "standard": "statusline.py",
 }
 

@@ -2,6 +2,12 @@
 import json, sys, subprocess, os, time, tempfile, re
 sys.stdout.reconfigure(encoding='utf-8')
 
+# 图标模式：默认兼容 Unicode（不依赖 Nerd Font），设置 STATUSLINE_ICON_MODE=nerdfont 或使用 --icon-mode=nerdfont 使用完整 NF 图标
+ICON_MODE = os.environ.get('STATUSLINE_ICON_MODE', '')
+if '--icon-mode=nerdfont' in sys.argv:
+    ICON_MODE = 'nerdfont'
+USE_NF = ICON_MODE.lower() == 'nerdfont'
+
 data = json.load(sys.stdin)
 session_id = data.get('session_id', '')
 model = data['model']['display_name']
@@ -187,7 +193,10 @@ if branch:
 venv = os.environ.get('VIRTUAL_ENV') or os.environ.get('CONDA_DEFAULT_ENV') or ''
 venv_name = os.path.basename(venv) if venv else ''
 
-# Powerline 风格
+# Powerline 风格 - 兼容非 Powerline 字体（如 Cascadia Code）
+# 设置 STATUSLINE_ICON_MODE=nerdfont 使用 Nerd Font 图标
+ICON_MODE = os.environ.get('STATUSLINE_ICON_MODE', '')
+USE_NF = ICON_MODE.lower() == 'nerdfont'
 RESET = '\033[0m'
 SEP = '\ue0b0'  # Powerline 箭头
 
@@ -253,6 +262,26 @@ def render_line(segments):
     output += RESET
     return output
 
+# 图标定义：兼容 Unicode（默认）vs Nerd Font（STATUSLINE_ICON_MODE=nerdfont）
+if USE_NF:
+    ICON_BRANCH   = '\ue0a0'
+    ICON_FOLDER   = '\ue5ff'
+    ICON_WORKTREE = '\ue728'
+    ICON_VENV     = '\ue73c'
+    ICON_COST     = '\uf155'
+    ICON_DURATION = '\uf017'
+    ICON_API      = '\uf362'
+    ICON_SPEED    = '\uf0e7'
+else:
+    ICON_BRANCH   = '\u2387'
+    ICON_FOLDER   = ''
+    ICON_WORKTREE = '\u25c6'
+    ICON_VENV     = '\u03bb'
+    ICON_COST     = '$'
+    ICON_DURATION = '\u25f7'
+    ICON_API      = ''
+    ICON_SPEED    = '\u25b6'
+
 # --- 第一行：模型 → 目录 → 分支 → 虚拟环境 ---
 # --- 第二行：进度条 → 费用 → 时长 → 速度 ---
 # 色块分配原则：上下同位置不同色
@@ -265,13 +294,16 @@ if thinking_effort:
     model_label += f" [{thinking_effort}]"
 line1_segs = []
 line1_segs.append((model_label, C_FROST, C_POLAR0))
-line1_segs.append((f"\ue5ff {directory}", C_GRAY, C_SNOW1))
+if ICON_FOLDER:
+    line1_segs.append((f"{ICON_FOLDER} {directory}", C_GRAY, C_SNOW1))
+else:
+    line1_segs.append((f"{directory}", C_GRAY, C_SNOW1))
 if branch:
-    line1_segs.append((f"\ue0a0 {branch}{git_dirty}", branch_color, C_POLAR0))
+    line1_segs.append((f"{ICON_BRANCH} {branch}{git_dirty}", branch_color, C_POLAR0))
 if wt_name:
-    line1_segs.append((f"\ue728 {wt_name}", C_OCEAN, C_SNOW1))
+    line1_segs.append((f"{ICON_WORKTREE} {wt_name}", C_OCEAN, C_SNOW1))
 elif venv_name:
-    line1_segs.append((f"\ue73c {venv_name}", C_PURPLE, C_SNOW1))
+    line1_segs.append((f"{ICON_VENV} {venv_name}", C_PURPLE, C_SNOW1))
 
 # --- 第二行：进度条(文字跨三色) → 费用 → 时长 → 速度 ---
 BAR_WIDTH = 20
@@ -319,16 +351,20 @@ bar_entry = (bar_parts, empty_color, C_SNOW1)
 
 # 速度格式化
 if tok_per_sec and tok_per_sec >= 1000:
-    tok_per_sec_str = f"\uf0e7 {tok_per_sec / 1000:.1f}k t/s"
+    tok_per_sec_str = f"{ICON_SPEED} {tok_per_sec / 1000:.1f}k t/s"
 elif tok_per_sec:
-    tok_per_sec_str = f"\uf0e7 {tok_per_sec:.1f} t/s"
+    tok_per_sec_str = f"{ICON_SPEED} {tok_per_sec:.1f} t/s"
 else:
     tok_per_sec_str = ""
 
 line2_segs = []
 line2_segs.append(bar_entry)
-line2_segs.append((f"\uf155{cost:.2f}", cost_color, C_POLAR0))
-line2_segs.append((f"\uf017 {duration_str} \uf362 {api_str}", C_OCEAN, C_SNOW1))
+if USE_NF:
+    line2_segs.append((f"{ICON_COST}{cost:.2f}", cost_color, C_POLAR0))
+    line2_segs.append((f"{ICON_DURATION} {duration_str} {ICON_API} {api_str}", C_OCEAN, C_SNOW1))
+else:
+    line2_segs.append((f"{ICON_COST} {cost:.2f}", cost_color, C_POLAR0))
+    line2_segs.append((f"{ICON_DURATION} {duration_str} [{api_str}]", C_OCEAN, C_SNOW1))
 if tok_per_sec_str:
     line2_segs.append((tok_per_sec_str, C_POLAR1, C_SNOW1))
 
