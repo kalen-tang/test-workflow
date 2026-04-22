@@ -274,7 +274,7 @@ left side
 ### 步骤 7：自动生成 XMind 文件
 
 ```
-从 Markdown 文件中提取详细测试案例 MindMap 代码块 → 调用 plantuml_to_xmind.py 脚本 → 转换为 XMind 格式 → 输出到同目录
+从 Markdown 文件中提取详细测试案例 MindMap 代码块 → 调用 ${CLAUDE_SKILL_DIR}/scripts/plantuml_to_xmind.py 脚本 → 转换为 XMind 格式 → 输出到同目录
 ```
 
 **自动转换逻辑**：
@@ -521,11 +521,10 @@ right side
 
 格式转换实用脚本：
 
-- **`scripts/plantuml_to_xmind.py`** - PlantUML MindMap 转 XMind 格式工具
+- **`${CLAUDE_SKILL_DIR}/scripts/plantuml_to_xmind.py`** - PlantUML MindMap 转 XMind 格式工具
   - 用法：`uv run ${CLAUDE_SKILL_DIR}/scripts/plantuml_to_xmind.py <Markdown文件或PlantUML文件> <需求ID>`
   - 示例：`uv run ${CLAUDE_SKILL_DIR}/scripts/plantuml_to_xmind.py ./result/xxx_场景案例.md BANK-1234`
   - 输出：生成到输入文件同目录，文件名为 `需求ID_测试案例.xmind`
-  - 依赖：Python >= 3.10, md2xmind >= 1.0.0（uv 自动管理）
 
 ### 参考文件
 
