@@ -217,7 +217,7 @@ my-skill/
 To validate input files, run the helper script. It checks for required fields and returns any validation errors:
 
 ```bash
-python scripts/helper.py input.txt
+python ${CLAUDE_SKILL_DIR}/scripts/helper.py input.txt
 ```
 ````
 
@@ -233,7 +233,7 @@ python scripts/helper.py input.txt
 
 ```markdown theme={null}
 Run the validation script to check the form:
-python scripts/validate_form.py input.pdf
+python ${CLAUDE_SKILL_DIR}/scripts/validate_form.py input.pdf
 ```
 
 有关构建 Skills 的完整指导，请参阅[最佳实践指南](https://docs.claude.com/zh-CN/docs/agents-and-tools/agent-skills/best-practices#progressive-disclosure-patterns)。

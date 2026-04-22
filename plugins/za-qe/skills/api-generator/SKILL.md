@@ -368,7 +368,6 @@ tests:
 
 ```bash
 #!/bin/bash
-# run_{module}_tests.sh
 
 echo "开始 {Module Name} API测试..."
 
@@ -463,8 +462,6 @@ test_automation_case/
 ├── service/
 │   ├── account_service/
 │   └── resource_service/
-├── scripts/
-│   └── run_{module}_tests.sh
 └── conftest.py
 ```
 

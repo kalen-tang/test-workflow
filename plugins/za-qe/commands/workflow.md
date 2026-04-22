@@ -266,11 +266,6 @@ allowed-tools: Read, Write, Edit, Grep, Glob, Bash(uv run:*), Bash, TodoWrite, A
   - `<案例输出目录>/<项目名>_场景案例表.md`（结构化场景表，供 api-generator 消费）
   - `<案例输出目录>/<需求ID>_测试案例.xmind`（自动从 Markdown 提取测试案例 MindMap 转换）
 
-**XMind 生成命令**：
-```bash
-uv run "${CLAUDE_PLUGIN_ROOT}/scripts/plantuml_to_xmind.py" '<场景案例.md绝对路径>' '<需求ID>'
-```
-
 **调用方式**：按照 case-designer Skill 的流程执行
 
 **完成后**：更新进度，如有接口数据报告则继续 api-generator，否则输出最终汇总。

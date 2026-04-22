@@ -11,6 +11,7 @@ allowed-tools: Read Write Edit Glob Grep Bash(uv *) Bash(uv run *)
 基于需求文档（和可选的接口数据报告）生成可视化的测试设计和结构化的场景案例表，帮助测试团队快速设计全面的测试方案，同时为 `api-generator` 提供可消费的场景数据。
 
 **产出物**：
+
 1. **场景案例 Markdown**（内嵌 PlantUML 业务流程图 + 测试功能点 MindMap + 详细测试案例 MindMap，一份文件包含所有可视化内容）
 2. XMind 文件（从 Markdown 中自动提取详细测试案例 MindMap 并转换，给人编辑）
 3. **场景案例表 Markdown**（结构化，给 api-generator 消费）
@@ -32,34 +33,39 @@ allowed-tools: Read Write Edit Glob Grep Bash(uv *) Bash(uv run *)
 ### 1. 需求文档解析
 
 **支持的文档格式**：
+
 - Word 文档（.doc, .docx）
 - Markdown 文件（.md）
 - 纯文本文件（.txt）
 - PDF 文档（.pdf）
 
 **解析策略**：
+
 - **自动识别文档结构**：章节标题、段落、列表、表格
 - **提取业务信息**：功能描述、业务流程、验收标准、异常场景
 - **容错处理**：即使文档不规范，仍尽力提取有用信息
 
 **文档来源**：
+
 - 单个或多个需求文档
 - 支持任意目录位置（用户指定路径）
 - 允许混合格式（同时处理 Word 和 Markdown）
 
->💡 **提示**：文档质量越高，生成的测试用例越精准。建议文档包含清晰的功能描述和业务流程。
+> 💡 **提示**：文档质量越高，生成的测试用例越精准。建议文档包含清晰的功能描述和业务流程。
 
 ### 2. PlantUML 流程图生成
 
 根据需求文档生成 PlantUML Activity Diagram，展示完整的业务流程。
 
 **生成内容**：
+
 - **主要流程**：核心业务步骤和操作
 - **关键决策点**：条件分支和判断逻辑
 - **异常处理**：错误场景和回滚流程
 - **注释说明**：复杂步骤的解释（使用 `note` 语法）
 
 **PlantUML 格式**：
+
 ```plantuml
 @startuml
 !theme materia
@@ -79,6 +85,7 @@ stop
 ```
 
 **流程图特点**：
+
 - 使用 `!theme materia` 主题（简洁美观）
 - 整合所有需求文档的流程（多文档合并）
 - 仅包含需求明确提及的内容（不添加推测）
@@ -91,12 +98,14 @@ stop
 基于需求文档生成测试功能点的 PlantUML MindMap，至少三层结构。
 
 **生成内容**：
+
 - **根节点**：项目或模块名称
 - **一级节点**：主要功能模块（循环使用 `right side` / `left side`）
 - **二级节点**：具体功能点
 - **三级节点**：验证点或子功能
 
 **PlantUML 格式**：
+
 ```plantuml
 @startmindmap
 !theme blueprint
@@ -125,6 +134,7 @@ left side
 ```
 
 **命名规范**（重要）：
+
 - ✅ **去掉"测试"后缀**：使用"搜索栏"而非"搜索栏测试"
 - ✅ **简化验证点表达**：使用"显示正常"而非"验证搜索栏显示正常"
 - ✅ **功能模块 - 验证点**结构：采用父子节点关系
@@ -132,6 +142,7 @@ left side
   - 避免：`验证搜索栏显示正常`
 
 **节点组织**：
+
 - 一级节点前添加 `right side` 或 `left side`（循环交替）
 - 避免单独设置"边界值"、"安全"、"性能"一级节点（建议分散到具体功能下）
 - 每个叶子节点应该可测试和可验证
@@ -143,6 +154,7 @@ left side
 基于测试功能点扩展为详细测试案例，至少四层结构。
 
 **生成内容**：
+
 - **根节点**：测试案例集名称
 - **一级节点**：测试场景（循环使用 `right side` / `left side`）
 - **二级节点**：测试步骤（操作节点）
@@ -150,6 +162,7 @@ left side
 - **四级节点**：详细验证内容（可选）
 
 **PlantUML 格式**：
+
 ```plantuml
 @startmindmap
 !theme blueprint
@@ -179,6 +192,7 @@ left side
 ```
 
 **命名规范**（关键）：
+
 - ✅ **去掉"测试"后缀**：场景名称直接使用功能名称
 - ✅ **动作与结果分离**：
   - 操作节点：`点击搜索icon`、`输入关键词`
@@ -192,6 +206,7 @@ left side
   ```
 
 **数据传递标记**（可选）：
+
 - 如果测试步骤涉及数据传递，使用 `{{步骤N.字段名}}` 标记
 - 示例：`用户ID: {{步骤1.返回的userId}}`
 - 便于后续理解测试步骤间的依赖关系
@@ -201,26 +216,31 @@ left side
 ## 工作流程
 
 ### 步骤 1：文档接收与解析
+
 ```
 接收需求文档（支持多种格式）→ 识别文档结构 → 提取业务信息 → 识别功能模块和业务流程
 ```
 
 ### 步骤 2：生成流程图
+
 ```
 分析业务流程 → 识别主要步骤和决策点 → 生成PlantUML Activity Diagram
 ```
 
 ### 步骤 3：生成测试功能点
+
 ```
 提取功能模块 → 分解为功能点 → 生成三层MindMap → 应用命名规范
 ```
 
 ### 步骤 4：生成详细测试案例
+
 ```
 基于测试功能点 → 扩展为测试步骤 → 生成四层 MindMap → 区分操作和验证
 ```
 
 ### 步骤 5：输出 Markdown 文件
+
 ```
 整合三个PlantUML 代码块 → 添加测试策略说明 → 输出 Markdown 到指定目录
 ```
@@ -232,10 +252,12 @@ left side
 基于步骤 3、4 的测试功能点和详细测试案例，生成结构化的**场景案例表 Markdown**，符合 `references/scenario-table.md` 规范。
 
 **生成内容**：
+
 - **场景总览表**：场景ID、名称、类型（positive/negative/flow/boundary）、优先级、涉及接口、来源
 - **场景详情**：每个场景的前置条件、步骤表（操作/调用接口/请求要点/预期结果）、验证点
 
 **场景来源优先级**：
+
 1. **从验收标准生成**（最优先）：每个 AC 至少对应一个场景
 2. **从用户故事生成**：构建端到端业务流程场景
 3. **从业务规则生成**：生成边界和异常场景
@@ -250,24 +272,23 @@ left side
 > 用例设计模式参见 `references/test-case-patterns.md`
 
 ### 步骤 7：自动生成 XMind 文件
+
 ```
 从 Markdown 文件中提取详细测试案例 MindMap 代码块 → 调用 plantuml_to_xmind.py 脚本 → 转换为 XMind 格式 → 输出到同目录
 ```
 
 **自动转换逻辑**：
+
 - 从 Markdown 输出文件中提取需求ID（如 `BANK-1234`）
 - 从 Markdown 中提取详细测试案例的 PlantUML MindMap 代码块
 - 使用脚本自动转换为 `需求ID_测试案例.xmind`
-
-**脚本依赖**：
-- Python >= 3.10
-- md2xmind >= 1.0.0（自动通过 uv 内联安装）
 
 > 💡 **提示**：XMind 文件会自动生成在输出目录中，便于团队协作编辑和可视化展示。
 
 ## 输出格式
 
 生成的文件包括：
+
 - **Markdown 文件**：包含 PlantUML 代码块的完整测试设计文档（流程图、功能点、测试案例全部内嵌）
 - **XMind 文件**：自动从 Markdown 中提取 MindMap 并转换的 `.xmind` 文件（测试功能点和测试案例）
 - **场景案例表**：结构化的 Markdown 表格，供 api-generator 消费
@@ -277,10 +298,12 @@ left side
 生成的 Markdown 文件包含以下部分：
 
 ### 1. 文档信息
+
 ```markdown
 # XX项目 场景案例
 
 ## 文档信息
+
 - **生成时间**: 2026-03-17 14:30:00
 - **需求文档来源**:
   - ./docs/requirement1.md
@@ -289,6 +312,7 @@ left side
 ```
 
 ### 2. 业务流程图
+
 ````markdown
 ## 业务流程图
 
@@ -306,6 +330,7 @@ stop
 ````
 
 ### 3. 测试功能点
+
 ````markdown
 ## 测试功能点
 
@@ -326,6 +351,7 @@ right side
 ````
 
 ### 4. 详细测试案例
+
 ````markdown
 ## 详细测试案例
 
@@ -346,19 +372,23 @@ right side
 ````
 
 ### 5. 测试策略建议
+
 ```markdown
 ## 测试策略建议
 
 ### 测试重点
+
 - 核心业务流程：搜索功能、结果展示
 - 异常场景：空结果、网络异常
 
 ### 测试优先级
+
 - P0（高优先级）：核心搜索流程
 - P1（中优先级）：结果排序、筛选
 - P2（低优先级）：搜索历史、推荐
 
 ### 测试方法
+
 - 功能测试：覆盖所有功能点
 - 边界值测试：空输入、超长输入
 - 兼容性测试：不同设备和浏览器
@@ -383,12 +413,12 @@ right side
 
 ### 参数说明
 
-| 参数 | 说明 | 示例 |
-|---- | ---- | ---- |
-| `<文档路径>` | 需求文档路径（必填，支持多个） | `./docs/req.md` |
+| 参数              | 说明                               | 示例                |
+| ----------------- | ---------------------------------- | ------------------- |
+| `<文档路径>`      | 需求文档路径（必填，支持多个）     | `./docs/req.md`     |
 | `--output <目录>` | 输出目录（可选，默认 `./result/`） | `--output ./output` |
-| `--format <格式>` | 输出格式（可选，默认 `markdown`） | `--format markdown` |
-| `--no-strategy` | 不生成测试策略建议（可选） | `--no-strategy` |
+| `--format <格式>` | 输出格式（可选，默认 `markdown`）  | `--format markdown` |
+| `--no-strategy`   | 不生成测试策略建议（可选）         | `--no-strategy`     |
 
 ### 使用场景
 
@@ -400,6 +430,7 @@ right side
 ```
 
 **预期输出**：
+
 - `./result/new_feature_场景案例.md` - Markdown 文档（含 PlantUML 代码块）
 - `./result/BANK-XXXX_测试案例.xmind` - 详细测试案例 XMind 文件（自动生成）
 
@@ -411,6 +442,7 @@ right side
 ```
 
 **预期输出**：
+
 - `./result/integrated_场景案例.md` - Markdown 文档（含 PlantUML 代码块）
 - `./result/BANK-XXXX_测试案例.xmind` - XMind 文件（自动生成）
 
@@ -422,6 +454,7 @@ right side
 ```
 
 **预期输出**：
+
 - `./review/requirement_场景案例.md` - Markdown 文档（含 PlantUML 代码块）
 - `./review/BANK-XXXX_测试案例.xmind` - XMind 文件（可用 XMind 软件打开编辑）
 
@@ -430,6 +463,7 @@ right side
 ### 文档质量建议
 
 文档质量直接影响生成效果。包含以下内容可获得更佳结果：
+
 - ✅ 清晰的功能描述
 - ✅ 明确的业务流程
 - ✅ 具体的验收标准
@@ -440,11 +474,13 @@ right side
 ### PlantUML 和 XMind 使用
 
 **PlantUML 渲染**：
+
 - **在线渲染**：[PlantUML Online](http://www.plantuml.com/plantuml/uml/)
 - **VS Code 插件**：PlantUML
 - **本地渲染**：安装 PlantUML CLI
 
 **XMind 使用**：
+
 - 自动生成的 `.xmind` 文件可以用 [XMind](https://www.xmind.net/) 软件打开
 - 支持在线协作编辑和导出为多种格式（PDF、图片等）
 - 更适合团队评审和迭代修改
@@ -452,6 +488,7 @@ right side
 ### 后续优化
 
 本技能生成的测试案例适合人工 Review 和调整：
+
 - 📝 人工补充遗漏的测试点
 - 📝 调整测试优先级
 - 📝 细化测试步骤
@@ -483,15 +520,17 @@ right side
 ### 脚本工具
 
 格式转换实用脚本：
+
 - **`scripts/plantuml_to_xmind.py`** - PlantUML MindMap 转 XMind 格式工具
-  - 用法：`uv run scripts/plantuml_to_xmind.py <Markdown文件或PlantUML文件> <需求ID>`
-  - 示例：`uv run scripts/plantuml_to_xmind.py ./result/xxx_场景案例.md BANK-1234`
+  - 用法：`uv run ${CLAUDE_SKILL_DIR}/scripts/plantuml_to_xmind.py <Markdown文件或PlantUML文件> <需求ID>`
+  - 示例：`uv run ${CLAUDE_SKILL_DIR}/scripts/plantuml_to_xmind.py ./result/xxx_场景案例.md BANK-1234`
   - 输出：生成到输入文件同目录，文件名为 `需求ID_测试案例.xmind`
   - 依赖：Python >= 3.10, md2xmind >= 1.0.0（uv 自动管理）
 
 ### 参考文件
 
 详细的技术参考和规则：
+
 - **`references/flowchart-generation.md`** - PlantUML 流程图生成规则
 - **`references/test-points-mindmap.md`** - 测试功能点 MindMap 生成规则
 - **`references/test-cases-mindmap.md`** - 详细测试案例 MindMap 生成规则
@@ -503,6 +542,7 @@ right side
 ### 示例文件
 
 实用的完整示例：
+
 - **`examples/sample-requirement.md`** - 示例需求文档
 - **`examples/sample-output.md`** - 完整输出示例
 - **`examples/sample-flowchart.puml`** - 流程图示例

@@ -20,11 +20,13 @@ arguments:
 ## 使用方法
 
 ### 交互式配置（推荐）
+
 ```
 /za-qe-tools:config
 ```
 
 ### 直接指定
+
 ```
 /za-qe-tools:config dippy on
 /za-qe-tools:config notify off
@@ -42,18 +44,19 @@ arguments:
 
 ## 可配置模块
 
-| 模块 | 功能 | 默认 | 选项 |
-|------|------|------|------|
-| `statusline` | 状态栏 | 开启 (powerline) | powerline / powerline-nf / standard / off |
-| `notify` | 会话结束 + 权限等待通知 | 关闭 | on / off |
-| `dippy` | Bash 命令智能审批 | 关闭 | on / off |
-| `esp` | 会话事件流查看 | 关闭 | on / off |
+| 模块         | 功能                    | 默认             | 选项                                      |
+| ------------ | ----------------------- | ---------------- | ----------------------------------------- |
+| `statusline` | 状态栏                  | 开启 (powerline) | powerline / powerline-nf / standard / off |
+| `notify`     | 会话结束 + 权限等待通知 | 关闭             | on / off                                  |
+| `dippy`      | Bash 命令智能审批       | 关闭             | on / off                                  |
+| `esp`        | 会话事件流查看          | 关闭             | on / off                                  |
 
 ## 执行步骤
 
 ### 第一步：解析参数
 
 检查用户是否直接指定了模块和状态：
+
 - `/za-qe-tools:config dippy on` → 直接开启 dippy，跳到第三步
 - `/za-qe-tools:config statusline standard` → 直接切换状态栏模式，跳到第三步
 - 无参数 → 进入第二步交互式配置
