@@ -1,0 +1,82 @@
+[
+  {
+    "name": "invest-framework-overview",
+    "description": "INVEST微服务框架技术栈和分层架构概览。当需要了解INVEST框架整体架构、技术选型、目录结构时使用。支持银行投资业务系统开发，适用于项目初期架构理解和新人onboarding。",
+    "when_to_use": "了解INVEST框架Spring Boot + MyBatis-Plus技术栈、理解Controller-Service-DAO分层架构、银行投资业务系统新人onboarding时使用",
+    "keywords": ["invest-framework", "spring-boot", "mybatis-plus", "microservice-overview", "layered-architecture", "project-structure", "invest-overview", "technology-stack", "bank-invest"],
+    "category": "backend-framework",
+    "level": "user_level"
+  },
+  {
+    "name": "invest-controller-spec",
+    "description": "INVEST框架Controller层完整开发规范。当编写Controller、处理HTTP请求响应、实现RESTful API、处理分页查询时使用。包含ResponseData规范、分页处理、Swagger注解等核心内容。",
+    "when_to_use": "创建Controller层RESTful API接口、配置ResponseData统一响应结构、处理分页查询请求、编写Swagger API文档注解时使用",
+    "keywords": ["invest-controller", "restful-api", "response-data", "pagination-controller", "swagger-annotation", "request-mapping", "http-request-handling", "api-design"],
+    "category": "backend-framework",
+    "level": "user_level"
+  },
+  {
+    "name": "invest-service-spec",
+    "description": "INVEST框架Service层完整开发规范。当编写业务逻辑、设计服务接口、实现业务方法、处理事务时使用。包含Service接口设计、ServiceImpl实现、Manager层使用、TransactionUtils事务管理等内容。禁止使用@Transactional注解。",
+    "when_to_use": "设计Service接口和ServiceImpl实现类、编写业务逻辑代码、使用TransactionUtils编程式事务管理、配置Manager层跨服务调用时使用",
+    "keywords": ["invest-service", "service-impl", "transaction-utils", "business-logic", "manager-layer", "service-interface", "programmatic-transaction", "禁止-transactional"],
+    "category": "backend-framework",
+    "level": "user_level"
+  },
+  {
+    "name": "invest-dao-spec",
+    "description": "INVEST框架数据访问层完整开发规范。当设计DAO/Mapper层、使用Mybatis-Plus或自研Mybatis框架、编写数据库访问代码时使用。包含SBS项目BaseMapper规范和FTC项目CrudMapper规范。",
+    "when_to_use": "创建DAO层Mapper接口、SBS项目继承BaseMapper、FTC项目继承CrudMapper、编写mapper.xml SQL语句时使用",
+    "keywords": ["invest-dao", "base-mapper", "crud-mapper", "mybatis-plus", "mapper-xml", "sbs-mapper", "ftc-mapper", "database-access"],
+    "category": "backend-framework",
+    "level": "user_level"
+  },
+  {
+    "name": "invest-dto-spec",
+    "description": "INVEST框架DTO设计完整规范。当设计数据传输对象、处理分页查询、定义API参数、进行数据转换等DTO时使用。包含BaseReq继承、分页DTO、请求响应DTO设计、DTO映射等核心内容。",
+    "when_to_use": "设计请求响应DTO结构、继承BaseReq分页基类、配置PageReqDTO和PageRspDTO分页传输对象、DTO与PO映射转换时使用",
+    "keywords": ["invest-dto", "base-req", "page-req-dto", "page-rsp-dto", "data-transfer-object", "dto-mapping", "request-dto", "response-dto", "pagination-dto"],
+    "category": "backend-framework",
+    "level": "user_level"
+  },
+  {
+    "name": "invest-entity-spec",
+    "description": "INVEST框架实体类完整开发规范。当设计数据库实体、配置MyBatis-Plus注解、处理持久化对象时使用。包含实体类设计、字段注解、命名规范等内容。",
+    "when_to_use": "设计数据库实体类、配置@TableName和@TableField注解、处理MyBatis-Plus持久化对象映射时使用",
+    "keywords": ["invest-entity", "table-name", "table-field", "mybatis-plus-entity", "persistent-object", "entity-design", "field-annotation", "database-entity"],
+    "category": "backend-framework",
+    "level": "user_level"
+  },
+  {
+    "name": "invest-exception-spec",
+    "description": "INVEST框架异常处理完整规范。当处理业务异常、设计错误码、实现异常处理机制、统一异常响应时使用。包含BusinessException使用、ResourceHandler接口、错误码枚举设计等内容。",
+    "when_to_use": "抛出BusinessException业务异常、设计错误码枚举类、实现ResourceHandler国际化接口、统一异常响应处理时使用",
+    "keywords": ["invest-exception", "business-exception", "error-code", "resource-handler", "exception-handling", "error-enum", "i18n-error", "unified-exception"],
+    "category": "backend-framework",
+    "level": "user_level"
+  },
+  {
+    "name": "invest-database-guide",
+    "description": "INVEST数据库ORM使用指南。用于MyBatis-Plus配置、分页查询、TransactionUtils事务处理等数据持久化场景。",
+    "when_to_use": "配置MyBatis-Plus ORM增强功能、实现IPage分页查询、使用TransactionUtils编程式事务管理数据持久化时使用",
+    "keywords": ["invest-database", "mybatis-plus-config", "ipage-pagination", "transaction-utils", "orm-config", "data-persistence", "mapper-config", "database-orm"],
+    "category": "database",
+    "level": "user_level"
+  },
+  {
+    "name": "invest-feign-guide",
+    "description": "INVEST Feign服务调用指南。用于OpenFeign服务间调用配置和使用。当需要配置Feign客户端、实现服务间调用、处理Feign接口时使用。",
+    "when_to_use": "配置OpenFeign客户端接口、实现微服务间远程调用、处理Feign降级和超时配置时使用",
+    "keywords": ["invest-feign", "open-feign", "feign-client", "remote-call", "service-to-service", "feign-fallback", "microservice-call", "feign-config"],
+    "category": "middleware",
+    "level": "user_level"
+  },
+  {
+    "name": "smart-interface-spec",
+    "description": "测试点分析 - 基于代码变更生成测试要点报告，结果强制保存到文件 $ARGUMENTS",
+    "when_to_use": "分析git diff或指定文件，生成完整的测试点分析报告",
+    "keywords": ["test-point-analysis", "code-change", "testing-scenarios", "regression-testing"],
+    "category": "testing",
+    "level": "user_level"
+  }
+]

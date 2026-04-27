@@ -1,4 +1,5 @@
 ---
+name: smart-interface-spec
 description: 测试点分析 - 基于代码变更生成测试要点报告，结果强制保存到文件 $ARGUMENTS
 ---
 
@@ -11,13 +12,13 @@ $ARGUMENTS
 **如果未指定文件/目录**：自动分析git最近修改的代码（git diff）
 
 **指定方式示例**：
-- 单个文件: `/test-point-analysis src/main/java/group/za/bank/trade/controller/TradeController.java`
-- 多个文件: `/test-point-analysis File1.java File2.java`
-- 整个目录: `/test-point-analysis src/main/java/group/za/bank/trade/`
-- Git修改: `/test-point-analysis` (不带参数)
-- 保存到指定目录: `/test-point-analysis -o ./test-results` 或 `/test-point-analysis --output ./test-results`
-- **分支对比**: `/test-point-analysis --branch main feature/my-branch` 或 `/test-point-analysis -b main feature/my-branch`
-- **当前改动 vs 分支**: `/test-point-analysis --branch main` 或 `/test-point-analysis -b main`（只传一个分支，对比当前工作区与该分支的差异）
+- 单个文件: `/smart-interface-spec src/main/java/group/za/bank/trade/controller/TradeController.java`
+- 多个文件: `/smart-interface-spec File1.java File2.java`
+- 整个目录: `/smart-interface-spec src/main/java/group/za/bank/trade/`
+- Git修改: `/smart-interface-spec` (不带参数)
+- 保存到指定目录: `/smart-interface-spec -o ./test-results` 或 `/smart-interface-spec --output ./test-results`
+- **分支对比**: `/smart-interface-spec --branch main feature/my-branch` 或 `/smart-interface-spec -b main feature/my-branch`
+- **当前改动 vs 分支**: `/smart-interface-spec --branch main` 或 `/smart-interface-spec -b main`（只传一个分支，对比当前工作区与该分支的差异）
 
 ---
 
@@ -28,25 +29,25 @@ $ARGUMENTS
 | 配置项 | 说明 |
 |--------|------|
 | **输出模式** | 始终保存到文件，窗口仅显示摘要 |
-| **默认目录** | 当前工作目录下的 `test-point-analysis-results` |
-| **文件名格式** | `test-point-analysis-{时间戳}.md`，时间戳通过 `date +"%Y%m%d-%H%M%S"` 命令获取 |
+| **默认目录** | 当前工作目录下的 `smart-interface-spec-results` |
+| **文件名格式** | `smart-interface-spec-{时间戳}.md`，时间戳通过 `date +"%Y%m%d-%H%M%S"` 命令获取 |
 | **指定目录** | 通过 `-o <路径>` 或 `--output <路径>` 指定 |
 
 ### 输出示例
 ```bash
 # 分析git diff，保存到默认目录
-/test-point-analysis
+/smart-interface-spec
 
 # 分析指定文件，保存到默认目录
-/test-point-analysis src/main/java/group/za/bank/trade/controller/TradeController.java
+/smart-interface-spec src/main/java/group/za/bank/trade/controller/TradeController.java
 
 # 保存到指定目录
-/test-point-analysis -o ./reports src/main/java/group/za/bank/trade/
-/test-point-analysis --output /tmp/test-points File1.java File2.java
+/smart-interface-spec -o ./reports src/main/java/group/za/bank/trade/
+/smart-interface-spec --output /tmp/test-points File1.java File2.java
 
 # 分支对比，保存到默认目录
-/test-point-analysis --branch main feature/order-refactor
-/test-point-analysis -b main
+/smart-interface-spec --branch main feature/order-refactor
+/smart-interface-spec -b main
 ```
 
 ---
@@ -71,12 +72,12 @@ $ARGUMENTS
 #### 0.2 准备文件输出
 1. 确定输出目录路径：
    - 如果指定了 `-o`/`--output`，使用该路径
-   - 否则使用默认目录 `./test-point-analysis-results`
+   - 否则使用默认目录 `./smart-interface-spec-results`
 2. **强制执行以下 shell 命令获取当前时间戳**，禁止手动填写或猜测时间：
    ```bash
    date +"%Y%m%d-%H%M%S"
    ```
-   将命令输出结果作为时间戳，生成文件名格式：`test-point-analysis-{时间戳}.md`
+   将命令输出结果作为时间戳，生成文件名格式：`smart-interface-spec-{时间戳}.md`
 3. 记录完整输出路径备用
 
 ### Step 1: 读取代码变更
@@ -331,12 +332,94 @@ $ARGUMENTS
 
 ---
 
+### 🧪 接口级功能测试点
+
+**⚠️ 每个测试点必须关联到变更接口编号（I-XXX/R-XXX），确保Step 3中识别的每个接口都有对应测试点。**
+
+#### 正向测试用例
+| 编号 | 关联接口 | 测试场景 | 前置条件 | 操作步骤 | 预期结果 | 优先级 |
+|------|---------|---------|---------|---------|---------|--------|
+| F-001 | I-001 | [场景描述] | [条件] | [步骤] | [预期] | P0/P1/P2 |
+
+#### 反向测试用例
+| 编号 | 关联接口 | 测试场景 | 输入数据 | 预期结果 | 优先级 |
+|------|---------|---------|---------|---------|--------|
+| R-001 | I-002 | [异常场景] | [输入] | [预期] | P0/P1/P2 |
+
+#### 边界测试用例
+| 编号 | 关联接口 | 测试场景 | 边界值 | 预期结果 | 优先级 |
+|------|---------|---------|--------|---------|--------|
+| B-001 | I-001 | [边界场景] | [边界值] | [预期] | P0/P1/P2 |
+
+---
+
+### 🔌 接口测试点
+
+#### API接口测试
+| 编号 | 接口 | 方法 | 测试场景 | 预期状态码 | 预期响应 | 优先级 |
+|------|------|------|---------|-----------|---------|--------|
+| A-001 | `/api/xxx` | POST | [场景] | 200 | `{...}` | P0 |
+
+#### Feign调用测试
+| 编号 | Feign接口 | 测试场景 | 预期结果 | 优先级 |
+|------|----------|---------|---------|--------|
+| F-001 | `XxxClient.xxx()` | 远程调用成功 | 正常处理 | P0 |
+
+---
+
+### 💾 数据层测试点
+
+| 编号 | 测试场景 | 涉及表/SQL | 预期结果 | 优先级 |
+|------|---------|-----------|---------|--------|
+| D-001 | [场景] | `table_name` | [预期] | P0 |
+
+---
+
+### ⚠️ 异常与边界测试点
+
+| 编号 | 异常类型 | 触发条件 | 预期处理 | 优先级 |
+|------|---------|---------|---------|--------|
+| E-001 | NullPointerException | [触发条件] | 优雅降级/错误提示 | P0 |
+
+---
+
+### 🔄 回归测试清单
+
+#### 高优先级回归（P0）
+- [ ] [功能点描述] - 原因：[为什么需要回归]
+
+#### 中优先级回归（P1）
+- [ ] [功能点描述] - 原因：[为什么需要回归]
+
+#### 低优先级回归（P2）
+- [ ] [功能点描述] - 原因：[为什么需要回归]
+
+---
 
 ### 📊 测试点统计
-| 维度   | P0 (必须) | P1 (重要) | P2 (一般) | 合计 |
+
+| 维度 | P0 (必须) | P1 (重要) | P2 (一般) | 合计 |
 |------|----------|----------|----------|------|
-| 性能测试 | X | X | X | X |
+| 功能测试 | X | X | X | X |
+| 接口测试 | X | X | X | X |
+| 数据层测试 | X | X | X | X |
+| 异常与边界 | X | X | X | X |
+| 回归测试 | X | X | X | X |
 | **总计** | **X** | **X** | **X** | **X** |
+
+---
+
+### 🎯 测试执行建议
+
+**冒烟测试（优先执行）**:
+1. [列出3-5个最核心的测试用例编号]
+
+**自动化测试建议**:
+1. [列出适合自动化的测试场景]
+
+**手工测试建议**:
+1. [列出必须手工执行的测试场景]
+
 ---
 
 ## 📋 分析原则
@@ -365,7 +448,7 @@ $ARGUMENTS
 
 2. **写入完整分析报告**:
    ```
-   完整路径: {output_dir}/test-point-analysis-{timestamp}.md
+   完整路径: {output_dir}/smart-interface-spec-{timestamp}.md
    ```
 
 3. **在窗口输出摘要**（保持简洁，完整内容在文件中）:
@@ -392,38 +475,38 @@ $ARGUMENTS
 
 ### 示例1: 分析git diff（默认行为）
 ```bash
-/test-point-analysis
+/smart-interface-spec
 ```
-**行为**: 自动分析git diff的修改，保存到 `./test-point-analysis-results/test-point-analysis-YYYYMMDD-HHmmss.md`
+**行为**: 自动分析git diff的修改，保存到 `./smart-interface-spec-results/smart-interface-spec-YYYYMMDD-HHmmss.md`
 
 ### 示例2: 分析指定文件
 ```bash
-/test-point-analysis src/main/java/group/za/bank/trade/controller/TradeController.java
+/smart-interface-spec src/main/java/group/za/bank/trade/controller/TradeController.java
 ```
 **输出**: 保存到默认目录
 
 ### 示例3: 保存到指定目录
 ```bash
-/test-point-analysis -o ./reports src/main/java/group/za/bank/trade/
-/test-point-analysis --output /tmp/test-points File1.java File2.java
+/smart-interface-spec -o ./reports src/main/java/group/za/bank/trade/
+/smart-interface-spec --output /tmp/test-points File1.java File2.java
 ```
 **输出**: 保存到指定路径
 
 ### 示例4: 对比两个分支进行分析
 ```bash
 # 分析 feature 分支相对于 main 的所有改动（两分支对比）
-/test-point-analysis --branch main feature/order-refactor
+/smart-interface-spec --branch main feature/order-refactor
 
 # 分析当前本地文件相对于 main 分支的改动（单分支模式，含未提交改动）
-/test-point-analysis --branch main
-/test-point-analysis -b main
+/smart-interface-spec --branch main
+/smart-interface-spec -b main
 
 # 结合输出参数
-/test-point-analysis --branch main -o ./test-reports
-/test-point-analysis -b main --output ./test-reports
+/smart-interface-spec --branch main -o ./test-reports
+/smart-interface-spec -b main --output ./test-reports
 
 # 短参数形式（两分支）
-/test-point-analysis -b main feature/order-refactor
+/smart-interface-spec -b main feature/order-refactor
 ```
 **两分支模式行为**: 执行 `git diff main feature/order-refactor`，获取变更文件列表，读取文件内容进行分析
 

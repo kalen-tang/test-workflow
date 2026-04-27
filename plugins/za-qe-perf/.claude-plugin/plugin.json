@@ -1,0 +1,43 @@
+{
+  "name": "za-qe-perf",
+  "version": "1.0.0",
+  "description": "INVEST微服务框架性能测试与规范检查工具集",
+  "author": "Alfie",
+  "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "https://gitlab.in.za/claude/alfie/qe"
+  },
+  "keywords": [
+    "invest",
+    "microservice",
+    "performance",
+    "testing",
+    "规范检查",
+    "代码质量"
+  ],
+  "skills": [
+    "invest-framework-overview",
+    "invest-controller-spec",
+    "invest-service-spec",
+    "invest-dao-spec",
+    "invest-dto-spec",
+    "invest-entity-spec",
+    "invest-exception-spec",
+    "invest-database-guide",
+    "invest-feign-guide",
+    "smart-interface-spec"
+  ],
+  "commands": [
+    "invest-framework-overview",
+    "invest-controller-spec",
+    "invest-service-spec",
+    "invest-dao-spec",
+    "invest-dto-spec",
+    "invest-entity-spec",
+    "invest-exception-spec",
+    "invest-database-guide",
+    "invest-feign-guide",
+    "smart-interface-spec"
+  ]
+}
