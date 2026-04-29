@@ -571,11 +571,11 @@ right side
 
 格式转换实用脚本：
 
-- **`scripts/plantuml_to_xmind.py`** - PlantUML MindMap 转 XMind 格式工具
-  - 调用前先用 `Glob` 定位脚本绝对路径（`${CLAUDE_SKILL_DIR}` 在子代理中不可用，始终使用绝对路径）
-  - 用法：`uv run <脚本绝对路径>/plantuml_to_xmind.py <Markdown文件或PlantUML文件> <需求ID>`
-  - 示例：`uv run /path/to/skills/case-designer/scripts/plantuml_to_xmind.py ./result/BANK-XXXX_CASE.md BANK-XXXX`
+- **`${CLAUDE_SKILL_DIR}/scripts/plantuml_to_xmind.py`** - PlantUML MindMap 转 XMind 格式工具
+  - 用法：`uv run ${CLAUDE_SKILL_DIR}/scripts/plantuml_to_xmind.py <Markdown文件或PlantUML文件> <需求ID>`
+  - 示例：`uv run ${CLAUDE_SKILL_DIR}/scripts/plantuml_to_xmind.py ./result/BANK-XXXX_CASE.md BANK-XXXX`
   - 输出：生成到输入文件同目录，文件名为 `BANK-XXXX_CASE.xmind`
+  - **注意**：在子代理（Task）中 `${CLAUDE_SKILL_DIR}` 不可用，须由主流程预先计算脚本绝对路径后传入
 
 ### 参考文件
 
