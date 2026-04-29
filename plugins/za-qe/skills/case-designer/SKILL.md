@@ -1,7 +1,7 @@
 ---
 name: case-designer
 description: 此技能用于生成场景案例和可视化测试设计。当用户说帮我生成测试案例、把需求转成测试用例、生成PlantUML流程图、画一下测试功能点、需要测试MindMap或测试案例可视化、生成场景案例时应触发。
-allowed-tools: Read, Write, Edit, Glob, Grep, Bash(uv *)
+allowed-tools: Read, Write, Edit, Glob, Grep, Bash(uv *), Bash(uv run:*)
 ---
 
 # 场景案例设计器
@@ -235,6 +235,18 @@ left side
 分析业务流程 → 识别主要步骤和决策点 → 生成PlantUML Activity Diagram
 ```
 
+生成流程图代码块后，立即用验证脚本校验语法：
+
+1. 用 `Write` 工具将流程图代码写入临时文件 `<根目录>/temp/flowchart_validate.puml`（内容为完整的 `@startuml...@enduml` 代码块）
+2. 执行验证：
+   ```bash
+   uv run "${CLAUDE_SKILL_DIR}/scripts/validate_plantuml.py" --file '<根目录>/temp/flowchart_validate.puml'
+   ```
+3. 返回 `OK` → 删除临时文件，继续步骤3
+4. 返回 `ERROR` → 根据错误信息修正流程图代码，用 `Edit` 更新临时文件，重新执行验证，直到通过（最多重试 5 次）
+
+> 只校验流程图（`@startuml...@enduml`），MindMap 代码块不在此步骤校验。
+
 ### 步骤 3：生成测试功能点
 
 ```
@@ -254,6 +266,7 @@ left side
 ```
 
 > **注意**：PlantUML 代码全部内嵌在 Markdown 文件的代码块中，不单独输出 `.puml` 文件。
+
 
 ### 步骤 6：生成场景案例表
 
