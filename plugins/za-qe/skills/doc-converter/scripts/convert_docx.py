@@ -7,15 +7,21 @@
 # ]
 # ///
 """
-将目录中的 docx/doc 文件转换为 UTF-8 Markdown。
+将 docx/doc 文件转换为 UTF-8 Markdown。支持批量（目录模式）和单文件模式。
 
 用法:
+    # 批量模式：转换目录中所有 docx/doc
     uv run convert_docx.py <input_dir> <output_dir> [--prefix PREFIX]
 
+    # 单文件模式：转换单个文件到指定输出路径
+    uv run convert_docx.py --file <input_file> --output-file <output_path>
+
 参数:
-    input_dir:   包含 .docx/.doc 文件的目录
-    output_dir:  Markdown 输出目录（不存在时自动创建）
-    --prefix:    输出文件名前缀（可选，如 "design_"）
+    input_dir:     包含 .docx/.doc 文件的目录（批量模式）
+    output_dir:    Markdown 输出目录（批量模式，不存在时自动创建）
+    --prefix:      输出文件名前缀（批量模式可选，如 "design_"）
+    --file:        单个 docx/doc 文件路径（单文件模式）
+    --output-file: 输出 Markdown 文件完整路径（单文件模式）
 
 输出格式:
     OK:    <output_path>           转换并确认为 UTF-8
@@ -26,6 +32,7 @@
 示例:
     uv run convert_docx.py D:/docs/req D:/result
     uv run convert_docx.py D:/docs/design D:/result --prefix design_
+    uv run convert_docx.py --file D:/docs/需求.docx --output-file D:/project/BANK-90819_PRD.md
 """
 
 import argparse
@@ -67,6 +74,35 @@ def fix_encoding(path: pathlib.Path) -> str:
         except (UnicodeDecodeError, UnicodeError):
             continue
     return "warn"
+
+
+def convert_single(input_file: str, output_file: str) -> int:
+    """
+    转换单个 docx/doc 文件到指定输出路径。
+
+    :return: 0 成功，1 失败
+    """
+    src = pathlib.Path(input_file)
+    out = pathlib.Path(output_file)
+    out.parent.mkdir(parents=True, exist_ok=True)
+
+    md = MarkItDown()
+    try:
+        result = md.convert(str(src))
+        out.write_text(result.text_content, encoding="utf-8")
+    except Exception as e:
+        print(f"ERROR: {src} {e}", file=sys.stderr)
+        return 1
+
+    status = fix_encoding(out)
+    if status == "ok":
+        print(f"OK: {out}")
+    elif status.startswith("fixed:"):
+        enc = status.split(":", 1)[1]
+        print(f"FIXED: {out} from {enc}")
+    else:
+        print(f"WARN: {out}")
+    return 0
 
 
 def convert(input_dir: str, output_dir: str, prefix: str = "") -> int:
@@ -120,10 +156,20 @@ if __name__ == "__main__":
         sys.stderr = io.TextIOWrapper(sys.stderr.buffer, encoding=sys.getdefaultencoding(), errors="replace")
 
     parser = argparse.ArgumentParser(description=__doc__, formatter_class=argparse.RawDescriptionHelpFormatter)
-    parser.add_argument("input_dir", help="包含 docx/doc 文件的输入目录")
-    parser.add_argument("output_dir", help="Markdown 输出目录")
+    parser.add_argument("input_dir", nargs="?", help="包含 docx/doc 文件的输入目录（批量模式）")
+    parser.add_argument("output_dir", nargs="?", help="Markdown 输出目录（批量模式）")
     parser.add_argument("--prefix", default="", help="输出文件名前缀（如 design_）")
+    parser.add_argument("--file", dest="input_file", help="单个 docx/doc 文件路径（单文件模式）")
+    parser.add_argument("--output-file", dest="output_file", help="输出 Markdown 文件完整路径（单文件模式）")
     args = parser.parse_args()
 
-    errors = convert(args.input_dir, args.output_dir, args.prefix)
+    if args.input_file:
+        if not args.output_file:
+            parser.error("--file 需要搭配 --output-file 使用")
+        errors = convert_single(args.input_file, args.output_file)
+    elif args.input_dir and args.output_dir:
+        errors = convert(args.input_dir, args.output_dir, args.prefix)
+    else:
+        parser.error("请使用批量模式（input_dir output_dir）或单文件模式（--file --output-file）")
+
     sys.exit(1 if errors else 0)

@@ -291,20 +291,11 @@ questions:
 
 ### 步骤 2.1：转换需求文档
 
-调用 `doc-converter` Skill，传入：
-- 输入目录：需求文档所在目录（绝对路径）
-- 输出目录：根目录下的 `temp/` 子目录（绝对路径）；调用前先用 `Bash` 工具确保目录存在：`mkdir -p '<根目录绝对路径>/temp'`
+调用 `doc-converter` Skill，使用**单文件模式**直接转换到目标路径：
+- 输入文件：需求文档（绝对路径）
+- 输出文件：`<根目录绝对路径>/BANK-XXXX_PRD.md`
 
-`doc-converter` 完成后，将需求文档对应的 md 文件从 `temp/` **重命名并移动**到根目录：
-
-```
-temp/<原文件名>.md  →  <根目录>/BANK-XXXX_PRD.md
-```
-
-使用 `Bash` 工具（绝对路径，禁止 cd）：
-```bash
-mv '<temp目录绝对路径>/<原文件名>.md' '<根目录绝对路径>/BANK-XXXX_PRD.md'
-```
+`doc-converter` 的单文件模式会自动创建输出目录并直接输出到指定路径，无需中间 temp/ 目录和 mv 操作。
 
 ---
 
@@ -314,25 +305,19 @@ mv '<temp目录绝对路径>/<原文件名>.md' '<根目录绝对路径>/BANK-XX
 
 **分支A：设计文档与需求文档在同一目录**
 
-步骤2.1 已将该目录所有文档转换到 temp/，设计文档 md 已存在于 temp/ 中。
-无需再次调用 doc-converter，直接重命名移动：
+步骤2.1 使用单文件模式已完成需求文档转换。设计文档同样使用单文件模式直接转换：
 
-```bash
-mv '<temp目录绝对路径>/<设计文档原文件名>.md' '<根目录绝对路径>/BANK-XXXX_DESIGN.md'
-```
+调用 `doc-converter` Skill，传入：
+- 输入文件：设计文档（绝对路径）
+- 输出文件：`<根目录绝对路径>/BANK-XXXX_DESIGN.md`
 
 **分支B：设计文档在不同目录**
 
+同样使用单文件模式：
+
 调用 `doc-converter` Skill，传入：
-- 输入目录：设计文档所在目录（绝对路径）
-- 输出目录：根目录下的 `temp/` 子目录
-- 前缀参数：`--prefix design_`
-
-转换后重命名移动：
-
-```
-temp/design_<原文件名>.md  →  <根目录>/BANK-XXXX_DESIGN.md
-```
+- 输入文件：设计文档（绝对路径）
+- 输出文件：`<根目录绝对路径>/BANK-XXXX_DESIGN.md`
 
 ---
 

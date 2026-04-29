@@ -3,7 +3,7 @@ name: doc-reviewer
 description: 此技能应在用户需要检查或对比需求文档、设计文档（含概要设计、详细设计）、代码差异文档时使用。产出标准化报告，包含各文档独立质量评分、需求实现对齐颗粒度分析、针对性测试建议及测试风险点的高效解决措施。适配文档按类型分目录管理的使用场景。
 version: 1.0.0
 status: active
-allowed-tools: Read Write Edit Glob Grep
+allowed-tools: Read, Write, Edit, Glob, Grep
 ---
 
 # 需求实现检查技能

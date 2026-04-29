@@ -1,22 +1,7 @@
 ---
 description: 从需求文档生成场景化测试案例（PlantUML流程图和MindMap测试设计）
 argument-hint: [doc_paths] [--output dir]
-arguments:
-  - name: doc_paths
-    description: 需求文档路径（支持多个文档，自动合并），支持 .md/.docx/.txt/.pdf 格式
-    required: true
-  - name: output
-    description: 输出目录（可选，默认 ./result/）
-    required: false
-allowed-tools:
-  - Read
-  - Write
-  - Edit
-  - Glob
-  - Grep
-  - Skill
-  - Bash(uv *)
-  - Bash(uv run *)
+allowed-tools: Read, Write, Edit, Glob, Grep, Skill, Bash(uv *), Bash(uv run *)
 ---
 
 # 场景测试案例生成器

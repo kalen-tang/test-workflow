@@ -9,7 +9,13 @@
       "Glob",
       "Grep",
       "AskUserQuestion",
-      "Task"
+      "Task",
+      "Skill(za-qe:doc-converter)",
+      "Skill(za-qe:req-parser)",
+      "Skill(za-qe:design-parser)",
+      "Skill(za-qe:interface-extractor)",
+      "Skill(za-qe:case-designer)",
+      "Skill(za-qe:api-generator)"
     ]
   }
 }

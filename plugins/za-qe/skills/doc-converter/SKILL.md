@@ -10,13 +10,20 @@ allowed-tools: Read, Glob, Bash(uv run:*)
 
 ## 技能目标
 
-将目录中的 `.docx`/`.doc` 文件批量转换为 UTF-8 编码的 Markdown 文件，并自动修复编码问题。作为 workflow 阶段 2 的执行者，也可独立使用。
+将 `.docx`/`.doc` 文件转换为 UTF-8 编码的 Markdown 文件，并自动修复编码问题。支持批量（目录模式）和单文件模式。作为 workflow 阶段 2 的执行者，也可独立使用。
 
 ## 输入
+
+### 批量模式
 
 - **输入目录**：包含 `.docx`/`.doc` 文件的目录路径（绝对路径）
 - **输出目录**：Markdown 文件输出目录路径（绝对路径，不存在时自动创建）
 - **文件名前缀**（可选）：输出文件名前缀（如 `design_`，用于区分设计文档）
+
+### 单文件模式
+
+- **输入文件**：单个 `.docx`/`.doc` 文件路径（绝对路径）
+- **输出文件**：Markdown 输出文件完整路径（绝对路径，含自定义文件名，父目录不存在时自动创建）
 
 ## 输出
 
@@ -27,7 +34,13 @@ allowed-tools: Read, Glob, Bash(uv run:*)
 
 ### 步骤 1：调用转换脚本
 
-使用绝对路径调用 `convert_docx.py` 脚本，一次性完成转换和编码修复：
+**单文件模式**（推荐，workflow 中使用）：
+
+```bash
+uv run "${CLAUDE_SKILL_DIR}/scripts/convert_docx.py" --file '<输入文件绝对路径>' --output-file '<输出文件绝对路径>'
+```
+
+**批量模式**（转换整个目录）：
 
 ```bash
 uv run "${CLAUDE_SKILL_DIR}/scripts/convert_docx.py" '<输入目录绝对路径>' '<输出目录绝对路径>'
@@ -61,7 +74,8 @@ uv run "${CLAUDE_SKILL_DIR}/scripts/convert_docx.py" '<输入目录绝对路径>
 
 ## 脚本工具
 
-- **`scripts/convert_docx.py`** — 批量 docx/doc → Markdown 转换 + 编码修复（一体化）
+- **`scripts/convert_docx.py`** — docx/doc → Markdown 转换 + 编码修复（一体化）
+  - 支持批量模式（目录）和单文件模式（`--file` + `--output-file`）
   - 依赖：`markitdown[docx]>=0.1.0`（uv 自动管理）
   - 编码检测优先级：utf-8 → utf-8-sig → gb18030 → big5 → utf-16
   - 转换完每个文件后自动检查并修复编码
