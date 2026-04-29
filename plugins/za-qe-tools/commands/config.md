@@ -1,5 +1,5 @@
 ---
-description: "管理 za-qe-tools 各功能模块的配置。当用户说'配置工具'、'工具配置'、'开启dippy'、'关闭通知'、'模块管理'、'tools config'、'切换状态栏'、'关闭状态栏'、'状态栏配置' 时触发。"
+description: "管理 za-qe-tools 各功能模块的配置。当用户明确说'开启dippy'、'关闭dippy'、'开启通知'、'关闭通知'、'开启esp'、'关闭esp'、'切换状态栏'、'关闭状态栏'、'状态栏配置'、'za-qe-tools配置' 时触发。"
 argument-hint: "[模块名 on/off | statusline powerline/powerline-nf/standard/off]"
 allowed-tools:
   - Read
