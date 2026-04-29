@@ -61,7 +61,7 @@ of [zabank / imc / zabank-imc-cubercore-service|http://...]
 on branch [BANK-89156_20260414_1632|http://...]:{quote}feat(BANK-89156):...{quote}
 ```
 
-解析逻辑（Python）：
+解析逻辑（Python），支持按开发人员过滤：
 ```python
 import re, json
 
@@ -69,10 +69,29 @@ with open(jira_tmp_file, encoding='utf-8') as f:
     data = json.load(f)
 
 comments = data['fields']['comment']['comments']
-repo_branch_map = {}  # {service_name: branch_name}
+repo_branch_map = {}  # {service_name: (branch_name, developer)}
+# dev_filter 为空列表时不过滤，由阶段0传入
+# 示例：dev_filter = ['张三', 'li.si']  或  dev_filter = []
 
 for comment in comments:
     body = comment.get('body', '')
+    
+    # 提取评论开头的开发人员（中文姓名或英文用户名）
+    # 格式：[姓名|http://gitlab.in.za/username] mentioned this issue ...
+    dev_match = re.match(r'^\[([^\|]+)\|([^\]]*)\]', body.strip())
+    developer = dev_match.group(1).strip() if dev_match else ''
+    dev_url_path = dev_match.group(2).strip() if dev_match else ''
+    
+    # 若有过滤条件，按姓名或 URL 中的用户名匹配（大小写不敏感）
+    if dev_filter:
+        matched = any(
+            f.strip().lower() in developer.lower() or
+            f.strip().lower() in dev_url_path.lower()
+            for f in dev_filter
+        )
+        if not matched:
+            continue
+    
     # 提取仓库名（路径最后一段）
     repo_match = re.search(r'of \[.*?([a-zA-Z0-9_-]+-[a-zA-Z0-9_-]+-[a-zA-Z0-9_-]+)\|', body)
     # 提取分支名
@@ -81,10 +100,10 @@ for comment in comments:
     if repo_match and branch_match:
         repo_name = repo_match.group(1)   # 如：zabank-imc-cubercore-service
         branch_name = branch_match.group(1)  # 如：BANK-89156_20260414_1632
-        repo_branch_map[repo_name] = branch_name
+        repo_branch_map[repo_name] = (branch_name, developer)
 
-for repo, branch in repo_branch_map.items():
-    print(f"服务: {repo}, 分支: {branch}")
+for repo, (branch, dev) in repo_branch_map.items():
+    print(f"服务: {repo}, 分支: {branch}, 开发: {dev}")
 ```
 
 ### 方式 2：Dev Status API（备选）

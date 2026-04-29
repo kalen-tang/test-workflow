@@ -19,13 +19,18 @@ allowed-tools: Read Write Glob Grep Bash(curl *) Bash(git *) Bash(python *) Bash
 
 ## 阶段 0：启动信息收集（最优先执行）
 
-两项均已知才能继续：
+前两项均已知才能继续，第三项为可选：
 
 **收集项 1 - 需求编号**：若用户指令中已包含（如"分析 BANK-89156"），直接使用；否则提示用户提供。
 
 **收集项 2 - 本地工作目录**：询问本地项目根目录（如 `C:\workspace`），各服务仓库均在该目录下。
 - Windows 路径转换为 bash 路径：`C:\workspace` → `/c/workspace`，`D:\projects` → `/d/projects`
 - 记录为 `WORKSPACE` 变量（bash 路径格式），后续所有命令基于此路径
+
+**收集项 3 - 开发人员（可选）**：若用户指定了开发人员（姓名或用户名，可多个，如"张三"或"zhang.san"），记录为 `DEV_FILTER` 列表；未提供则分析该需求**所有**开发人员的变更。
+- 支持中文姓名（如"高原"）或英文用户名（如"yuan.gao"）匹配
+- 多人时以逗号分隔，如"张三,李四"
+- Jira 评论中开发人员信息格式：`[姓名|http://gitlab.in.za/username]`，两种格式均可匹配
 
 ---
 
@@ -65,17 +70,63 @@ PYEOF
 
 **首选：从 Jira 评论提取**（ZA Bank 实际分支信息所在）。Infra-DevOps 机器人在 MR 创建时自动发评论，格式：
 ```
-[xxx] mentioned this issue in [a merge request] of [zabank/imc/zabank-imc-cubercore-service]
-on branch [BANK-89156_20260414_1632]
+[高原|http://gitlab.in.za/yuan.gao] mentioned this issue in [a merge request|http://...] 
+of [zabank / imc / zabank-imc-cubercore-service|http://...] 
+on branch [BANK-89156_20260414_1632|http://...]:{quote}feat(BANK-89156):...{quote}
 ```
 
-正则提取（详见 `references/jira-api.md`）：
+正则提取（详见 `references/jira-api.md`），**若指定了 `DEV_FILTER`，需先过滤开发人员**：
+
 ```python
-repo_match = re.search(r'of \[.*?([a-zA-Z0-9_-]+-[a-zA-Z0-9_-]+-[a-zA-Z0-9_-]+)\|', body)
-branch_match = re.search(r'on branch \[([^\]|]+)', body)
+import re, json
+
+with open(jira_tmp_file, encoding='utf-8') as f:
+    data = json.load(f)
+
+comments = data['fields']['comment']['comments']
+repo_branch_map = {}   # {service_name: (branch_name, developer)}
+dev_filter = []  # 从阶段0收集，空列表=不过滤
+
+for comment in comments:
+    body = comment.get('body', '')
+    
+    # 提取评论中的开发人员（中文姓名或英文用户名）
+    # 格式：[姓名|http://gitlab.in.za/username] 或 [username|...]
+    dev_match = re.match(r'^\[([^\|]+)\|[^\]]*gitlab[^\]]*\]', body.strip())
+    developer = dev_match.group(1).strip() if dev_match else ''
+    
+    # 若指定了过滤条件，判断是否匹配（姓名或 URL 中的用户名任一命中即可）
+    if dev_filter:
+        url_username = ''
+        if dev_match:
+            url_match = re.match(r'^\[[^\|]+\|[^\]]*gitlab\.in\.za/([^\]]+)\]', body.strip())
+            url_username = url_match.group(1).strip() if url_match else ''
+        matched = any(
+            f.strip().lower() in developer.lower() or
+            f.strip().lower() in url_username.lower()
+            for f in dev_filter
+        )
+        if not matched:
+            continue  # 跳过不匹配的评论
+    
+    # 提取仓库名（路径最后一段）
+    repo_match = re.search(r'of \[.*?([a-zA-Z0-9_-]+-[a-zA-Z0-9_-]+-[a-zA-Z0-9_-]+)\|', body)
+    # 提取分支名
+    branch_match = re.search(r'on branch \[([^\]|]+)', body)
+    
+    if repo_match and branch_match:
+        repo_name = repo_match.group(1)
+        branch_name = branch_match.group(1)
+        repo_branch_map[repo_name] = (branch_name, developer)
+
+for repo, (branch, dev) in repo_branch_map.items():
+    print(f"服务: {repo}, 分支: {branch}, 开发: {dev}")
 ```
 
-结果记录为 `{仓库名: 分支名}` 映射，去重后得到所有涉及服务。**备选**：Development API（见 `references/jira-api.md`）。
+若指定了 `DEV_FILTER` 但过滤后结果为空，则提示用户：
+> 未在 Jira 评论中找到指定开发人员 `{DEV_FILTER}` 的提交记录，请确认姓名/用户名是否正确，或检查该需求是否有 MR 关联。
+
+结果记录为 `{仓库名: (分支名, 开发人员)}` 映射，去重后得到涉及服务列表。**备选**：Development API（见 `references/jira-api.md`）。
 
 ---
 
@@ -159,7 +210,7 @@ git -C "${WORKSPACE}/<svc>" diff origin/master...origin/<branch> \
 生成两份 Markdown 文件至 `./result/` 目录（模板详见 `references/output-template.md`）：
 
 **`<需求ID>_代码变更分析.md`**：
-1. 需求概览 → 2. 变更概览表 → 3. 各服务变更详情 → 4. 业务流程 & 数据库信息 → 5. 质量风险汇总 → 6. [优化需求] 优化影响分析
+1. 需求概览（含分析范围：全量开发人员 or 指定人员名单）→ 2. 变更概览表 → 3. 各服务变更详情 → 4. 业务流程 & 数据库信息 → 5. 质量风险汇总 → 6. [优化需求] 优化影响分析
 
 **`<需求ID>_测试策略.md`**：
 1. 测试范围和目标 → 2. P0 必测用例 → 3. P1 建议用例 → 4. P2 可选用例 → 5. 回归测试建议 → 6. 测试数据准备 → 7. 测试环境依赖
