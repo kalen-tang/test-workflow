@@ -119,8 +119,9 @@ allowed-tools: Read, Write, Edit, Grep, Glob, Bash(uv run:*), Bash(uvx *), Bash,
 
 **选项构建规则（每个配置项）**：
 - 检测到的候选最多取前 3 个，每个作为一个选项（标注来源说明）
-- 末位固定加"手动输入"选项
-- 若候选数量 ≤ 2，末位再加"无"选项（需求ID和需求文档除外，不加"无"）
+- **不添加"手动输入"选项**（`AskUserQuestion` 自带 "Other" 输入框，用户可直接输入自定义值）
+- 设计文档和自动化目录：末位加"无"选项
+- 需求ID和需求文档为必填项，不加"无"选项
 
 **需求ID 过滤规则**：
 
@@ -128,7 +129,10 @@ allowed-tools: Read, Write, Edit, Grep, Glob, Bash(uv run:*), Bash(uvx *), Bash,
 - 数字部分 ≥ 10000（即 `BANK-10000`/`IP-10000` 及以上）；小于 10000 的 ID（如 `BANK-999`）**忽略，不作为选项**
 - 格式符合 `BANK-\d{5,}` 或 `IP-\d{5,}`
 
-过滤后若无有效候选 ID（或原本就未检测到任何 ID），需求ID 问题**仅保留"手动输入"一个选项**，该选项 description 标注"必填，请输入 BANK-XXXXX 或 IP-XXXXX（数字≥10000）"。
+**无候选时的处理**：
+- 需求ID 过滤后无有效候选：options 仅放一个"无，中断退出"选项（用户通过 Other 输入ID，或选此项中止流程）
+- 需求文档无候选：同上，options 仅放"无，中断退出"
+- 设计文档/自动化目录无候选：options 仅放"无"选项（可选项，不需要中断退出）
 
 **`AskUserQuestion` 调用结构**：
 
@@ -142,8 +146,9 @@ questions:
         description: "来自文件名：{来源文件名}"
       - label: "{检测到的ID2}"          # 若有（数字≥10000）
         description: "来自文件名：{来源文件名}"
-      - label: "手动输入"
-        description: "自行输入 BANK-XXXXX 或 IP-XXXXX 格式（必填，不能为空）"
+      # 无候选时仅保留下面这一个选项：
+      - label: "无，中断退出"
+        description: "中止工作流，请确认文件名包含 BANK-XXXXX 后重试"
 
   - header: "需求文档"
     question: "请选择需求文档（必填）："
@@ -153,8 +158,9 @@ questions:
         description: "关键词匹配：{命中的关键词}"
       - label: "{需求候选文件2}"          # 若有
         description: "关键词匹配：{命中的关键词}"
-      - label: "手动输入"
-        description: "输入文件路径（不能为空）"
+      # 无候选时仅保留下面这一个选项：
+      - label: "无，中断退出"
+        description: "中止工作流，请将需求文档放入当前目录后重试"
 
   - header: "设计文档"
     question: "请选择设计文档（可选）："
@@ -162,8 +168,6 @@ questions:
     options:
       - label: "{设计候选文件1}"
         description: "关键词匹配：{命中的关键词}"
-      - label: "手动输入"
-        description: "输入文件路径，输入 - 表示无设计文档"
       - label: "无"
         description: "不提供设计文档，仅生成场景案例"
 
@@ -173,22 +177,21 @@ questions:
     options:
       - label: "当前目录"               # 仅当检测到 pytest.ini 时加入
         description: "检测到 pytest.ini：{CWD绝对路径}"
-      - label: "手动输入"
-        description: "输入目录路径，输入 - 表示无自动化目录"
       - label: "无"
         description: "不关联自动化工程"
 ```
 
-> 经过滤后无有效候选 ID（或未检测到任何 ID），需求ID 问题只保留"手动输入"选项，description 标注必填说明。
-> 用户未通过参数传入 `[需求ID]` 时才展示需求ID问题；若已传入则该问题从 `questions` 中移除（只展示3个问题）。
+> 用户未通过参数传入 `[需求ID]` 时才展示需求ID问题；若已传入则该问题从 `questions` 中移除。
+> 用户选择"无，中断退出"时，输出"工作流已中止"并停止执行。
+> 用户通过 Other 输入自定义值时，直接使用该值（需求ID须校验格式：BANK-XXXXX 或 IP-XXXXX，数字≥10000，不合规则重询）。
 
-**用户选"手动输入"后的处理**：
+**用户选 Other 输入值后的处理**：
 
-收到 `AskUserQuestion` 结果后，检查各项是否为"手动输入"：
-- 需求ID 选了"手动输入" → 再次单独调用 `AskUserQuestion` 询问具体值（格式：BANK-XXXXX 或 IP-XXXXX，数字部分必须 ≥ 10000，不能为空；输入不合规则重询）
-- 需求文档 选了"手动输入" → 再次询问文件路径（不能为空，输入 `无`/`-` 提示错误并重询）
-- 设计文档 选了"手动输入" → 再次询问文件路径（输入 `无`/`-` 视为空值，合法）
-- 自动化目录 选了"手动输入" → 再次询问目录路径（输入 `无`/`-` 视为空值；输入有效路径后用 `Glob` 校验是否存在 `pytest.ini`，不存在则警告不阻断）
+收到 `AskUserQuestion` 结果后，检查各项是否为用户自定义输入（非选项中的 label）：
+- 需求ID 为自定义输入 → 校验格式（BANK-XXXXX 或 IP-XXXXX，数字部分≥10000），不合规则用 `AskUserQuestion` 重询
+- 需求文档 为自定义输入 → 校验文件是否存在，不存在则重询
+- 设计文档 为自定义输入 → 输入 `无`/`-`/空 视为不提供；有效路径校验存在性
+- 自动化目录 为自定义输入 → 输入 `无`/`-`/空 视为不提供；有效路径用 `Glob` 校验 `pytest.ini`，不存在则警告不阻断
 
 ---
 
