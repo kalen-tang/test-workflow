@@ -46,33 +46,42 @@ ls ./result/
 # 交互模式（推荐）：自动探测环境后引导配置
 /za-qe:qe-workflow
 
-# 指定参数模式：跳过交互直接执行
-/za-qe:qe-workflow --req_dir ./docs/req --design_dir ./docs/design --output_dir ./result
+# 指定需求ID（跳过ID询问）
+/za-qe:qe-workflow BANK-12345
 ```
 
 **执行流程**：
 
 ```mermaid
 flowchart TD
-    Start(["/za-qe:qe-workflow"]) --> Detect["阶段1：环境探测<br/>扫描 docx/doc 文件<br/>检测 pytest.ini"]
-    Detect --> Config["交互式目录配置<br/>需求文档目录（必填）<br/>设计文档目录（可选）<br/>案例输出目录<br/>自动化项目目录"]
-    Config --> Convert["阶段2：文档转换<br/>uvx markitdown docx→md<br/>编码检查 → UTF-8 修复"]
+    Start(["/za-qe:qe-workflow [需求ID]"]) --> Phase0["阶段0：续传检测\n检测 workflow.md 是否存在"]
+    Phase0 -->|存在| Resume["询问：继续/清除重来"]
+    Phase0 -->|不存在| Detect["阶段1：环境探测\n扫描文件名（需求/设计关键词）\n扫描 BANK-XXXX/IP-XXXX ID\n检测 pytest.ini"]
+    Resume -->|继续| SkipToStep["跳转到上次失败步骤"]
+    Resume -->|清除重来| Detect
+    Detect --> Config["交互式配置\n需求ID（必填）\n需求文档（必填）\n设计文档（可选）\n自动化目录（可选）"]
+    Config --> WriteWF["写入 workflow.md（状态锚点）\n创建 BANK-XXXX_NOTES.md"]
+    WriteWF --> Convert["阶段2：文档转换\ndoc-converter → temp/\n重命名 → BANK-XXXX_PRD.md / DESIGN.md\n内容扫描补充确认ID"]
+
     Convert --> HasReq{有需求文档?}
-    Convert --> HasDesign{有设计文档?}
+    HasReq -->|No| Stop([中止])
+    HasReq -->|Yes| HasDesign{有设计文档?}
 
-    HasReq -->|Yes| ReqParser["req-parser<br/>规范化需求文档"]
-    HasDesign -->|Yes| DesignParser["design-parser<br/>规范化设计文档"]
+    HasDesign -->|Yes| ReqParser["req-parser\n→ BANK-XXXX_PRD.md"]
+    HasDesign -->|No| ReqParserOnly["req-parser\n→ BANK-XXXX_PRD.md"]
 
-    ReqParser --> HasBoth{有设计文档?}
-    DesignParser --> Analyzer
+    ReqParser --> DesignParser["design-parser\n→ BANK-XXXX_DESIGN.md"]
+    DesignParser --> Extractor["interface-extractor\n→ temp/BANK-XXXX_接口数据报告.md"]
+    Extractor --> CaseDesigner["case-designer\n→ BANK-XXXX_CASE.md\n→ temp/BANK-XXXX_CASE_TABLE.md\n→ BANK-XXXX.xmind"]
 
-    HasBoth -->|Yes| Extractor["interface-extractor<br/>接口数据报告"]
-    HasBoth -->|No| TipOnly["提示可选操作<br/>case-designer"]
+    ReqParserOnly --> CaseDesignerOnly["case-designer\n→ BANK-XXXX_CASE.md\n→ BANK-XXXX.xmind"]
 
-    HasDesign -->|No + 无需求| Stop([结束])
-
-    Analyzer --> ApiGen["api-generator<br/>API 自动化测试用例"]
-    ApiGen --> Done([完成])
+    HasAuto{有自动化目录?}
+    CaseDesigner --> HasAuto
+    HasAuto -->|Yes| ApiGen["api-generator\n→ 自动化目录/"]
+    HasAuto -->|No| Done1([完成：案例生成])
+    ApiGen --> Done2([完成：全流程])
+    CaseDesignerOnly --> Done3([完成：仅需求])
 ```
 
 **优势**：
@@ -80,9 +89,12 @@ flowchart TD
 | 维度 | 手动逐步执行 | /za-qe:qe-workflow |
 |------|------------|-----------|
 | 步骤 | 5+ 步 | 1 步启动 |
+| 断点续传 | 无 | 自动保存进度，可从失败步骤继续 |
 | 文档转换 | 手动 markitdown | 自动批量转换 |
 | 编码问题 | 容易遗漏 | 自动检测修复 |
+| ID检测 | 手动确认 | 自动扫描文件名和内容 |
 | Skill 串联 | 手动传路径 | 自动衔接 |
+| 文件命名 | 自定义 | 统一 BANK-XXXX 规范 |
 
 ---
 
@@ -330,7 +342,7 @@ flowchart TD
 | req-parser | 原始需求文档 | 规范化需求文档（PRD 7 章结构） |
 | design-parser | 原始设计文档 | 规范化设计文档 |
 | doc-reviewer | 规范化需求 + 规范化设计 | 验证报告 |
-| case-designer | 规范化需求 + 接口数据 | 场景案例 + 场景案例表 |
+| case-designer | 规范化需求 + 接口数据 | BANK-XXXX_CASE.md + temp/BANK-XXXX_CASE_TABLE.md + BANK-XXXX.xmind |
 | api-generator | 场景案例表 + 接口数据 | API 测试代码 |
 
 ---
@@ -402,4 +414,4 @@ doc-reviewer 需要配置文档目录，可以在 SKILL.md 中修改默认配置
 
 ---
 
-**版本**: v1.4.0 | [项目主文档](../../README.md) | ZA Bank Test Team
+**版本**: v1.5.0 | [项目主文档](../../README.md) | ZA Bank Test Team

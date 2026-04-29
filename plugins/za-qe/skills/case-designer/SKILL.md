@@ -1,7 +1,7 @@
 ---
 name: case-designer
 description: 此技能用于生成场景案例和可视化测试设计。当用户说帮我生成测试案例、把需求转成测试用例、生成PlantUML流程图、画一下测试功能点、需要测试MindMap或测试案例可视化、生成场景案例时应触发。
-allowed-tools: Read Write Edit Glob Grep Bash(uv *) Bash(uv run *)
+allowed-tools: Read, Write, Edit, Glob, Grep, Bash(uv *)
 ---
 
 # 场景案例设计器
@@ -38,7 +38,9 @@ allowed-tools: Read Write Edit Glob Grep Bash(uv *) Bash(uv run *)
 
 ### 1. 需求文档解析
 
-**支持的文档格式**：
+> **调用方式说明**：workflow 串联调用时，输入必须是 req-parser 产出的 `.md` 文件（规范化需求文档）；独立调用时，以下格式均受支持：
+
+**支持的文档格式（独立调用）**：
 
 - Word 文档（.doc, .docx）
 - Markdown 文件（.md）
@@ -271,7 +273,9 @@ left side
 
 **数据传递标记**：使用 `{{步骤N.字段名}}` 标记步骤间的数据依赖
 
-**输出文件**：`<输出目录>/<项目名>_CASE_TABLE.md`
+**输出文件**：`<输出目录>/temp/<项目名>_CASE_TABLE.md`
+
+> 场景案例表始终输出到 `<输出目录>/temp/` 子目录（而非输出目录根），workflow 调用和独立调用均遵循此规则。
 
 > 详细格式参见 `references/scenario-table.md`
 > 场景识别指南参见 `references/scenario-identification.md`

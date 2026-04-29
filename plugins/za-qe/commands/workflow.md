@@ -1,7 +1,7 @@
 ---
 description: 测试左移全流程工作流：自动探测环境、断点续传、统一命名规范，从需求/设计文档生成API自动化测试用例
 argument-hint: [需求ID]
-allowed-tools: Read, Write, Edit, Grep, Glob, Bash(uv run:*), Bash, TodoWrite, AskUserQuestion, Skill(za-qe:doc-converter), Skill(za-qe:req-parser), Skill, Task
+allowed-tools: Read, Write, Edit, Grep, Glob, Bash(uv run:*), Bash, AskUserQuestion, Skill(za-qe:doc-converter), Skill(za-qe:req-parser), Skill(za-qe:design-parser), Skill(za-qe:interface-extractor), Skill(za-qe:case-designer), Skill(za-qe:api-generator), Skill, Task
 ---
 
 # 测试左移全流程工作流
@@ -227,6 +227,16 @@ allowed-tools: Read, Write, Edit, Grep, Glob, Bash(uv run:*), Bash, TodoWrite, A
 ## 阶段 2：文档转换
 
 > 阶段2读取阶段1配置的文件，输出路径统一写入根目录（`workflow.md` 所在目录）。
+
+> **格式预检**：在调用 doc-converter 前，检查阶段1配置的需求文档路径扩展名：
+> - 若已是 `.md` 格式 → 跳过 doc-converter，直接用 `Bash` 将文件复制（或重命名）到根目录：
+>   ```bash
+>   cp '<需求文档绝对路径>' '<根目录绝对路径>/BANK-XXXX_PRD.md'
+>   ```
+>   然后跳转到步骤2.3（内容扫描确认ID）。
+> - 若是 `.docx`/`.doc` 格式 → 正常执行步骤2.1（调用 doc-converter）。
+>
+> 设计文档同理：若已是 `.md` 格式，步骤2.2直接复制到根目录为 `BANK-XXXX_DESIGN.md`，跳过 doc-converter 调用。
 
 ### 步骤 2.1：转换需求文档
 
