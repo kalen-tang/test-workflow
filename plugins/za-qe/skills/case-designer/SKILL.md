@@ -229,23 +229,46 @@ left side
 接收需求文档（支持多种格式）→ 识别文档结构 → 提取业务信息 → 识别功能模块和业务流程
 ```
 
-### 步骤 2：生成流程图
+### 步骤 2：生成流程图（子代理执行）
 
-```
-分析业务流程 → 识别主要步骤和决策点 → 生成PlantUML Activity Diagram
-```
+流程图生成和验证在**子代理**中完成，避免验证重试循环污染主流程上下文。
 
-生成流程图代码块后，立即用验证脚本校验语法：
+#### 主流程：派发子代理
 
-1. 用 `Write` 工具将流程图代码写入临时文件 `<根目录>/temp/flowchart_validate.puml`（内容为完整的 `@startuml...@enduml` 代码块）
-2. 执行验证：
+用 `Task` 工具派发一个子代理，传入以下信息：
+- 需求文档路径：`<根目录>/BANK-XXXX_PRD.md`（子代理自行 Read，不在 prompt 里传内容）
+- 验证脚本绝对路径：`<CLAUDE_SKILL_DIR绝对路径>/scripts/validate_plantuml.py`
+- 临时文件路径：`<根目录>/temp/flowchart_validate.puml`
+- 输出文件路径：`<根目录>/temp/flowchart_result.puml`
+
+#### 子代理任务
+
+1. 读取需求文档，分析业务流程，识别主要步骤和决策点
+2. 生成符合以下规范的 PlantUML Activity Diagram：
+   - 使用 `!theme materia` 主题
+   - 包含主要流程、关键决策点、异常处理
+   - 格式参见 case-designer references/flowchart-generation.md
+3. 将生成的代码块写入临时文件：
    ```bash
-   uv run "${CLAUDE_SKILL_DIR}/scripts/validate_plantuml.py" --file '<根目录>/temp/flowchart_validate.puml'
+   # Write 工具写入 <根目录>/temp/flowchart_validate.puml
    ```
-3. 返回 `OK` → 删除临时文件，继续步骤3
-4. 返回 `ERROR` → 根据错误信息修正流程图代码，用 `Edit` 更新临时文件，重新执行验证，直到通过（最多重试 5 次）
+4. 执行验证：
+   ```bash
+   uv run '<验证脚本绝对路径>' --file '<根目录>/temp/flowchart_validate.puml'
+   ```
+5. 若返回 `ERROR` → 根据错误信息修正代码块，更新临时文件，重新验证（最多重试 5 次）
+6. 验证通过后将最终代码块写入结果文件 `<根目录>/temp/flowchart_result.puml`
+7. 最后一行输出状态：
+   - 成功：`STATUS: OK`
+   - 5次仍失败：`STATUS: WARN 流程图验证失败，已保留最后一次生成结果，请人工检查`
 
-> 只校验流程图（`@startuml...@enduml`），MindMap 代码块不在此步骤校验。
+#### 主流程：接收子代理结果
+
+- `STATUS: OK` → 读取 `<根目录>/temp/flowchart_result.puml` 内容，作为流程图代码块，继续步骤3
+- `STATUS: WARN` → 同样读取结果文件继续，但在最终输出中标注"⚠️ 流程图语法存在问题，建议人工检查"
+- 删除两个临时文件（`flowchart_validate.puml`、`flowchart_result.puml`）
+
+> `${CLAUDE_SKILL_DIR}` 在子代理内可能不可用，因此主流程在派发子代理前需计算脚本绝对路径并显式传入。
 
 ### 步骤 3：生成测试功能点
 

@@ -336,7 +336,7 @@ temp/design_<原文件名>.md  →  <根目录>/BANK-XXXX_DESIGN.md
 > **重要原则**：
 > - 阶段3所有 Skill 一律读取阶段2产出的 md 文件，**不得直接读取原始 doc/docx 文件**
 > - **每个 Skill 执行完成后，必须立即继续执行下一个 Skill，不得停下等待用户指令**
-> - 每完成一个 Skill，立即用 `Edit` 工具更新 `workflow.md` 进度后进入下一步
+> - 每完成一个 Skill，进度更新由**主流程**统一用 `Edit` 写入 `workflow.md`，子代理不写 workflow.md
 
 ### 分支决策
 
@@ -344,43 +344,41 @@ temp/design_<原文件名>.md  →  <根目录>/BANK-XXXX_DESIGN.md
 
 | 场景 | 执行路径 |
 |------|---------|
-| 需求 + 设计 + 自动化目录 | 3.1 req-parser → 3.2 design-parser → 3.3 interface-extractor → 3.4 case-designer → 3.5 api-generator（输出到自动化目录） |
-| 需求 + 设计 + 无自动化 | 3.1 req-parser → 3.2 design-parser → 3.3 interface-extractor → 3.4 case-designer（结束） |
+| 需求 + 设计 + 自动化目录 | 3.1/3.2 并行 → 3.3 interface-extractor → 3.4 case-designer → 3.5 api-generator（输出到自动化目录） |
+| 需求 + 设计 + 无自动化 | 3.1/3.2 并行 → 3.3 interface-extractor → 3.4 case-designer（结束） |
 | 仅需求（无设计） | 3.1 req-parser → 3.4 case-designer（结束） |
 | 仅设计（无需求） | **中止**：输出"需求文档为必填项，仅有设计文档无法执行工作流，请重新执行 /za-qe:qe-workflow" |
 | 无需求 | **中止**：输出"需求文档为必填项，请重新执行 /za-qe:qe-workflow 并提供需求文档" |
 
 ---
 
-### 步骤 3.1：调用 req-parser（有需求文档时必须执行）
+### 步骤 3.1 + 3.2：并行调用 req-parser 和 design-parser（有设计文档时）
 
-**触发条件**：存在 `<根目录>/BANK-XXXX_PRD.md`
+**触发条件**：同时存在需求文档和设计文档时，用 `Task` 工具同时派发两个子代理并行执行。
 
-- **输入**：`<根目录>/BANK-XXXX_PRD.md`
-- **输出**：覆盖写入 `<根目录>/BANK-XXXX_PRD.md`（req-parser 规范化内容替换原转换内容）
+#### 子代理A：req-parser
 
-按照 req-parser Skill 的流程执行，明确告知输出路径为 `<根目录>/BANK-XXXX_PRD.md`。
+- **任务**：按照 req-parser Skill 的流程，读取 `<根目录>/BANK-XXXX_PRD.md`，规范化后覆盖写入同路径
+- **返回格式**（最后一行）：
+  - 成功：`STATUS: OK`
+  - 失败：`STATUS: ERROR <原因>`
+- **约束**：不得修改 `workflow.md`
 
-**完成后**：用 `Edit` 工具将 `workflow.md` 中"阶段3.1：req-parser"从 `[ ]` 改为 `[x]`，在"产出文件"区域追加：
-```
-阶段3.1: <根目录绝对路径>/BANK-XXXX_PRD.md
-```
-立即进入下一步（分支决策中3.1的下一步）。
+#### 子代理B：design-parser
 
----
+- **任务**：按照 design-parser Skill 的流程，读取 `<根目录>/BANK-XXXX_DESIGN.md`，规范化后覆盖写入同路径
+- **返回格式**（最后一行）：
+  - 成功：`STATUS: OK`
+  - 失败：`STATUS: ERROR <原因>`
+- **约束**：不得修改 `workflow.md`
 
-### 步骤 3.2：调用 design-parser（有设计文档时执行）
+#### 等待两个子代理完成后，主流程处理结果
 
-**触发条件**：存在 `<根目录>/BANK-XXXX_DESIGN.md`
+- 两者均 `OK` → 用 `Edit` 将 `workflow.md` 中 3.1 和 3.2 均标记为 `[x]`，追加产出文件记录，立即进入步骤3.3
+- 子代理A失败 → 将 3.1 标记为 `[!]`，中止后续执行（design-parser 结果已产出可保留）
+- 子代理B失败 → 将 3.2 标记为 `[!]`，中止后续执行（req-parser 结果已产出可保留）
 
-- **输入**：`<根目录>/BANK-XXXX_DESIGN.md`
-- **输出**：覆盖写入 `<根目录>/BANK-XXXX_DESIGN.md`
-
-**完成后**：用 `Edit` 工具将"阶段3.2：design-parser"标记为 `[x]`，追加：
-```
-阶段3.2: <根目录绝对路径>/BANK-XXXX_DESIGN.md
-```
-立即进入步骤3.3。
+> **仅需求（无设计）时**：不派发子代理，直接在主流程中执行 req-parser Skill，完成后标记 3.1 为 `[x]`，跳过3.2，进入步骤3.4。
 
 ---
 
