@@ -4,7 +4,7 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 ## 📋 项目概述
 
-基于 Claude Code 插件系统构建的**银行测试自动化工具集**，提供从需求分析到用例生成的全流程测试左移解决方案。核心是 `za-qe` 插件（`plugins/za-qe/`），包含六个核心 Skills 和六个工作流命令。
+基于 Claude Code 插件系统构建的**银行测试自动化工具集**，提供从需求分析到用例生成的全流程测试左移解决方案。核心是 `za-qe` 插件（`plugins/za-qe/`），包含八个核心 Skills 和六个工作流命令。
 
 - **Marketplace**：`alfie-qe`（owner: Alfie）
 - **仓库地址**：`https://gitlab.in.za/claude/alfie/qe`
@@ -35,7 +35,7 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 ### 插件系统两级配置
 
 1. **项目级**：`.claude-plugin/marketplace.json` — 定义可用插件（`core`/`optional`）
-2. **插件级**：`plugins/za-qe/.claude-plugin/plugin.json` — 插件元数据（当前 v2.2.0），声明 `commands`/`skills` 路径
+2. **插件级**：`plugins/za-qe/.claude-plugin/plugin.json` — 插件元数据（当前 v2.5.3），声明 `commands`/`skills` 路径
 
 ### 核心与可选插件
 
@@ -49,12 +49,14 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 | Skill | 状态 | 用途 |
 |-------|------|------|
-| `interface-extractor` | ✅ | 从设计文档提取接口数据，生成接口数据报告 |
-| `doc-reviewer` | ✅ | 验证需求实现一致性 |
-| `case-designer` | ✅ | 生成 PlantUML 流程图、测试用例 MindMap 和场景案例表 |
-| `api-generator` | ✅ | 生成 Python pytest 测试代码和 YAML 数据 |
 | `req-parser` | ✅ | 将原始需求文档转为标准化 Markdown |
 | `design-parser` | ✅ | 检查开发方案文档是否符合规范 |
+| `doc-converter` | ✅ | 将 docx/doc 文档批量转换为 UTF-8 Markdown |
+| `interface-extractor` | ✅ | 从设计文档提取接口数据，生成接口数据报告 |
+| `case-designer` | ✅ | 生成 PlantUML 流程图、测试用例 MindMap 和场景案例表 |
+| `api-generator` | ✅ | 生成 Python pytest 测试代码和 YAML 数据 |
+| `doc-reviewer` | ✅ | 验证需求实现一致性 |
+| `code-diff-analysis` | ✅ | 分析需求代码变更，识别质量风险，输出测试策略 |
 
 ### 工作流模式
 

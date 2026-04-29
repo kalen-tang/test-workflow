@@ -1,11 +1,11 @@
 # Alfie QE - 银行测试自动化工具集 用户手册
 
-[![Version](https://img.shields.io/badge/version-1.3.0-blue.svg)](https://gitlab.in.za/claude/alfie/qe)
+[![Version](https://img.shields.io/badge/version-2.5.3-blue.svg)](https://gitlab.in.za/claude/alfie/qe)
 [![Category](https://img.shields.io/badge/category-testing-green.svg)](https://gitlab.in.za/claude/alfie/qe)
 
 ## 📋 概述
 
-QA Toolkit 是一个完整的测试左移解决方案，提供从需求分析到用例生成的全流程自动化能力。通过**六个核心 Skills** 和**六个工作流命令**的协同工作，帮助测试团队在开发早期介入，提升测试效率和质量。
+QA Toolkit 是一个完整的测试左移解决方案，提供从需求分析到用例生成的全流程自动化能力。通过**八个核心 Skills** 和**六个工作流命令**的协同工作，帮助测试团队在开发早期介入，提升测试效率和质量。
 
 > 项目架构、实施计划、团队信息见 [项目主文档](../../README.md)
 
@@ -138,7 +138,7 @@ flowchart TD
 🔧 za-qe 工具集状态
 ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-✅ 可用 Skills (6个):
+✅ 可用 Skills (8个):
   • /interface-extractor - 接口数据提取器
   • /doc-reviewer - 需求验证器
   • /za-qe:qe-gencase - 场景测试案例生成器
@@ -315,19 +315,52 @@ flowchart TD
 
 ---
 
-### 6. design-parser（设计文档规范化器）🚧
+### 6. design-parser（设计文档规范化器）
 
-将原始设计文档转为标准化 YAML 格式，是完整模式第一阶段的核心组件。
+检查开发方案文档是否符合规范，补全接口数据（通过 UDOC API），产出规范化 MD 文件。
 
-- 解析原始设计文档
-- 提取接口设计、数据库设计、系统交互
-- 生成标准化输出（遵循 normalized-design 格式，详见 skills/design-parser/references/）
-
-**当前状态**: 🚧 开发中
+- 按团队规范格式化和补全设计文档
+- 通过 UDOC sync 接口自动补全接口参数
+- 生成待补充清单（缺失章节标注）
 
 ```bash
 /design-parser ./docs/design.docx
 ```
+
+**输出**: 规范化开发方案（Markdown），保存到 `./result/`
+
+---
+
+### 7. doc-converter（文档转换器）
+
+将 docx/doc 文档批量转换为 UTF-8 Markdown，自动修复编码问题。
+
+- 批量转换 docx/doc → Markdown
+- 自动检测和修复编码（utf-8/gb18030/big5 等）
+- 作为 workflow 阶段 2 的执行者
+
+```bash
+/doc-converter ./docs/ ./output/
+```
+
+**输出**: UTF-8 编码的 Markdown 文件
+
+---
+
+### 8. code-diff-analysis（代码变更分析器）
+
+通过 Jira API 获取需求的开发分支信息，分析代码变更，识别质量风险。
+
+- 从 Jira 评论提取开发分支和服务信息
+- 使用 git diff 分析代码变更（按模块分段）
+- 识别 P0/P1/P2 质量风险
+- 输出变更分析报告和测试策略
+
+```bash
+/code-diff-analysis BANK-89156
+```
+
+**输出**: 代码变更分析报告 + 测试策略文档（Markdown），保存到 `./result/`
 
 ---
 
@@ -341,8 +374,12 @@ flowchart TD
 |-------|---------|---------|
 | req-parser | 原始需求文档 | 规范化需求文档（PRD 7 章结构） |
 | design-parser | 原始设计文档 | 规范化设计文档 |
-| doc-reviewer | 规范化需求 + 规范化设计 | 验证报告 |
+| doc-converter | docx/doc 文件目录 | UTF-8 Markdown 文件 |
+| interface-extractor | 规范化设计文档 | 接口数据报告 |
 | case-designer | 规范化需求 + 接口数据 | BANK-XXXX_CASE.md + temp/BANK-XXXX_CASE_TABLE.md + BANK-XXXX_CASE.xmind |
+| api-generator | 场景案例表 + 接口数据 | API 测试代码 |
+| doc-reviewer | 规范化需求 + 规范化设计 | 验证报告 |
+| code-diff-analysis | Jira 需求编号 + 本地仓库 | 代码变更分析报告 + 测试策略 |
 | api-generator | 场景案例表 + 接口数据 | API 测试代码 |
 
 ---
@@ -405,13 +442,14 @@ doc-reviewer 需要配置文档目录，可以在 SKILL.md 中修改默认配置
 | Skill | 文档 | 参考文档 |
 |-------|------|---------|
 | interface-extractor | [SKILL.md](./skills/interface-extractor/SKILL.md) | [references/](./skills/interface-extractor/references/) (2个), [examples/](./skills/interface-extractor/examples/) |
-| doc-reviewer | [SKILL.md](./skills/doc-reviewer/SKILL.md) | - |
+| doc-reviewer | [SKILL.md](./skills/doc-reviewer/SKILL.md) | [references/](./skills/doc-reviewer/references/) (1个) |
 | case-designer | [SKILL.md](./skills/case-designer/SKILL.md) | [references/](./skills/case-designer/references/) (4个), [examples/](./skills/case-designer/examples/) (5个) |
 | api-generator | [SKILL.md](./skills/api-generator/SKILL.md) | [references/](./skills/api-generator/references/) (6个), [examples/](./skills/api-generator/examples/) |
 | req-parser | [SKILL.md](./skills/req-parser/SKILL.md) | [references/](./skills/req-parser/references/), [examples/](./skills/req-parser/examples/) |
 | design-parser | [SKILL.md](./skills/design-parser/SKILL.md) | [references/](./skills/design-parser/references/) |
+| doc-converter | [SKILL.md](./skills/doc-converter/SKILL.md) | [scripts/](./skills/doc-converter/scripts/) |
 | code-diff-analysis | [SKILL.md](./skills/code-diff-analysis/SKILL.md) | [references/](./skills/code-diff-analysis/references/) (3个) |
 
 ---
 
-**版本**: v1.5.0 | [项目主文档](../../README.md) | ZA Bank Test Team
+**版本**: v2.5.3 | [项目主文档](../../README.md) | ZA Bank Test Team
