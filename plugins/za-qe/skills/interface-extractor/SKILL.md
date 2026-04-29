@@ -3,7 +3,7 @@ name: interface-extractor
 description: 此技能应在用户要求"提取接口信息"、"分析开发方案"、"接口数据提取"、"提取接口"、"接口校验"、"微服务映射"、"分析设计文档接口"、"从udoc提取接口"，或提到接口提取、接口分析、测试左移分析时使用。
 version: 1.0.0
 status: active
-allowed-tools: Read, Write, Edit, Glob, Grep
+allowed-tools: Read, Write, Edit, Glob, Grep, TaskCreate, TaskUpdate
 ---
 
 # 接口数据提取器
@@ -37,6 +37,8 @@ allowed-tools: Read, Write, Edit, Glob, Grep
 输出文件：`<输出目录>/<项目名>_接口数据报告.md`
 
 ## 执行流程
+
+> **进度追踪**：开始执行前，使用 TaskCreate 为每个步骤创建任务，每个步骤开始时标记 `in_progress`，完成后标记 `completed`。
 
 ### 步骤 1：读取输入文档
 

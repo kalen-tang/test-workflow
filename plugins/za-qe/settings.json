@@ -10,6 +10,8 @@
       "Grep",
       "AskUserQuestion",
       "Task",
+      "TaskCreate",
+      "TaskUpdate",
       "Skill(za-qe:doc-converter)",
       "Skill(za-qe:req-parser)",
       "Skill(za-qe:design-parser)",

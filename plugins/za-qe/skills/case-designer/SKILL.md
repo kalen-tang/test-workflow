@@ -3,7 +3,7 @@ name: case-designer
 description: 此技能应在用户说"帮我生成测试案例"、"把需求转成测试用例"、"生成PlantUML流程图"、"画一下测试功能点"、"需要测试MindMap"、"测试案例可视化"、"生成场景案例"时使用。用于生成场景案例和可视化测试设计。
 version: 2.0.0
 status: active
-allowed-tools: Read, Write, Edit, Glob, Grep, Bash(uv *), Bash(uv run:*), Task
+allowed-tools: Read, Write, Edit, Glob, Grep, Bash(uv *), Bash(uv run:*), Task, TaskCreate, TaskUpdate
 ---
 
 # 场景案例设计器
@@ -72,6 +72,8 @@ allowed-tools: Read, Write, Edit, Glob, Grep, Bash(uv *), Bash(uv run:*), Task
 > 详细规则参见 `references/test-cases-mindmap.md`
 
 ## 工作流程
+
+> **进度追踪**：开始执行前，使用 TaskCreate 为每个步骤创建任务，每个步骤开始时标记 `in_progress`，完成后标记 `completed`。
 
 ### 步骤 1：文档接收与解析
 

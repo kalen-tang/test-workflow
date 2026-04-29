@@ -1,7 +1,7 @@
 ---
 description: 测试左移全流程工作流：自动探测环境、断点续传、统一命名规范，从需求/设计文档生成API自动化测试用例
 argument-hint: [需求ID]
-allowed-tools: Read, Write, Edit, Grep, Glob, Bash(uv run:*), Bash(uvx *), Bash, AskUserQuestion, Skill(za-qe:doc-converter), Skill(za-qe:req-parser), Skill(za-qe:design-parser), Skill(za-qe:interface-extractor), Skill(za-qe:case-designer), Skill(za-qe:api-generator), Task
+allowed-tools: Read, Write, Edit, Grep, Glob, Bash(uv run:*), Bash(uvx *), Bash, AskUserQuestion, TaskCreate, TaskUpdate, Skill(za-qe:doc-converter), Skill(za-qe:req-parser), Skill(za-qe:design-parser), Skill(za-qe:interface-extractor), Skill(za-qe:case-designer), Skill(za-qe:api-generator), Task
 ---
 
 # 测试左移全流程工作流
@@ -122,9 +122,10 @@ allowed-tools: Read, Write, Edit, Grep, Glob, Bash(uv run:*), Bash(uvx *), Bash,
 **选项构建规则（每个配置项）**：
 - 检测到的候选最多取前 3 个，每个作为一个选项（标注来源说明）
 - **严禁添加任何"手动输入"/"手动指定"/"自定义"类选项**（`AskUserQuestion` 自带 "Other"（即 "Type something"）输入框，这就是手动输入功能，再加选项完全重复）
-- options 中只允许出现：检测到的候选项、"无"（可选项用）、"无，中断退出"（必填项无候选时用）
-- 设计文档和自动化目录：末位加"无"选项
-- 需求ID和需求文档为必填项，不加"无"选项
+- options 中只允许出现：检测到的候选项、"无"（可选项用）、"无，中断退出"（必填项用）、"跳过"（可选项凑满2个时用）
+- **每个 question 的 options 必须至少 2 个**（`AskUserQuestion` 硬性约束）。不足 2 个时，必填项补"无，中断退出"，可选项补"跳过"
+- 设计文档和自动化目录：始终带"无"选项
+- 需求ID和需求文档：始终带"无，中断退出"选项
 
 **需求ID 过滤规则**：
 
@@ -133,9 +134,9 @@ allowed-tools: Read, Write, Edit, Grep, Glob, Bash(uv run:*), Bash(uvx *), Bash,
 - 格式符合 `BANK-\d{5,}` 或 `IP-\d{5,}`
 
 **无候选时的处理**：
-- 需求ID 过滤后无有效候选：options 仅放一个"无，中断退出"选项（用户通过 Other 输入ID，或选此项中止流程）
-- 需求文档无候选：同上，options 仅放"无，中断退出"
-- 设计文档/自动化目录无候选：options 仅放"无"选项（可选项，不需要中断退出）
+- 需求ID 过滤后无有效候选：options 放"无，中断退出" + "跳过"（确保 ≥ 2 个），用户通过 Other 输入ID
+- 需求文档无候选：同上，options 放"无，中断退出" + "跳过"
+- 设计文档/自动化目录无候选：options 放"无" + "跳过"
 
 **`AskUserQuestion` 调用结构**：
 
@@ -150,25 +151,33 @@ questions:
     multiSelect: false
     options:
       - label: "BANK-90819"
-        description: "来自文件名：BANK-90819/"
+        description: "来自目录名：BANK-90819/"
+      - label: "无，中断退出"
+        description: "中止工作流"
   - header: "需求文档"
     question: "请选择需求文档（必填）："
     multiSelect: false
     options:
       - label: "ZA Search产品需求-part5.docx"
         description: "关键词匹配：产品需求"
+      - label: "无，中断退出"
+        description: "中止工作流"
   - header: "设计文档"
     question: "请选择设计文档（可选）："
     multiSelect: false
     options:
       - label: "无"
         description: "不提供设计文档，仅生成场景案例"
+      - label: "跳过"
+        description: "稍后再决定"
   - header: "自动化目录"
     question: "请选择自动化项目根目录（可选）："
     multiSelect: false
     options:
       - label: "无"
         description: "不关联自动化工程"
+      - label: "跳过"
+        description: "稍后再决定"
 ```
 
 **完整模板（含所有可能的候选项占位）**：
@@ -183,9 +192,11 @@ questions:
         description: "来自文件名：{来源文件名}"
       - label: "{检测到的ID2}"          # 若有（数字≥10000）
         description: "来自文件名：{来源文件名}"
-      # 无候选时仅保留下面这一个选项：
+      # 无候选时保留以下两个选项（确保 ≥ 2）：
       - label: "无，中断退出"
         description: "中止工作流，请确认文件名包含 BANK-XXXXX 后重试"
+      - label: "跳过"
+        description: "稍后通过 Other 输入"
 
   - header: "需求文档"
     question: "请选择需求文档（必填）："
@@ -195,31 +206,38 @@ questions:
         description: "关键词匹配：{命中的关键词}"
       - label: "{需求候选文件2}"          # 若有
         description: "关键词匹配：{命中的关键词}"
-      # 无候选时仅保留下面这一个选项：
+      # 无候选时保留以下两个选项（确保 ≥ 2）：
       - label: "无，中断退出"
         description: "中止工作流，请将需求文档放入当前目录后重试"
+      - label: "跳过"
+        description: "稍后通过 Other 输入"
 
   - header: "设计文档"
     question: "请选择设计文档（可选）："
     multiSelect: false
-    options:                              # ⚠️ 只放候选文件 + "无"，不得加其他选项
+    options:                              # ⚠️ 只放候选文件 + "无" + "跳过"确保≥2个选项
       - label: "{设计候选文件1}"
         description: "关键词匹配：{命中的关键词}"
       - label: "无"
         description: "不提供设计文档，仅生成场景案例"
+      - label: "跳过"
+        description: "稍后再决定"
 
   - header: "自动化目录"
     question: "请选择自动化项目根目录（可选）："
     multiSelect: false
-    options:                              # ⚠️ 只放候选目录 + "无"，不得加其他选项
+    options:                              # ⚠️ 只放候选目录 + "无" + "跳过"确保≥2个选项
       - label: "当前目录"               # 仅当检测到 pytest.ini 时加入
         description: "检测到 pytest.ini：{CWD绝对路径}"
       - label: "无"
         description: "不关联自动化工程"
+      - label: "跳过"
+        description: "稍后再决定"
 ```
 
 > 用户通过参数传入 `[需求ID]` 时，需求ID 问题仍然展示，但将传入的 ID 作为第一个选项（标注"来自命令参数"），方便用户确认或通过 Other 修改。
 > 用户选择"无，中断退出"时，输出"工作流已中止"并停止执行。
+> 用户选择"跳过"时，等同于选"无"，视为不提供该配置项。
 > 用户通过 Other 输入自定义值时，直接使用该值（需求ID须校验格式：BANK-XXXXX 或 IP-XXXXX，数字≥10000，不合规则重询）。
 
 **用户选 Other 输入值后的处理**：
@@ -309,19 +327,16 @@ questions:
 
 **用户选"确认，开始执行"**：
 
-1. 使用 `TaskCreate` 为执行计划中的每个阶段创建一个任务（根据配置动态决定创建哪些），示例：
+**立即（在写入 workflow.md 之前）** 使用 `TaskCreate` 工具为执行计划中的每个阶段创建任务（根据配置动态决定创建哪些）。所有 TaskCreate 调用必须在同一轮完成，确保用户立刻看到完整的任务列表：
 
-```
-TaskCreate: subject="阶段2：文档转换", description="docx → md + 编码修复", activeForm="转换文档"
-TaskCreate: subject="阶段3.1：req-parser", description="需求文档标准化", activeForm="标准化需求文档"
-TaskCreate: subject="阶段3.2：design-parser", description="设计文档规范化", activeForm="规范化设计文档"       # 仅有设计文档时
-TaskCreate: subject="阶段3.3：interface-extractor", description="接口数据提取", activeForm="提取接口数据"     # 仅有设计文档时
-TaskCreate: subject="阶段3.4：case-designer", description="场景案例 + XMind 生成", activeForm="生成场景案例"
-TaskCreate: subject="阶段3.5：api-generator", description="API 测试代码生成", activeForm="生成API测试代码"   # 仅有自动化目录且有接口数据时
-```
+- 调用 TaskCreate：subject="阶段2：文档转换"，description="docx → md + 编码修复"，activeForm="转换文档"
+- 调用 TaskCreate：subject="阶段3.1：req-parser"，description="需求文档标准化"，activeForm="标准化需求文档"
+- 调用 TaskCreate：subject="阶段3.2：design-parser"，description="设计文档规范化"，activeForm="规范化设计文档"（仅有设计文档时）
+- 调用 TaskCreate：subject="阶段3.3：interface-extractor"，description="接口数据提取"，activeForm="提取接口数据"（仅有设计文档时）
+- 调用 TaskCreate：subject="阶段3.4：case-designer"，description="场景案例 + XMind 生成"，activeForm="生成场景案例"
+- 调用 TaskCreate：subject="阶段3.5：api-generator"，description="API 测试代码生成"，activeForm="生成API测试代码"（仅有自动化目录且有接口数据时）
 
-2. 进入步骤 1.3 写入 workflow.md
-3. 后续每个阶段开始时用 `TaskUpdate` 将对应任务标记为 `in_progress`，完成后标记为 `completed`
+然后进入步骤 1.3 写入 workflow.md。后续每个阶段开始时用 `TaskUpdate` 标记为 `in_progress`，完成后标记为 `completed`。
 
 **用户选"重新配置"**：回到步骤 1.2（重新展示四个配置项，使用当前已有的扫描结果）。
 

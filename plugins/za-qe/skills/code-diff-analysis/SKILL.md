@@ -2,7 +2,7 @@
 name: code-diff-analysis
 description: 此技能应在用户说"分析代码变更"、"分析代码diff"、"分析代码差异"、"分析需求的PR"、"分析BANK-XXXXX的代码变更"、"查看代码变更风险"、"帮我分析这个需求的代码改动"时使用。分析需求的代码变更，识别潜在的质量风险，输出变更内容及可执行的测试策略。
 status: active
-allowed-tools: Read, Write, Glob, Grep, Bash(curl *), Bash(git *), Bash(python *), Bash(ls *), Bash(mkdir *)
+allowed-tools: Read, Write, Glob, Grep, Bash(curl *), Bash(git *), Bash(python *), Bash(ls *), Bash(mkdir *), TaskCreate, TaskUpdate
 ---
 
 # 代码变更分析器
@@ -16,6 +16,8 @@ allowed-tools: Read, Write, Glob, Grep, Bash(curl *), Bash(git *), Bash(python *
 2. **测试策略文档**：按 P0/P1/P2 优先级排列的可执行测试用例
 
 ---
+
+> **进度追踪**：开始执行前，使用 TaskCreate 为每个阶段创建任务，每个阶段开始时标记 `in_progress`，完成后标记 `completed`。
 
 ## 阶段 0：启动信息收集（最优先执行）
 

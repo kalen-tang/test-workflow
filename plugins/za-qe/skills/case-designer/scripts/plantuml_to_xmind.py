@@ -17,7 +17,7 @@
 
 示例:
     uv run plantuml_to_xmind.py ./result/xxx_场景案例.md BANK-1234
-    # 输出: ./result/BANK-1234_测试案例.xmind
+    # 输出: ./result/BANK-1234_CASE.xmind
 """
 
 import io
@@ -92,7 +92,7 @@ def convert(markdown_file: str, requirement_id: str) -> str:
     plantuml_content = extract_test_case_mindmap(md_content)
     md_for_xmind = plantuml_to_md(plantuml_content)
 
-    output_file = md_path.parent / f"{requirement_id}_测试案例.xmind"
+    output_file = md_path.parent / f"{requirement_id}_CASE.xmind"
 
     # 屏蔽 md2xmind 库自身的 print 输出（含乱码）
     old_stdout = sys.stdout

@@ -35,7 +35,7 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 ### 插件系统两级配置
 
 1. **项目级**：`.claude-plugin/marketplace.json` — 定义可用插件（`core`/`optional`）
-2. **插件级**：`plugins/za-qe/.claude-plugin/plugin.json` — 插件元数据（当前 v2.5.8），声明 `commands`/`skills` 路径
+2. **插件级**：`plugins/za-qe/.claude-plugin/plugin.json` — 插件元数据（当前 v2.5.9），声明 `commands`/`skills` 路径
 
 ### 核心与可选插件
 

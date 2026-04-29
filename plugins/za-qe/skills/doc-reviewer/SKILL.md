@@ -3,7 +3,7 @@ name: doc-reviewer
 description: 此技能应在用户需要检查或对比需求文档、设计文档（含概要设计、详细设计）、代码差异文档时使用。产出标准化报告，包含各文档独立质量评分、需求实现对齐颗粒度分析、针对性测试建议及测试风险点的高效解决措施。适配文档按类型分目录管理的使用场景。
 version: 1.0.0
 status: active
-allowed-tools: Read, Write, Edit, Glob, Grep
+allowed-tools: Read, Write, Edit, Glob, Grep, TaskCreate, TaskUpdate
 ---
 
 # 需求实现检查技能
@@ -21,6 +21,8 @@ allowed-tools: Read, Write, Edit, Glob, Grep
 3. **代码差异文档目录**（可选）：包含代码变更分析文档
 
 ## 执行流程
+
+> **进度追踪**：开始执行前，使用 TaskCreate 为每个步骤创建任务，每个步骤开始时标记 `in_progress`，完成后标记 `completed`。
 
 ### 步骤1：文档接收与预处理
 

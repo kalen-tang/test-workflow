@@ -1,6 +1,6 @@
 # Alfie QE - 银行测试自动化工具集 用户手册
 
-[![Version](https://img.shields.io/badge/version-2.5.8-blue.svg)](https://gitlab.in.za/claude/alfie/qe)
+[![Version](https://img.shields.io/badge/version-2.5.9-blue.svg)](https://gitlab.in.za/claude/alfie/qe)
 [![Category](https://img.shields.io/badge/category-testing-green.svg)](https://gitlab.in.za/claude/alfie/qe)
 
 ## 📋 概述
@@ -452,4 +452,4 @@ doc-reviewer 需要配置文档目录，可以在 SKILL.md 中修改默认配置
 
 ---
 
-**版本**: v2.5.8 | [项目主文档](../../README.md) | ZA Bank Test Team
+**版本**: v2.5.9 | [项目主文档](../../README.md) | ZA Bank Test Team

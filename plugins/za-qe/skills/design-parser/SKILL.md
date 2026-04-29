@@ -3,7 +3,7 @@ name: design-parser
 description: 此技能应在用户说"检查开发方案"、"规范化设计文档"、"开发方案转 MD"、"解析开发方案"、"分析开发方案完整性"、"开发文档规范检查"、"检查接口是否完整"、"设计文档评审"时使用。检查开发方案文档是否符合规范，并产出规范化后的 MD 文件供后续接口自动化生成使用。
 version: 1.0.0
 status: active
-allowed-tools: Read, Write, Edit, Glob, Grep, Bash
+allowed-tools: Read, Write, Edit, Glob, Grep, Bash, TaskCreate, TaskUpdate
 ---
 
 # 开发方案文档规范化器
@@ -21,6 +21,8 @@ allowed-tools: Read, Write, Edit, Glob, Grep, Bash
 **按需章节**：流程图、UML、数据库变更、兼容性分析等，原文有则保留，原文没有则标注"无"
 
 ## 执行流程
+
+> **进度追踪**：开始执行前，使用 TaskCreate 为每个步骤创建任务，每个步骤开始时标记 `in_progress`，完成后标记 `completed`。
 
 ### 第一步：读取原始文档
 
