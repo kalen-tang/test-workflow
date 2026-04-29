@@ -1,6 +1,6 @@
 {
   "name": "za-qe",
-  "version": "2.3.2",
+  "version": "2.4.0",
   "description": "测试左移工具集：需求分析、设计分析、接口提取、场景案例设计、API用例生成、代码变更分析等核心能力",
   "author": { "name": "Alfie" },
   "commands": ["./commands/"],
