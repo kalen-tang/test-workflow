@@ -1,5 +1,5 @@
 ---
-description: "管理 za-qe-tools 各功能模块的配置。当用户明确说'开启dippy'、'关闭dippy'、'开启通知'、'关闭通知'、'开启esp'、'关闭esp'、'切换状态栏'、'关闭状态栏'、'状态栏配置'、'za-qe-tools配置' 时触发。"
+description: "此命令用于管理 za-qe-tools 各功能模块（dippy 命令审批、系统通知、esp 配置开关、状态栏样式）的持久化配置。当用户明确说'za-qe-tools配置'、'配置dippy'、'开启dippy'、'关闭dippy'、'开启通知'、'关闭通知'、'配置状态栏'、'状态栏配置'、'切换状态栏'、'关闭状态栏'、'esp配置'、'关闭esp配置' 时触发。不处理启动 esp 进程的请求（由 /za-qe-tools:esp 命令处理）。"
 argument-hint: "[模块名 on/off | statusline powerline/powerline-nf/standard/off]"
 allowed-tools:
   - Read
@@ -114,14 +114,18 @@ cat ~/.claude/za-qe-tools.json 2>/dev/null || echo '{}'
 ```
 
 ```bash
-cat ~/.claude/settings.json 2>/dev/null | grep -o '"statusLine[^}]*}'
+cat ~/.claude/settings.json 2>/dev/null | python3 -c "import json,sys; d=json.load(sys.stdin); print(d.get('statusLine',''))" 2>/dev/null || echo ""
 ```
 
 将用户的选择与现有配置合并，写入 `~/.claude/za-qe-tools.json`（dippy/notify/esp）。
 
 ### 第四步：处理 statusline
 
-如果 statusline 模式发生变化（非第一步直接指定的情况，则基于用户选择）：
+执行 statusline 脚本的时机：
+- **直接参数模式**（第一步）：无论新旧值是否相同，直接执行对应脚本
+- **交互式模式**（第二步）：仅当用户选择的值与当前配置值不同时，才执行对应脚本
+
+对应脚本调用：
 
 - `off` → `uv run ${CLAUDE_PLUGIN_ROOT}/scripts/auto-setup.py off`
 - `powerline` → `uv run ${CLAUDE_PLUGIN_ROOT}/scripts/auto-setup.py powerline`

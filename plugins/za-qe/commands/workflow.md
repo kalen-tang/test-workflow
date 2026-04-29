@@ -1,7 +1,7 @@
 ---
 description: 测试左移全流程工作流：自动探测环境、断点续传、统一命名规范，从需求/设计文档生成API自动化测试用例
 argument-hint: [需求ID]
-allowed-tools: Read, Write, Edit, Grep, Glob, Bash(uv run:*), Bash(uvx *), Bash, AskUserQuestion, Skill(za-qe:doc-converter), Skill(za-qe:req-parser), Skill(za-qe:design-parser), Skill(za-qe:interface-extractor), Skill(za-qe:case-designer), Skill(za-qe:api-generator), Skill, Task
+allowed-tools: Read, Write, Edit, Grep, Glob, Bash(uv run:*), Bash(uvx *), Bash, AskUserQuestion, Skill(za-qe:doc-converter), Skill(za-qe:req-parser), Skill(za-qe:design-parser), Skill(za-qe:interface-extractor), Skill(za-qe:case-designer), Skill(za-qe:api-generator), Task
 ---
 
 # 测试左移全流程工作流
@@ -196,6 +196,8 @@ questions:
 - 检测根目录下是否存在 `pytest.ini`
 
 扫描完成后，若发现新的候选（设计文档、ID、pytest.ini）与 CWD 扫描结果不同，**重新询问**设计文档、需求ID、自动化目录这三个配置项（需求文档已确认，不重询）。
+
+> **终止条件**：根目录由步骤1.2首次确认的需求文档路径唯一决定，步骤1.2.5-A 的重询不允许用户更改需求文档路径，因此根目录不会再次变化，不存在循环风险。
 
 **B. 检测根目录的 workflow.md**
 
@@ -395,6 +397,7 @@ Task prompt 须包含：
 - req-parser SKILL.md 的完整内容（让子代理知晓规范）
 - 输入文件绝对路径：`<根目录>/BANK-XXXX_PRD.md`
 - 输出文件绝对路径：`<根目录>/BANK-XXXX_PRD.md`（覆盖写入）
+- 可用工具：Read, Write, Edit, Glob, Grep
 - 约束：不得修改 `workflow.md`
 - 要求：输出中包含 `---STATUS---\nOK\n---END---` 或 `---STATUS---\nERROR <原因>\n---END---`
 
@@ -404,6 +407,7 @@ Task prompt 须包含：
 - design-parser SKILL.md 的完整内容（让子代理知晓规范）
 - 输入文件绝对路径：`<根目录>/BANK-XXXX_DESIGN.md`
 - 输出文件绝对路径：`<根目录>/BANK-XXXX_DESIGN.md`（覆盖写入）
+- 可用工具：Read, Write, Edit, Glob, Grep
 - 约束：不得修改 `workflow.md`
 - 要求：输出中包含 `---STATUS---\nOK\n---END---` 或 `---STATUS---\nERROR <原因>\n---END---`
 
@@ -550,11 +554,11 @@ workflow.md 已记录当前进度，下次执行 /za-qe:qe-workflow 可从失败
 
 - `/za-qe:qe-gencase` — 生成场景案例（PlantUML 流程图 + MindMap）
 - `/za-qe:qe-help` — 查看详细帮助
-- `/req-parser` — 独立执行需求文档标准化
-- `/design-parser` — 独立执行设计文档规范化
-- `/interface-extractor` — 独立执行接口数据提取
-- `/case-designer` — 独立执行场景案例设计
-- `/api-generator` — 独立执行 API 用例生成
+- `/za-qe:req-parser` — 独立执行需求文档标准化
+- `/za-qe:design-parser` — 独立执行设计文档规范化
+- `/za-qe:interface-extractor` — 独立执行接口数据提取
+- `/za-qe:case-designer` — 独立执行场景案例设计
+- `/za-qe:api-generator` — 独立执行 API 用例生成
 
 ---
 
