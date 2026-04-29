@@ -233,6 +233,64 @@ questions:
 
 ---
 
+### 步骤 1.2.9：配置确认与执行计划展示
+
+所有配置项（含步骤 1.2.5 的重询结果）确定后，在写入 workflow.md 之前，先向用户展示最终配置和执行计划，等待确认。
+
+使用 `AskUserQuestion` 展示：
+
+```
+questions:
+  - header: "确认配置"
+    question: |
+      请确认以下配置和执行计划：
+
+      ━━━ 配置 ━━━
+        需求ID：{BANK-XXXX}
+        需求文档：{需求文档文件名}
+        设计文档：{设计文档文件名 或 无}
+        自动化目录：{自动化目录路径 或 无}
+        根目录：{根目录绝对路径}
+
+      ━━━ 执行计划 ━━━
+        □ 阶段2：文档转换（docx → md + 编码修复）
+        □ 阶段3.1：req-parser — 需求文档标准化
+        □ 阶段3.2：design-parser — 设计文档规范化（如有设计文档）
+        □ 阶段3.3：interface-extractor — 接口数据提取（如有设计文档）
+        □ 阶段3.4：case-designer — 场景案例 + XMind 生成
+        □ 阶段3.5：api-generator — API 测试代码生成（如有自动化目录且有接口数据）
+
+      确认后将写入 workflow.md 并开始执行。
+    multiSelect: false
+    options:
+      - label: "确认，开始执行"
+        description: "写入 workflow.md 并按上述计划执行"
+      - label: "重新配置"
+        description: "返回步骤 1.2 重新选择配置项"
+```
+
+> 执行计划中，根据实际配置动态显示：无设计文档时不显示 3.2 和 3.3；无自动化目录时不显示 3.5。
+
+**用户选"确认，开始执行"**：
+
+1. 使用 `TaskCreate` 为执行计划中的每个阶段创建一个任务（根据配置动态决定创建哪些），示例：
+
+```
+TaskCreate: subject="阶段2：文档转换", description="docx → md + 编码修复", activeForm="转换文档"
+TaskCreate: subject="阶段3.1：req-parser", description="需求文档标准化", activeForm="标准化需求文档"
+TaskCreate: subject="阶段3.2：design-parser", description="设计文档规范化", activeForm="规范化设计文档"       # 仅有设计文档时
+TaskCreate: subject="阶段3.3：interface-extractor", description="接口数据提取", activeForm="提取接口数据"     # 仅有设计文档时
+TaskCreate: subject="阶段3.4：case-designer", description="场景案例 + XMind 生成", activeForm="生成场景案例"
+TaskCreate: subject="阶段3.5：api-generator", description="API 测试代码生成", activeForm="生成API测试代码"   # 仅有自动化目录且有接口数据时
+```
+
+2. 进入步骤 1.3 写入 workflow.md
+3. 后续每个阶段开始时用 `TaskUpdate` 将对应任务标记为 `in_progress`，完成后标记为 `completed`
+
+**用户选"重新配置"**：回到步骤 1.2（重新展示四个配置项，使用当前已有的扫描结果）。
+
+---
+
 ### 步骤 1.3：写入 workflow.md
 
 配置确认后，在**需求文档所在目录（根目录）**写入 `workflow.md`。
