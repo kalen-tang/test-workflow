@@ -46,9 +46,9 @@ def encode_plantuml(source: str) -> str:
 
 def extract_blocks(text: str) -> list[str]:
     """从文本中提取所有 PlantUML 代码块（@startuml/@startmindmap/@startwbs 等）。"""
-    # 匹配 markdown 代码块内的 plantuml 内容
+    # 匹配 markdown 代码块内的 plantuml 内容（@start 后接可选类型词）
     md_pattern = re.compile(
-        r"```(?:plantuml)?\s*\n(@start\w+.*?@end\w+)\s*\n```",
+        r"```(?:plantuml)?\s*\n(@start\w*.*?@end\w*)\s*\n```",
         re.DOTALL | re.IGNORECASE,
     )
     blocks = md_pattern.findall(text)
@@ -57,7 +57,7 @@ def extract_blocks(text: str) -> list[str]:
 
     # 直接包含 @start 标记的纯文本
     raw_pattern = re.compile(
-        r"(@start\w+.*?@end\w+)",
+        r"(@start\w*.*?@end\w*)",
         re.DOTALL | re.IGNORECASE,
     )
     return raw_pattern.findall(text)
@@ -72,10 +72,12 @@ def validate_block(source: str, index: int) -> tuple[bool, str]:
     url = f"{PLANTUML_SERVER}/{encoded}"
 
     try:
-        resp = httpx.get(url, timeout=15, follow_redirects=True)
+        resp = httpx.get(url, timeout=15, follow_redirects=True, verify=False)
     except httpx.RequestError as e:
         return False, f"网络请求失败: {e}"
 
+    if resp.status_code == 400:
+        return False, "无效的 PlantUML 格式（HTTP 400）：请检查 @start/@end 标记是否完整，如 @startuml/@enduml 或 @startmindmap/@endmindmap"
     if resp.status_code != 200:
         return False, f"HTTP {resp.status_code}"
 
