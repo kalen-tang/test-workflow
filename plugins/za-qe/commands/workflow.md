@@ -33,7 +33,7 @@ allowed-tools: Read, Write, Edit, Grep, Glob, Bash(uv run:*), Bash(uvx *), Bash,
   req-parser → BANK-XXXX_PRD.md
   design-parser → BANK-XXXX_DESIGN.md
   interface-extractor → temp/BANK-XXXX_接口数据报告.md
-  case-designer → BANK-XXXX_CASE.md + temp/BANK-XXXX_CASE_TABLE.md + BANK-XXXX.xmind
+  case-designer → BANK-XXXX_CASE.md + temp/BANK-XXXX_CASE_TABLE.md + BANK-XXXX_CASE.xmind
   api-generator → <自动化目录>/ 或 temp/
 ```
 
@@ -413,13 +413,13 @@ temp/design_<原文件名>.md  →  <根目录>/BANK-XXXX_DESIGN.md
 - **输出**（明确传入以下路径）：
   - 场景案例文档：`<根目录>/BANK-XXXX_CASE.md`
   - 场景案例表：`<根目录>/temp/BANK-XXXX_CASE_TABLE.md`
-  - XMind 输出目录：`<根目录>/`（脚本自动生成 `BANK-XXXX.xmind`）
+  - XMind 输出目录：`<根目录>/`（脚本自动生成 `BANK-XXXX_CASE.xmind`）
 
 **完成后**：用 `Edit` 工具将"阶段3.4：case-designer"标记为 `[x]`，追加：
 ```
 阶段3.4_CASE: <根目录绝对路径>/BANK-XXXX_CASE.md
 阶段3.4_TABLE: <根目录绝对路径>/temp/BANK-XXXX_CASE_TABLE.md
-阶段3.4_XMIND: <根目录绝对路径>/BANK-XXXX.xmind
+阶段3.4_XMIND: <根目录绝对路径>/BANK-XXXX_CASE.xmind
 ```
 根据分支决策继续：有自动化目录且有接口数据报告 → 进入步骤3.5；否则输出完成汇总。
 
@@ -457,7 +457,7 @@ temp/design_<原文件名>.md  →  <根目录>/BANK-XXXX_DESIGN.md
   BANK-XXXX_PRD.md        ← 规范化需求文档
   BANK-XXXX_DESIGN.md     ← 规范化设计文档（如有）
   BANK-XXXX_CASE.md       ← 场景案例（流程图+MindMap）
-  BANK-XXXX.xmind         ← 测试案例 XMind
+  BANK-XXXX_CASE.xmind         ← 测试案例 XMind
   BANK-XXXX_NOTES.md      ← 测试记录文件（待手动填写）
   temp/BANK-XXXX_接口数据报告.md  ← 接口数据（如有）
   temp/BANK-XXXX_CASE_TABLE.md   ← 场景案例表
@@ -474,7 +474,7 @@ temp/design_<原文件名>.md  →  <根目录>/BANK-XXXX_DESIGN.md
 已生成：
   ✅ 规范化需求文档（BANK-XXXX_PRD.md）
   ✅ 场景案例（BANK-XXXX_CASE.md）
-  ✅ 测试案例 XMind（BANK-XXXX.xmind）
+  ✅ 测试案例 XMind（BANK-XXXX_CASE.xmind）
   ✅ 测试记录文件（BANK-XXXX_NOTES.md，待手动填写）
 
 后续可选操作：

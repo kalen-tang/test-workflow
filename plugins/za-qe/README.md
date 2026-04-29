@@ -72,9 +72,9 @@ flowchart TD
 
     ReqParser --> DesignParser["design-parser\n→ BANK-XXXX_DESIGN.md"]
     DesignParser --> Extractor["interface-extractor\n→ temp/BANK-XXXX_接口数据报告.md"]
-    Extractor --> CaseDesigner["case-designer\n→ BANK-XXXX_CASE.md\n→ temp/BANK-XXXX_CASE_TABLE.md\n→ BANK-XXXX.xmind"]
+    Extractor --> CaseDesigner["case-designer\n→ BANK-XXXX_CASE.md\n→ temp/BANK-XXXX_CASE_TABLE.md\n→ BANK-XXXX_CASE.xmind"]
 
-    ReqParserOnly --> CaseDesignerOnly["case-designer\n→ BANK-XXXX_CASE.md\n→ BANK-XXXX.xmind"]
+    ReqParserOnly --> CaseDesignerOnly["case-designer\n→ BANK-XXXX_CASE.md\n→ BANK-XXXX_CASE.xmind"]
 
     HasAuto{有自动化目录?}
     CaseDesigner --> HasAuto
@@ -342,7 +342,7 @@ flowchart TD
 | req-parser | 原始需求文档 | 规范化需求文档（PRD 7 章结构） |
 | design-parser | 原始设计文档 | 规范化设计文档 |
 | doc-reviewer | 规范化需求 + 规范化设计 | 验证报告 |
-| case-designer | 规范化需求 + 接口数据 | BANK-XXXX_CASE.md + temp/BANK-XXXX_CASE_TABLE.md + BANK-XXXX.xmind |
+| case-designer | 规范化需求 + 接口数据 | BANK-XXXX_CASE.md + temp/BANK-XXXX_CASE_TABLE.md + BANK-XXXX_CASE.xmind |
 | api-generator | 场景案例表 + 接口数据 | API 测试代码 |
 
 ---
