@@ -41,20 +41,22 @@ allowed-tools: Read, Write, Edit, Grep, Glob, Bash(uv run:*), Bash(uvx *), Bash,
 
 ## 阶段 0：续传检测 + 环境预扫描（并行）
 
-使用 `Task` 工具同时派发两个并行任务，无需等待其中一个完成再启动另一个：
+在主流程中同时发起以下 `Glob` 调用（一次性并行，**禁止使用 Task/Agent 子代理**）：
 
-- **任务A**：检测 CWD 下是否存在 `workflow.md`
-- **任务B**：扫描 CWD 下的 `*.docx`/`*.doc` 文件、提取文件名中的 `BANK-\d+`/`IP-\d+` ID、检测 `pytest.ini`
+1. `Glob("workflow.md", path=CWD)` — 检测 workflow.md 是否存在
+2. `Glob("*.docx", path=CWD)` + `Glob("*.doc", path=CWD)` — 扫描文档文件
+3. `Glob("pytest.ini", path=CWD)` — 检测 pytest.ini
 
-两个任务完成后，主流程汇总结果再进入步骤 0.1 处理。
-
-> **提前扫描的好处**：阶段1交互式配置时可以直接使用扫描结果，不需要再次扫描。
+所有 Glob 结果返回后，主流程在本地完成：
+- 按关键词将文件分类为需求候选、设计候选、未分类
+- 从文件名中用正则提取 `BANK-\d+` / `IP-\d+` ID
+- 汇总结果，进入步骤 0.1
 
 ### 步骤 0.1：处理 workflow.md 检测结果
 
-取任务A的结果：
+根据 Glob 结果判断：
 
-**如果 CWD 下不存在 workflow.md**：直接进入阶段1（使用任务B的扫描结果）。
+**如果 CWD 下不存在 workflow.md**：直接进入阶段1（使用上述扫描结果）。
 
 **如果存在**：读取文件内容，提取已记录的配置和进度，然后用 `AskUserQuestion` 询问用户：
 
@@ -90,7 +92,7 @@ allowed-tools: Read, Write, Edit, Grep, Glob, Bash(uv run:*), Bash(uvx *), Bash,
 
 ### 步骤 1.1：使用阶段0预扫描结果
 
-阶段0任务B已完成扫描，直接使用其结果，**无需重复扫描**。
+阶段0已完成扫描，直接使用其结果，**无需重复扫描**。
 
 预扫描结果包含：
 - CWD 下所有 `*.docx`/`*.doc` 文件，已按关键词分类为需求候选、设计候选、未分类
@@ -137,12 +139,46 @@ allowed-tools: Read, Write, Edit, Grep, Glob, Bash(uv run:*), Bash(uvx *), Bash,
 
 **`AskUserQuestion` 调用结构**：
 
+> **⚠️ 严格按下方模板构建 options，不得添加模板中未列出的任何选项。用户自定义输入通过自带的 Other 完成。**
+
+**示例：有1个需求ID候选、1个需求候选、无设计候选、无 pytest.ini 时的实际调用**：
+
 ```
 questions:
   - header: "需求ID"
     question: "请选择或输入需求ID："
     multiSelect: false
     options:
+      - label: "BANK-90819"
+        description: "来自文件名：BANK-90819/"
+  - header: "需求文档"
+    question: "请选择需求文档（必填）："
+    multiSelect: false
+    options:
+      - label: "ZA Search产品需求-part5.docx"
+        description: "关键词匹配：产品需求"
+  - header: "设计文档"
+    question: "请选择设计文档（可选）："
+    multiSelect: false
+    options:
+      - label: "无"
+        description: "不提供设计文档，仅生成场景案例"
+  - header: "自动化目录"
+    question: "请选择自动化项目根目录（可选）："
+    multiSelect: false
+    options:
+      - label: "无"
+        description: "不关联自动化工程"
+```
+
+**完整模板（含所有可能的候选项占位）**：
+
+```
+questions:
+  - header: "需求ID"
+    question: "请选择或输入需求ID："
+    multiSelect: false
+    options:                              # ⚠️ 只放候选ID + 无候选时的"无，中断退出"，不得加其他选项
       - label: "{检测到的ID1}"          # 数字≥10000 的 ID 才加入
         description: "来自文件名：{来源文件名}"
       - label: "{检测到的ID2}"          # 若有（数字≥10000）
@@ -154,7 +190,7 @@ questions:
   - header: "需求文档"
     question: "请选择需求文档（必填）："
     multiSelect: false
-    options:
+    options:                              # ⚠️ 只放候选文件 + 无候选时的"无，中断退出"，不得加其他选项
       - label: "{需求候选文件1}"
         description: "关键词匹配：{命中的关键词}"
       - label: "{需求候选文件2}"          # 若有
@@ -166,7 +202,7 @@ questions:
   - header: "设计文档"
     question: "请选择设计文档（可选）："
     multiSelect: false
-    options:
+    options:                              # ⚠️ 只放候选文件 + "无"，不得加其他选项
       - label: "{设计候选文件1}"
         description: "关键词匹配：{命中的关键词}"
       - label: "无"
@@ -175,7 +211,7 @@ questions:
   - header: "自动化目录"
     question: "请选择自动化项目根目录（可选）："
     multiSelect: false
-    options:
+    options:                              # ⚠️ 只放候选目录 + "无"，不得加其他选项
       - label: "当前目录"               # 仅当检测到 pytest.ini 时加入
         description: "检测到 pytest.ini：{CWD绝对路径}"
       - label: "无"
