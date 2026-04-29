@@ -13,8 +13,14 @@ allowed-tools: Read Write Edit Glob Grep Bash(uv *) Bash(uv run *)
 **产出物**：
 
 1. **场景案例 Markdown**（内嵌 PlantUML 业务流程图 + 测试功能点 MindMap + 详细测试案例 MindMap，一份文件包含所有可视化内容）
-2. XMind 文件（从 Markdown 中自动提取详细测试案例 MindMap 并转换，给人编辑）
+   - workflow 中输出路径：`<根目录>/BANK-XXXX_CASE.md`
+   - 独立调用时输出路径：`<输出目录>/<项目名>_CASE.md`
+2. **XMind 文件**（从 Markdown 中自动提取详细测试案例 MindMap 并转换，给人编辑）
+   - workflow 中输出路径：`<根目录>/BANK-XXXX.xmind`
+   - 独立调用时输出路径：`<输出目录>/BANK-XXXX.xmind`
 3. **场景案例表 Markdown**（结构化，给 api-generator 消费）
+   - workflow 中输出路径：`<根目录>/temp/BANK-XXXX_CASE_TABLE.md`
+   - 独立调用时输出路径：`<输出目录>/<项目名>_CASE_TABLE.md`
 
 ## 输入
 
@@ -265,7 +271,7 @@ left side
 
 **数据传递标记**：使用 `{{步骤N.字段名}}` 标记步骤间的数据依赖
 
-**输出文件**：`<输出目录>/<项目名>_场景案例表.md`
+**输出文件**：`<输出目录>/<项目名>_CASE_TABLE.md`
 
 > 详细格式参见 `references/scenario-table.md`
 > 场景识别指南参见 `references/scenario-identification.md`
@@ -281,7 +287,7 @@ left side
 
 - 从 Markdown 输出文件中提取需求ID（如 `BANK-1234`）
 - 从 Markdown 中提取详细测试案例的 PlantUML MindMap 代码块
-- 使用脚本自动转换为 `需求ID_测试案例.xmind`
+- 使用脚本自动转换为 `BANK-XXXX.xmind`
 
 > 💡 **提示**：XMind 文件会自动生成在输出目录中，便于团队协作编辑和可视化展示。
 
@@ -289,9 +295,9 @@ left side
 
 生成的文件包括：
 
-- **Markdown 文件**：包含 PlantUML 代码块的完整测试设计文档（流程图、功能点、测试案例全部内嵌）
-- **XMind 文件**：自动从 Markdown 中提取 MindMap 并转换的 `.xmind` 文件（测试功能点和测试案例）
-- **场景案例表**：结构化的 Markdown 表格，供 api-generator 消费
+- **场景案例 Markdown**（`BANK-XXXX_CASE.md`）：包含 PlantUML 代码块的完整测试设计文档（流程图、功能点、测试案例全部内嵌），放根目录
+- **XMind 文件**（`BANK-XXXX.xmind`）：自动从 Markdown 中提取 MindMap 并转换，放根目录
+- **场景案例表**（`temp/BANK-XXXX_CASE_TABLE.md`）：结构化 Markdown 表格，供 api-generator 消费，放 temp/ 目录
 
 ### Markdown 文件结构
 
@@ -431,8 +437,9 @@ right side
 
 **预期输出**：
 
-- `./result/new_feature_场景案例.md` - Markdown 文档（含 PlantUML 代码块）
-- `./result/BANK-XXXX_测试案例.xmind` - 详细测试案例 XMind 文件（自动生成）
+- `./result/BANK-XXXX_CASE.md` - 场景案例 Markdown（含 PlantUML 代码块）
+- `./result/BANK-XXXX.xmind` - XMind 文件（自动生成）
+- `./result/temp/BANK-XXXX_CASE_TABLE.md` - 场景案例表（供 api-generator 消费）
 
 #### 场景 2：多文档整合
 
@@ -443,8 +450,9 @@ right side
 
 **预期输出**：
 
-- `./result/integrated_场景案例.md` - Markdown 文档（含 PlantUML 代码块）
-- `./result/BANK-XXXX_测试案例.xmind` - XMind 文件（自动生成）
+- `./result/BANK-XXXX_CASE.md` - 场景案例 Markdown（含 PlantUML 代码块）
+- `./result/BANK-XXXX.xmind` - XMind 文件（自动生成）
+- `./result/temp/BANK-XXXX_CASE_TABLE.md` - 场景案例表（供 api-generator 消费）
 
 #### 场景 3：测试评审
 
@@ -455,8 +463,9 @@ right side
 
 **预期输出**：
 
-- `./review/requirement_场景案例.md` - Markdown 文档（含 PlantUML 代码块）
-- `./review/BANK-XXXX_测试案例.xmind` - XMind 文件（可用 XMind 软件打开编辑）
+- `./review/BANK-XXXX_CASE.md` - 场景案例 Markdown（含 PlantUML 代码块）
+- `./review/BANK-XXXX.xmind` - XMind 文件（可用 XMind 软件打开编辑）
+- `./review/temp/BANK-XXXX_CASE_TABLE.md` - 场景案例表（供 api-generator 消费）
 
 ## 注意事项
 
@@ -523,8 +532,8 @@ right side
 
 - **`${CLAUDE_SKILL_DIR}/scripts/plantuml_to_xmind.py`** - PlantUML MindMap 转 XMind 格式工具
   - 用法：`uv run ${CLAUDE_SKILL_DIR}/scripts/plantuml_to_xmind.py <Markdown文件或PlantUML文件> <需求ID>`
-  - 示例：`uv run ${CLAUDE_SKILL_DIR}/scripts/plantuml_to_xmind.py ./result/xxx_场景案例.md BANK-1234`
-  - 输出：生成到输入文件同目录，文件名为 `需求ID_测试案例.xmind`
+  - 示例：`uv run ${CLAUDE_SKILL_DIR}/scripts/plantuml_to_xmind.py ./result/BANK-XXXX_CASE.md BANK-XXXX`
+  - 输出：生成到输入文件同目录，文件名为 `BANK-XXXX.xmind`
 
 ### 参考文件
 

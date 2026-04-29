@@ -1,6 +1,6 @@
 ---
-description: 测试左移全流程工作流：自动探测环境、转换文档、串联分析技能，从需求/设计文档生成API自动化测试用例
-argument-hint: [req_dir] [design_dir] [output_dir] [project_dir]
+description: 测试左移全流程工作流：自动探测环境、断点续传、统一命名规范，从需求/设计文档生成API自动化测试用例
+argument-hint: [需求ID]
 allowed-tools: Read, Write, Edit, Grep, Glob, Bash(uv run:*), Bash, TodoWrite, AskUserQuestion, Skill(za-qe:doc-converter), Skill(za-qe:req-parser), Skill, Task
 ---
 
@@ -11,436 +11,496 @@ allowed-tools: Read, Write, Edit, Grep, Glob, Bash(uv run:*), Bash, TodoWrite, A
 > - **禁止使用分号 `;` 连接命令**，包括 `; echo "Exit code: $?"`、`; echo "EXIT:$?"`、`|| echo "失败"` 等任何退出码检查形式
 > - 命令失败时 Bash 会直接报错，无需手动检查退出码；需要顺序执行时改用 `&&`
 
-自动完成从原始文档到 API 自动化测试用例的全流程：环境探测 → 目录配置 → docx/doc 转 md → 编码修复 → 需求/设计分析 → API 用例生成。
+自动完成从原始文档到 API 自动化测试用例的全流程：续传检测 → 环境探测 → 交互式配置 → docx/doc 转 md → 编码修复 → 需求/设计分析 → 用例生成。
 
 ## 工作流概览
 
 ```
-阶段1：环境探测 + 目录配置
-  扫描当前目录 → 检测 docx/doc 文件 → 检测 pytest.ini
-  → 交互式确认/修改四个目录
+阶段0：续传检测
+  检测 CWD 下是否存在 workflow.md → 询问继续/清除重来
+
+阶段1：环境探测 + 交互式配置
+  扫描文件名（需求/设计关键词分类）→ 扫描 BANK-XXXX/IP-XXXX ID → 检测 pytest.ini
+  → 逐项 AskUserQuestion 确认四个配置项
+  → 写入 workflow.md（状态锚点）
 
 阶段2：文档转换
-  需求文档 docx/doc → markitdown → .md
-  设计文档 docx/doc → markitdown → .md（可选）
-  → 编码检查 → UTF-8 修复
+  docx/doc → markitdown → .md → UTF-8 修复
+  → 扫描 md 内容补充确认需求ID
+  → 输出 BANK-XXXX_PRD.md / BANK-XXXX_DESIGN.md 到根目录
 
-阶段3：Skill 串联
-  需求 md → req-parser → 规范化需求文档
-  设计 md → design-parser → 规范化设计文档
-  → interface-extractor → 接口数据报告
-  → case-designer → 场景案例 + 场景案例表
-  → api-generator → API 自动化测试用例
-```
-
-## 使用方式
-
-```bash
-# 交互模式（推荐）：自动探测环境后引导配置
-/za-qe:qe-workflow
-
-# 指定参数模式：跳过交互直接执行
-/za-qe:qe-workflow --req_dir ./docs/requirement --output_dir ./result
-
-# 完整参数模式
-/za-qe:qe-workflow --req_dir ./docs/req --design_dir ./docs/design --output_dir ./result --project_dir ./zabank_imc_case
+阶段3：Skill 串联（按分支决策）
+  req-parser → BANK-XXXX_PRD.md
+  design-parser → BANK-XXXX_DESIGN.md
+  interface-extractor → temp/BANK-XXXX_接口数据报告.md
+  case-designer → BANK-XXXX_CASE.md + temp/BANK-XXXX_CASE_TABLE.md + BANK-XXXX.xmind
+  api-generator → <自动化目录>/ 或 temp/
 ```
 
 ---
 
-## 阶段 1：环境探测 + 目录配置
+## 阶段 0：续传检测
 
-### 步骤 1.1：自动探测当前环境
+在执行任何操作之前，检测当前工作目录（CWD）下是否存在 `workflow.md`。
 
-**如果用户未提供任何参数**，自动执行环境探测：
+### 步骤 0.1：检测 workflow.md
 
-1. **扫描 docx/doc 文件**：使用 `Glob` 工具搜索当前工作目录下的 `*.docx` 和 `*.doc` 文件
-   - 如果找到 docx/doc 文件，将当前目录预设为**需求文档目录**默认值
-   - 记录找到的文件数量和文件名列表
+使用 `Glob` 工具检查 CWD 下是否存在 `workflow.md`。
 
-2. **检测 pytest.ini**：使用 `Glob` 工具检查当前目录是否存在 `pytest.ini`
-   - 如果找到，将当前目录预设为**自动化项目目录**默认值
+**如果不存在**：直接进入阶段1。
 
-3. **输出探测结果**：
-   ```
-   环境探测结果：
-     docx/doc 文件：找到 N 个（当前目录）
-     pytest.ini：✅ 检测到 / ❌ 未检测到
-   ```
-
-### 步骤 1.2：交互式目录配置
-
-使用 `AskUserQuestion` 工具向用户展示探测到的默认值，引导配置四个目录。
-
-**配置项说明**：
-
-| 配置项 | 是否必填 | 默认值逻辑 | 说明 |
-|--------|---------|-----------|------|
-| 需求文档目录 | 必填 | 如当前目录有 docx/doc → 当前目录 | 存放 .doc/.docx 需求文档的目录 |
-| 设计文档目录 | 可选 | 默认同需求文档目录 | 存放 .doc/.docx 设计文档的目录，置空表示无设计文档 |
-| 案例输出目录 | 可选 | 默认同需求文档目录 | 转换后的 md 及后续产出的存放目录 |
-| 自动化项目目录 | 可选 | 如当前目录有 pytest.ini → 当前目录 | 存在 pytest.ini 的自动化项目根目录 |
-
-**交互方式**：
-
-向用户展示以下配置表，让用户确认或修改：
+**如果存在**：读取文件内容，提取已记录的配置和进度，然后用 `AskUserQuestion` 询问用户：
 
 ```
-当前配置（基于环境探测）：
+检测到未完成的工作流记录：
+  需求ID：BANK-XXXX
+  需求文档：<路径>
+  上次执行到：<最后完成的步骤>
 
-  1. 需求文档目录：{探测到的默认值 或 "未检测到，请输入"}
-     找到文件：file1.docx, file2.doc, ...
-
-  2. 设计文档目录：{默认同需求文档目录}
-     说明：可置空表示无设计文档
-
-  3. 案例输出目录：{默认同需求文档目录}
-
-  4. 自动化项目目录：{探测到的默认值 或 "未检测到，可留空"}
+选项：
+  A. 继续未完成的工作流（从上次失败/中断的步骤继续）
+  B. 清除记录，重新开始
 ```
 
-- 用户可以对任意项进行修改
-- 用户可以将非必填项置空（输入空字符串或 "none"）
-- 设计文档目录如果与需求文档目录相同，后续扫描时会区分文件类型
+> **字段来源**：模板中 `BANK-XXXX` 取 workflow.md"**需求ID**"字段值，`<路径>` 取"需求文档"配置值，`<最后完成的步骤>` 取"执行进度"中最后一个标记为 `[x]` 的步骤名（若无则显示"尚未开始"）。workflow.md 格式详见阶段1步骤1.3。
 
-**如果用户提供了参数**（如 `--req_dir ./docs`），直接使用参数值，跳过交互引导。
+**如果选择继续**：
+- 从 `workflow.md` 读取所有配置（需求ID、根目录、各文件路径）
+- 找到第一个状态为 `[ ]`（未完成）或 `[!]`（失败）的步骤
+- 跳转到对应阶段执行，跳过所有已标记 `[x]`（完成）的步骤（映射规则：workflow.md 执行进度中的步骤名与本文件各阶段标题一一对应，按步骤名匹配本文件对应章节执行；如步骤名为"阶段2：文档转换"则跳转执行本文件"阶段 2"章节）
 
-### 步骤 1.3：验证配置
+**如果选择清除重来**：
+- 再次确认："确认删除 workflow.md 并重新开始？(yes/no)"
+- 用户确认后，使用 `Bash` 工具执行 `rm '<根目录绝对路径>/workflow.md'` 删除文件，然后进入阶段1
 
-1. **需求文档目录验证**：
-   - 目录必须存在
-   - 目录下至少存在一个 `.doc` 或 `.docx` 文件
-   - 如果不满足，提示用户重新输入
+### 步骤 0.2：workflow.md 有效性校验（续传时）
 
-2. **设计文档目录验证**（如果非空）：
-   - 目录必须存在
-   - 扫描 `.doc`/`.docx` 文件列表
+续传前校验 workflow.md 中记录的文件路径是否仍然存在：
+- 若已完成步骤的输出文件不存在 → 将该步骤状态改为 `[ ]`，需要重新执行
+- 若配置的目录不存在 → 提示用户重新配置，回到阶段1对应配置项
 
-3. **案例输出目录**：
-   - 如果不存在，使用 `uv run -m mkdir` 或直接用 Write 工具创建
-   - 目录确认后，立即用 Write 工具在输出目录下创建 `_workflow_progress.md`，内容为当前配置和进度占位。**这一步的目的是触发一次文件写入授权**，让用户选择 "Yes, allow all edits during this session"，后续所有文件写入（规范化文档、接口报告、测试代码等）不再逐个询问
-   - 在后续每个步骤完成后，用 Edit 工具追加进度到 `_workflow_progress.md`（如 `✅ req-parser 完成`）
-   - 全流程结束后保留该文件作为执行摘要，或提示用户可删除
+## 阶段 1：环境探测 + 交互式配置
 
-`_workflow_progress.md` 初始内容模板：
+### 步骤 1.1：自动扫描当前目录
+
+同时执行以下三项扫描：
+
+**1. 文档文件扫描**
+
+使用 `Glob` 扫描 CWD 下的 `*.docx` 和 `*.doc` 文件，按文件名关键词分类（大小写不敏感）：
+
+- **需求文档关键词**：`prd`, `req`, `requirement`, `需求`, `产品需求`, `功能需求`, `用户需求`, `业务需求`, `需求说明`, `需求规格`
+- **设计文档关键词**：`design`, `设计`, `方案`, `开发方案`, `技术方案`, `详细设计`, `概要设计`, `系统设计`, `接口设计`, `架构设计`
+
+分类规则：
+- 文件名同时命中两类关键词 → **需求优先**，在选项中标注"(需求关键词优先匹配)"
+- 未命中任何关键词的 docx/doc 文件 → 也列出，供用户手动选择
+
+**2. 需求ID扫描**
+
+扫描所有找到的文件名，提取符合以下正则的ID：
+- `BANK-\d+`（如 BANK-12345）
+- `IP-\d+`（如 IP-6789）
+
+**3. pytest.ini 检测**
+
+使用 `Glob` 检查 CWD 下是否存在 `pytest.ini`。
+
+**输出探测摘要**：
+
 ```
-# 测试左移工作流进度
+环境探测结果：
+  找到文件：N 个 docx/doc（需求候选：X 个，设计候选：Y 个，未分类：Z 个）
+  检测到ID：BANK-XXXX（来自文件名 xxx.docx）
+  pytest.ini：✅ 检测到 / ❌ 未检测到
+```
 
-**开始时间**：{当前时间}
-**需求文档目录**：{req_dir}
-**案例输出目录**：{output_dir}
+---
+
+### 步骤 1.2：交互式配置（逐项确认）
+
+使用 `AskUserQuestion` 工具逐项配置，每项独立询问。
+
+**配置项1：需求ID**
+
+> 仅当用户未通过参数传入 `[需求ID]` 时询问。
+
+构建选项列表：
+- 每个检测到的ID作为一个选项（标注来源文件名）
+- 末位加"手动输入"选项
+
+选项示例：
+```
+- BANK-12345（来自文件名 活动模块需求PRD.docx）
+- IP-6789（来自文件名 IP-6789_设计方案.docx）
+- 手动输入
+```
+
+> 即使只检测到一个ID，也需要用户确认。
+> 用户选"手动输入"时，再次用 `AskUserQuestion` 询问："请输入需求ID（格式：BANK-XXXX 或 IP-XXXX）"
+> 若未检测到任何ID，跳过选项列表，直接用 `AskUserQuestion` 询问："请输入需求ID（格式：BANK-XXXX 或 IP-XXXX）"（需求ID为必填项，不能为空）。
+
+---
+
+**配置项2：需求文档**
+
+构建选项列表：
+- 每个匹配需求关键词的文件名作为一个选项
+- 末位加"手动输入"选项
+- 若当前选项总数（不含"手动输入"）≤ 3，再加一个"无"选项
+
+> 需求文档为**必填项**，不能为空。
+> 用户选"无"或手动输入 `无`/`-` 时，输出提示"需求文档为必填项，请重新选择"，然后重新调用 `AskUserQuestion` 展示完整选项列表（与首次询问相同），直到用户选择有效文档为止。
+
+---
+
+**配置项3：设计文档**
+
+构建选项列表：
+- 每个匹配设计关键词的文件名作为一个选项
+- 末位加"手动输入"选项
+- 若当前选项总数（不含"手动输入"）≤ 3，再加一个"无"选项
+
+> 用户选"手动输入"时追问路径，输入 `无` 或 `-` 表示无设计文档，视为空值。
+> **注**：配置项3的"无"选项是合法空值（表示无设计文档）；配置项2的"无"是无效输入（需求不能为空）——两者语义不同，处理逻辑不同。
+
+---
+
+**配置项4：自动化项目根目录**
+
+构建选项列表：
+- 若检测到 `pytest.ini` → 加入"当前目录（检测到 pytest.ini）"选项
+- 末位加"手动输入"选项
+- 若当前选项总数（不含"手动输入"）≤ 3，再加一个"无"选项
+
+> 用户选"手动输入"时追问路径，输入 `无` 或 `-` 表示无自动化目录，视为空值。
+> 若用户输入了路径，用 `Glob` 校验该路径下是否存在 `pytest.ini`，不存在则输出警告（不阻断执行）。
+
+---
+
+### 步骤 1.3：写入 workflow.md
+
+配置确认后，在**需求文档所在目录（根目录）**写入 `workflow.md`。
+
+> 根目录 = 需求文档所在目录（不一定是 CWD）
+
+使用 `Write` 工具写入 `<根目录>/workflow.md`，内容模板如下：
+
+```markdown
+# Workflow 状态记录
+
+**创建时间**：{当前时间，格式：YYYY-MM-DD HH:MM:SS}
+**需求ID**：{BANK-XXXX}
+**根目录**：{根目录绝对路径}
+
+## 配置
+
+- 需求文档：{需求文档文件名}
+- 设计文档：{设计文档文件名 或 无}
+- 自动化目录：{自动化目录绝对路径 或 无}
 
 ## 执行进度
+
 - [ ] 阶段2：文档转换
-- [ ] 阶段3：req-parser
-- [ ] 阶段3：design-parser（如有）
-- [ ] 阶段3：interface-extractor（如有）
-- [ ] 阶段3：case-designer
-- [ ] 阶段3：api-generator（如有）
+- [ ] 阶段3.1：req-parser → BANK-XXXX_PRD.md
+- [ ] 阶段3.2：design-parser → BANK-XXXX_DESIGN.md（如有设计文档）
+- [ ] 阶段3.3：interface-extractor → temp/BANK-XXXX_接口数据报告.md（如有设计文档）
+- [ ] 阶段3.4：case-designer → BANK-XXXX_CASE.md + temp/BANK-XXXX_CASE_TABLE.md
+- [ ] 阶段3.5：api-generator（如有自动化目录）
+
+## 产出文件
+
+（每步完成后追加记录，格式：`步骤名: 文件绝对路径`）
+（注：写入时将执行进度列表中所有 `BANK-XXXX` 替换为实际需求ID）
 ```
 
-4. **自动化项目目录验证**（如果非空）：
-   - 必须存在 `pytest.ini` 文件
+同时使用 `Write` 工具在根目录创建 `BANK-XXXX_NOTES.md`（`BANK-XXXX` 替换为实际需求ID），内容为：
+
+```markdown
+# BANK-XXXX 测试记录
+
+> 此文件用于记录测试过程数据，包括测试数据、环境变量、mock 开关等。
+```
 
 ---
 
 ## 阶段 2：文档转换
 
-调用 `doc-converter` Skill 完成 docx/doc → Markdown 转换和编码修复。
+> 阶段2读取阶段1配置的文件，输出路径统一写入根目录（`workflow.md` 所在目录）。
 
 ### 步骤 2.1：转换需求文档
 
-调用 `doc-converter` Skill，传入需求文档目录和输出目录。
+调用 `doc-converter` Skill，传入：
+- 输入目录：需求文档所在目录（绝对路径）
+- 输出目录：根目录下的 `temp/` 子目录（绝对路径）；调用前先用 `Bash` 工具确保目录存在：`mkdir -p '<根目录绝对路径>/temp'`
 
-### 步骤 2.2：转换设计文档（可选）
-
-如果设计文档目录非空且与需求文档目录不同，再次调用 `doc-converter` Skill，传入设计文档目录、输出目录和 `--prefix design_` 参数。
-
-**如果设计文档目录与需求文档目录相同**：跳过此步骤（需求文档已在步骤 2.1 中转换）。
-
-### 步骤 2.3：编码检查与修复
-
-已由 `doc-converter` 内置处理，无需单独执行。
-
-### 步骤 2.4：转换结果汇报
-
-转换完成后，输出汇总：
+`doc-converter` 完成后，将需求文档对应的 md 文件从 `temp/` **重命名并移动**到根目录：
 
 ```
-文档转换完成：
-  需求文档：N 个转换成功，M 个失败
-  设计文档：N 个转换成功，M 个失败
-  编码修复：N 个已修复
-
-生成的 md 文件列表：
-  - ./result/需求文档1.md (UTF-8 ✅)
-  - ./result/需求文档2.md (UTF-8 ✅, 从 gb18030 转换)
-  - ./result/design_设计文档1.md (UTF-8 ✅)
+temp/<原文件名>.md  →  <根目录>/BANK-XXXX_PRD.md
 ```
 
-如果有失败的文件，列出失败原因并提示用户检查原始文档。
+使用 `Bash` 工具（绝对路径，禁止 cd）：
+```bash
+mv '<temp目录绝对路径>/<原文件名>.md' '<根目录绝对路径>/BANK-XXXX_PRD.md'
+```
+
+---
+
+### 步骤 2.2：转换设计文档（如有）
+
+**触发条件**：阶段1配置的设计文档非空。
+
+**分支A：设计文档与需求文档在同一目录**
+
+步骤2.1 已将该目录所有文档转换到 temp/，设计文档 md 已存在于 temp/ 中。
+无需再次调用 doc-converter，直接重命名移动：
+
+```bash
+mv '<temp目录绝对路径>/<设计文档原文件名>.md' '<根目录绝对路径>/BANK-XXXX_DESIGN.md'
+```
+
+**分支B：设计文档在不同目录**
+
+调用 `doc-converter` Skill，传入：
+- 输入目录：设计文档所在目录（绝对路径）
+- 输出目录：根目录下的 `temp/` 子目录
+- 前缀参数：`--prefix design_`
+
+转换后重命名移动：
+
+```
+temp/design_<原文件名>.md  →  <根目录>/BANK-XXXX_DESIGN.md
+```
+
+---
+
+### 步骤 2.3：内容扫描补充确认需求ID
+
+读取 `<根目录>/BANK-XXXX_PRD.md` 的**第一行和所有一级标题（`# ` 开头的行）**，使用正则提取 `BANK-\d+` 或 `IP-\d+`。
+
+- 若提取到的ID与阶段1配置的ID **一致**（或未提取到任何ID）→ 无需操作，继续。
+- 若提取到的ID与阶段1配置的ID **不同** → 用 `AskUserQuestion` 询问：
+
+```
+文档内容中检测到需求ID：{文档中的ID}
+当前配置的需求ID：{阶段1配置的ID}
+
+请选择：
+  A. 使用文档中的ID：{文档中的ID}
+  B. 保留当前配置的ID：{阶段1配置的ID}
+```
+
+若用户选择A（更正）：
+- 用 `Edit` 工具更新 `workflow.md` 中的 `**需求ID**` 字段，并将"执行进度"和"产出文件"区域中所有旧ID（如 `旧ID_PRD.md`）替换为新ID
+- 将根目录下已生成文件的名称中的旧ID替换为新ID（`BANK-XXXX_PRD.md` 重命名）
+- 使用 `Bash` 工具：`mv '<根目录>/旧ID_PRD.md' '<根目录>/新ID_PRD.md'`
+
+---
+
+### 步骤 2.4：更新进度
+
+在 `workflow.md` 中将"阶段2：文档转换"从 `[ ]` 改为 `[x]`，并在"产出文件"区域追加：
+
+```
+阶段2_PRD: <根目录绝对路径>/BANK-XXXX_PRD.md
+阶段2_DESIGN: <根目录绝对路径>/BANK-XXXX_DESIGN.md（如有设计文档）
+```
+
+使用 `Edit` 工具修改 `workflow.md`。
 
 ---
 
 ## 阶段 3：Skill 串联
 
 > **重要原则**：
-> - 阶段 3 的所有 Skill 一律读取阶段 2 产出的 **md 文件**，**不得直接读取原始 doc/docx 文件**
+> - 阶段3所有 Skill 一律读取阶段2产出的 md 文件，**不得直接读取原始 doc/docx 文件**
 > - **每个 Skill 执行完成后，必须立即继续执行下一个 Skill，不得停下等待用户指令**
-> - 所有 Skill 按决策逻辑确定的顺序串行执行，直到全部完成
-> - 每完成一个 Skill，更新 `_workflow_progress.md` 进度后立即进入下一步
+> - 每完成一个 Skill，立即用 `Edit` 工具更新 `workflow.md` 进度后进入下一步
 
-### 决策逻辑
+### 分支决策
 
-根据阶段 2 生成的文件，自动决定调用哪些 Skills：
+根据阶段1配置的结果，在进入步骤3.1前先确定执行路径：
 
-```
-有需求 md 且有设计 md？
-  → req-parser → design-parser → interface-extractor → case-designer（含 XMind）→ api-generator
-
-仅有设计 md（无需求文档）？
-  → design-parser → interface-extractor → api-generator（无场景表，基于接口生成基础用例）
-
-仅有需求 md（无设计文档）？
-  → req-parser → case-designer（含 XMind）
-  （case-designer 必须执行，无论有无设计文档）
-```
-
-### 步骤 3.1：调用 req-parser（如有需求 md）
-
-**触发条件**：存在需求文档转换后的 md 文件
-
-对每个需求 md 文件调用 `req-parser` Skill：
-- **输入**：转换后的需求 md 文件路径
-- **输出**：`<案例输出目录>/<模块名>_规范化需求文档.md`
-
-**调用方式**：按照 req-parser Skill 的流程执行，即：
-1. 解析 md 文档结构
-2. 提取功能、验收标准、业务规则
-3. 生成 given-when-then 测试场景
-4. 执行三级一致性检查
-5. 输出规范化需求文档
-
-**完成后**：更新进度，立即进入下一步（design-parser 或 case-designer）。
-
-### 步骤 3.2：调用 design-parser（如有设计 md）
-
-**触发条件**：存在设计文档转换后的 md 文件（`design_*.md`）
-
-对每个设计 md 文件调用 `design-parser` Skill：
-- **输入**：转换后的设计 md 文件路径
-- **输出**：`<案例输出目录>/<需求ID>_规范化开发方案.md`
-
-**调用方式**：按照 design-parser Skill 的流程执行，即：
-1. 读取 md 文档
-2. 提取 UDOC 链接中的接口数据（如有）
-3. 检查并补全内容
-4. 生成规范化 MD 文档
-5. 输出待补充清单（如有缺失）
-
-### 步骤 3.3：调用 interface-extractor（如有设计文档产出）
-
-**触发条件**：步骤 3.2 产出了规范化设计文档
-
-- **输入**：
-  - 规范化设计文档（必须）
-  - 规范化需求文档（可选，用于补充业务上下文）
-- **输出**：`<案例输出目录>/<项目名>_接口数据报告.md`
-
-**调用方式**：按照 interface-extractor Skill 的流程执行：
-1. 提取接口信息（路径、参数、响应）
-2. 接口路径校验（dmb 网关检测）
-3. 微服务识别与映射
-4. 接口依赖关系分析
-5. 输出接口数据报告
-
-### 步骤 3.4：调用 case-designer（有需求文档时必须执行）
-
-**触发条件**：步骤 3.1 产出了规范化需求文档（**无论有无设计文档，必须执行**）
-
-- **输入**：
-  - 规范化需求文档（必须）
-  - 接口数据报告（可选，步骤 3.3 产出；无则场景步骤"调用接口"列留空）
-- **输出**：
-  - `<案例输出目录>/<项目名>_场景案例.md`（内嵌 PlantUML 流程图 + 功能点 MindMap + 测试案例 MindMap）
-  - `<案例输出目录>/<项目名>_场景案例表.md`（结构化场景表，供 api-generator 消费）
-  - `<案例输出目录>/<需求ID>_测试案例.xmind`（自动从 Markdown 提取测试案例 MindMap 转换）
-
-**调用方式**：按照 case-designer Skill 的流程执行
-
-**完成后**：更新进度，如有接口数据报告则继续 api-generator，否则输出最终汇总。
-
-### 步骤 3.5：调用 api-generator
-
-**触发条件**：步骤 3.3 产出了接口数据报告
-
-- **输入**：
-  - 接口数据报告（必须，步骤 3.3 产出）
-  - 场景案例表（可选，步骤 3.4 产出，有则生成场景测试代码）
-- **输出目录**：
-  - 如果指定了自动化项目目录 → 测试代码和数据输出到该目录下
-  - 否则 → 输出到案例输出目录下
-
-**调用方式**：按照 api-generator Skill 的流程执行
-
-**完成后**：更新进度，输出最终汇总。
-
-### 仅有需求文档的执行结果
-
-无设计文档时，在 req-parser + case-designer + XMind 生成完成后输出：
-
-```
-已生成：
-  ✅ 规范化需求文档
-  ✅ 场景案例（PlantUML 流程图 + MindMap，内嵌于 Markdown）
-  ✅ 场景案例表（"调用接口"列为空，待补充接口数据）
-  ✅ 测试案例 XMind 文件
-
-后续可选操作：
-  1. 提供设计文档后重新执行 /za-qe:qe-workflow — 补全接口数据并生成 API 自动化测试
-  2. 手动在场景案例表中填入接口信息后调用 /za-qe:api-generator
-```
+| 场景 | 执行路径 |
+|------|---------|
+| 需求 + 设计 + 自动化目录 | 3.1 req-parser → 3.2 design-parser → 3.3 interface-extractor → 3.4 case-designer → 3.5 api-generator（输出到自动化目录） |
+| 需求 + 设计 + 无自动化 | 3.1 req-parser → 3.2 design-parser → 3.3 interface-extractor → 3.4 case-designer（结束） |
+| 仅需求（无设计） | 3.1 req-parser → 3.4 case-designer（结束） |
+| 仅设计（无需求） | **中止**：输出"需求文档为必填项，仅有设计文档无法执行工作流，请重新执行 /za-qe:qe-workflow" |
+| 无需求 | **中止**：输出"需求文档为必填项，请重新执行 /za-qe:qe-workflow 并提供需求文档" |
 
 ---
 
-## 执行成功输出
+### 步骤 3.1：调用 req-parser（有需求文档时必须执行）
+
+**触发条件**：存在 `<根目录>/BANK-XXXX_PRD.md`
+
+- **输入**：`<根目录>/BANK-XXXX_PRD.md`
+- **输出**：覆盖写入 `<根目录>/BANK-XXXX_PRD.md`（req-parser 规范化内容替换原转换内容）
+
+按照 req-parser Skill 的流程执行，明确告知输出路径为 `<根目录>/BANK-XXXX_PRD.md`。
+
+**完成后**：用 `Edit` 工具将 `workflow.md` 中"阶段3.1：req-parser"从 `[ ]` 改为 `[x]`，在"产出文件"区域追加：
+```
+阶段3.1: <根目录绝对路径>/BANK-XXXX_PRD.md
+```
+立即进入下一步（分支决策中3.1的下一步）。
+
+---
+
+### 步骤 3.2：调用 design-parser（有设计文档时执行）
+
+**触发条件**：存在 `<根目录>/BANK-XXXX_DESIGN.md`
+
+- **输入**：`<根目录>/BANK-XXXX_DESIGN.md`
+- **输出**：覆盖写入 `<根目录>/BANK-XXXX_DESIGN.md`
+
+**完成后**：用 `Edit` 工具将"阶段3.2：design-parser"标记为 `[x]`，追加：
+```
+阶段3.2: <根目录绝对路径>/BANK-XXXX_DESIGN.md
+```
+立即进入步骤3.3。
+
+---
+
+### 步骤 3.3：调用 interface-extractor（有设计文档产出时执行）
+
+**触发条件**：步骤3.2已完成
+
+- **输入**：
+  - 规范化设计文档：`<根目录>/BANK-XXXX_DESIGN.md`（必须）
+  - 规范化需求文档：`<根目录>/BANK-XXXX_PRD.md`（可选，补充业务上下文）
+- **输出**：`<根目录>/temp/BANK-XXXX_接口数据报告.md`
+
+确保 `<根目录>/temp/` 存在（步骤2.1已创建，此处无需重复创建）。
+
+**完成后**：用 `Edit` 工具将"阶段3.3：interface-extractor"标记为 `[x]`，追加：
+```
+阶段3.3: <根目录绝对路径>/temp/BANK-XXXX_接口数据报告.md
+```
+立即进入步骤3.4。
+
+---
+
+### 步骤 3.4：调用 case-designer（有需求文档时必须执行）
+
+**触发条件**：步骤3.1已完成
+
+- **输入**：
+  - 规范化需求文档：`<根目录>/BANK-XXXX_PRD.md`（必须）
+  - 接口数据报告：`<根目录>/temp/BANK-XXXX_接口数据报告.md`（可选；无则"调用接口"列留空）
+- **输出**（明确传入以下路径）：
+  - 场景案例文档：`<根目录>/BANK-XXXX_CASE.md`
+  - 场景案例表：`<根目录>/temp/BANK-XXXX_CASE_TABLE.md`
+  - XMind 输出目录：`<根目录>/`（脚本自动生成 `BANK-XXXX.xmind`）
+
+**完成后**：用 `Edit` 工具将"阶段3.4：case-designer"标记为 `[x]`，追加：
+```
+阶段3.4_CASE: <根目录绝对路径>/BANK-XXXX_CASE.md
+阶段3.4_TABLE: <根目录绝对路径>/temp/BANK-XXXX_CASE_TABLE.md
+阶段3.4_XMIND: <根目录绝对路径>/BANK-XXXX.xmind
+```
+根据分支决策继续：有自动化目录且有接口数据报告 → 进入步骤3.5；否则输出完成汇总。
+
+---
+
+### 步骤 3.5：调用 api-generator（有接口数据报告且有自动化目录时执行）
+
+**触发条件**：步骤3.3产出了接口数据报告 **且** 阶段1配置了自动化项目目录
+
+- **输入**：
+  - 接口数据报告：`<根目录>/temp/BANK-XXXX_接口数据报告.md`（必须）
+  - 场景案例表：`<根目录>/temp/BANK-XXXX_CASE_TABLE.md`（可选，有则生成场景测试代码）
+- **输出目录**：`<自动化项目目录>/`
+
+**完成后**：用 `Edit` 工具将"阶段3.5：api-generator"标记为 `[x]`，在"产出文件"区域追加：
+```
+阶段3.5: <自动化项目目录绝对路径>/
+```
+然后输出最终汇总。
+
+---
+
+## 完成汇总输出
+
+全部步骤执行完成后，输出以下汇总：
 
 ```
-🚀 测试左移全流程工作流执行完成
+测试左移全流程工作流执行完成
 ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-📁 目录配置：
-   需求文档目录：./docs/req
-   设计文档目录：./docs/design
-   案例输出目录：./result
-   自动化项目目录：./zabank_imc_case
+需求ID：BANK-XXXX
+根目录：<根目录路径>
 
-📄 文档转换 ✅
-   需求文档：3 个已转换
-   设计文档：1 个已转换
-   编码修复：1 个（gb18030 → UTF-8）
+产出文件：
+  BANK-XXXX_PRD.md        ← 规范化需求文档
+  BANK-XXXX_DESIGN.md     ← 规范化设计文档（如有）
+  BANK-XXXX_CASE.md       ← 场景案例（流程图+MindMap）
+  BANK-XXXX.xmind         ← 测试案例 XMind
+  BANK-XXXX_NOTES.md      ← 测试记录文件（待手动填写）
+  temp/BANK-XXXX_接口数据报告.md  ← 接口数据（如有）
+  temp/BANK-XXXX_CASE_TABLE.md   ← 场景案例表
 
-📊 需求分析 (req-parser) ✅
-   输出：./result/xxx_规范化需求文档.md
-
-🔧 设计分析 (design-parser) ✅
-   输出：./result/xxx_规范化开发方案.md
-
-🔌 接口提取 (interface-extractor) ✅
-   输出：./result/xxx_接口数据报告.md
-   识别接口：11 个
-   接口依赖链：3 条
-
-📋 场景案例 (case-designer) ✅
-   输出：./result/xxx_场景案例.md
-   输出：./result/xxx_场景案例表.md
-   场景数量：8 个（P0: 3, P1: 3, P2: 2）
-
-🧪 API 用例生成 (api-generator) ✅
-   输出目录：./zabank_imc_case/
-   测试代码：11 个
-   测试数据：33 个
+自动化测试代码：
+  <自动化目录>/（如有）
 
 ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+```
 
-🎯 下一步操作：
-  1. 查看接口数据报告：
-     cat ./result/xxx_接口数据报告.md
+**仅需求（无设计文档）时**，完成后输出：
 
-  2. 查看场景案例：
-     cat ./result/xxx_场景案例表.md
+```
+已生成：
+  ✅ 规范化需求文档（BANK-XXXX_PRD.md）
+  ✅ 场景案例（BANK-XXXX_CASE.md）
+  ✅ 测试案例 XMind（BANK-XXXX.xmind）
+  ✅ 测试记录文件（BANK-XXXX_NOTES.md，待手动填写）
 
-  3. 执行测试用例：
-     cd ./zabank_imc_case && pytest --envId sit
+后续可选操作：
+  1. 提供设计文档后重新执行 /za-qe:qe-workflow — 补全接口数据并生成 API 自动化测试
+  2. 手动在场景案例表中填入接口信息后调用 /api-generator
 ```
 
 ---
 
 ## 错误处理
 
-### 错误 1：需求文档目录无 doc/docx 文件
+### 文档转换失败
 
 ```
-❌ 错误：需求文档目录下未找到 .doc/.docx 文件
-   目录：./docs/req
-
-建议：
-- 检查目录路径是否正确
-- 确认目录下存在 Word 格式的需求文档
-- 如果文档已经是 .md 格式，可直接使用 /req-parser 处理
+警告：文档转换失败
+文件：<文件路径>
+建议：检查文件是否损坏；尝试用 Word 另存为 .docx 格式
 ```
+处理：跳过失败文件，继续处理其他文件；全部完成后汇报失败列表。
 
-**处理**：停止执行，要求用户重新输入需求文档目录。
-
-### 错误 2：markitdown 转换失败
+### Skill 执行失败
 
 ```
-⚠️ 警告：文档转换失败
-   文件：./docs/req/需求文档V2.doc
-   错误：markitdown 执行错误
+步骤 N 失败：<Skill名称> 执行未完成
 
-建议：
-- 检查文件是否损坏
-- 尝试用 Word 打开后另存为 .docx 格式
-- 手动转换为 Markdown 格式
+已完成步骤：
+  [x] 步骤1...
+  [!] 步骤N（失败）
+  [ ] 步骤N+1（未执行）
+
+workflow.md 已记录当前进度，下次执行 /za-qe:qe-workflow 可从失败步骤继续。
 ```
-
-**处理**：跳过失败文件，继续处理其他文件。全部完成后汇报失败列表。
-
-### 错误 3：编码无法识别
-
-```
-⚠️ 警告：文件编码无法自动识别
-   文件：./result/xxx.md
-
-建议：
-- 手动检查文件编码
-- 尝试用文本编辑器打开并另存为 UTF-8
-```
-
-**处理**：标记警告，继续后续流程。
-
-### 错误 4：Skill 执行失败
-
-```
-❌ 步骤 N 失败：{Skill名称} 执行未完成
-
-已完成的步骤：
-  ✅ 步骤 1 - 文档转换
-  ✅ 步骤 2 - 需求分析
-  ❌ 步骤 3 - 设计分析（失败）
-  ⏸️ 步骤 4 - 测试左移分析（未执行）
-  ⏸️ 步骤 5 - API 用例生成（未执行）
-
-建议：
-- 检查步骤 N 的输入文件
-- 查看错误详情
-- 修复问题后可从失败步骤手动继续
-```
-
-**处理**：停止后续 Skill 串联，保留已完成步骤的输出。
+处理：用 `Edit` 工具将该步骤在 `workflow.md` 中标记为 `[!]`，停止后续执行，保留已完成步骤产出。
 
 ---
 
 ## 相关命令
 
-- `/za-qe:qe-gencase` - 生成场景案例（PlantUML流程图 + MindMap）
-- `/za-qe:qe-help` - 查看详细帮助
-- `/req-parser` - 独立执行需求文档标准化
-- `/design-parser` - 独立执行设计文档规范化
-- `/interface-extractor` - 独立执行接口数据提取
-- `/case-designer` - 独立执行场景案例设计
-- `/api-generator` - 独立执行 API 用例生成
-
-## 详细文档
-
-- [interface-extractor 文档](../skills/interface-extractor/SKILL.md)
-- [case-designer 文档](../skills/case-designer/SKILL.md)
-- [req-parser 文档](../skills/req-parser/SKILL.md)
-- [design-parser 文档](../skills/design-parser/SKILL.md)
-- [api-generator 文档](../skills/api-generator/SKILL.md)
-- [插件 README](../README.md)
+- `/za-qe:qe-gencase` — 生成场景案例（PlantUML 流程图 + MindMap）
+- `/za-qe:qe-help` — 查看详细帮助
+- `/req-parser` — 独立执行需求文档标准化
+- `/design-parser` — 独立执行设计文档规范化
+- `/interface-extractor` — 独立执行接口数据提取
+- `/case-designer` — 独立执行场景案例设计
+- `/api-generator` — 独立执行 API 用例生成
 
 ---
 
-**版本**: v2.0.0 | **状态**: ✅ 可用
+**版本**: v3.0.0 | **状态**: ✅ 可用
