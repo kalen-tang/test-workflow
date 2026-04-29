@@ -1,7 +1,7 @@
 ---
 description: 测试左移全流程工作流：自动探测环境、断点续传、统一命名规范，从需求/设计文档生成API自动化测试用例
 argument-hint: [需求ID]
-allowed-tools: Read, Write, Edit, Grep, Glob, Bash(uv run:*), Bash, AskUserQuestion, Skill(za-qe:doc-converter), Skill(za-qe:req-parser), Skill(za-qe:design-parser), Skill(za-qe:interface-extractor), Skill(za-qe:case-designer), Skill(za-qe:api-generator), Skill, Task
+allowed-tools: Read, Write, Edit, Grep, Glob, Bash(uv run:*), Bash(uvx *), Bash, AskUserQuestion, Skill(za-qe:doc-converter), Skill(za-qe:req-parser), Skill(za-qe:design-parser), Skill(za-qe:interface-extractor), Skill(za-qe:case-designer), Skill(za-qe:api-generator), Skill, Task
 ---
 
 # 测试左移全流程工作流
@@ -117,64 +117,74 @@ allowed-tools: Read, Write, Edit, Grep, Glob, Bash(uv run:*), Bash, AskUserQuest
 
 ---
 
-### 步骤 1.2：交互式配置（逐项确认）
+### 步骤 1.2：交互式配置（单次合并展示）
 
-使用 `AskUserQuestion` 工具逐项配置，每项独立询问。
+将四个配置项合并为**一次 `AskUserQuestion` 调用**，`questions` 数组同时展示，用户在同一界面完成所有配置。
 
-**配置项1：需求ID**
+**选项构建规则（每个配置项）**：
+- 检测到的候选最多取前 3 个，每个作为一个选项（标注来源说明）
+- 末位固定加"手动输入"选项
+- 若候选数量 ≤ 2，末位再加"无"选项（需求ID和需求文档除外，不加"无"）
 
-> 仅当用户未通过参数传入 `[需求ID]` 时询问。
+**`AskUserQuestion` 调用结构**：
 
-构建选项列表：
-- 每个检测到的ID作为一个选项（标注来源文件名）
-- 末位加"手动输入"选项
-
-选项示例：
 ```
-- BANK-12345（来自文件名 活动模块需求PRD.docx）
-- IP-6789（来自文件名 IP-6789_设计方案.docx）
-- 手动输入
+questions:
+  - header: "需求ID"
+    question: "请选择或输入需求ID："
+    multiSelect: false
+    options:
+      - label: "{检测到的ID1}"
+        description: "来自文件名：{来源文件名}"
+      - label: "{检测到的ID2}"          # 若有
+        description: "来自文件名：{来源文件名}"
+      - label: "手动输入"
+        description: "自行输入 BANK-XXXX 或 IP-XXXX 格式"
+
+  - header: "需求文档"
+    question: "请选择需求文档（必填）："
+    multiSelect: false
+    options:
+      - label: "{需求候选文件1}"
+        description: "关键词匹配：{命中的关键词}"
+      - label: "{需求候选文件2}"          # 若有
+        description: "关键词匹配：{命中的关键词}"
+      - label: "手动输入"
+        description: "输入文件路径（不能为空）"
+
+  - header: "设计文档"
+    question: "请选择设计文档（可选）："
+    multiSelect: false
+    options:
+      - label: "{设计候选文件1}"
+        description: "关键词匹配：{命中的关键词}"
+      - label: "手动输入"
+        description: "输入文件路径，输入 - 表示无设计文档"
+      - label: "无"
+        description: "不提供设计文档，仅生成场景案例"
+
+  - header: "自动化目录"
+    question: "请选择自动化项目根目录（可选）："
+    multiSelect: false
+    options:
+      - label: "当前目录"               # 仅当检测到 pytest.ini 时加入
+        description: "检测到 pytest.ini：{CWD绝对路径}"
+      - label: "手动输入"
+        description: "输入目录路径，输入 - 表示无自动化目录"
+      - label: "无"
+        description: "不关联自动化工程"
 ```
 
-> 即使只检测到一个ID，也需要用户确认。
-> 用户选"手动输入"时，再次用 `AskUserQuestion` 询问："请输入需求ID（格式：BANK-XXXX 或 IP-XXXX）"
-> 若未检测到任何ID，跳过选项列表，直接用 `AskUserQuestion` 询问："请输入需求ID（格式：BANK-XXXX 或 IP-XXXX）"（需求ID为必填项，不能为空）。
+> 若未检测到任何ID，需求ID 问题只保留"手动输入"选项，跳过检测结果选项。
+> 用户未通过参数传入 `[需求ID]` 时才展示需求ID问题；若已传入则该问题从 `questions` 中移除（只展示3个问题）。
 
----
+**用户选"手动输入"后的处理**：
 
-**配置项2：需求文档**
-
-构建选项列表：
-- 每个匹配需求关键词的文件名作为一个选项
-- 末位加"手动输入"选项
-- 若当前选项总数（不含"手动输入"）≤ 3，再加一个"无"选项
-
-> 需求文档为**必填项**，不能为空。
-> 用户选"无"或手动输入 `无`/`-` 时，输出提示"需求文档为必填项，请重新选择"，然后重新调用 `AskUserQuestion` 展示完整选项列表（与首次询问相同），直到用户选择有效文档为止。
-
----
-
-**配置项3：设计文档**
-
-构建选项列表：
-- 每个匹配设计关键词的文件名作为一个选项
-- 末位加"手动输入"选项
-- 若当前选项总数（不含"手动输入"）≤ 3，再加一个"无"选项
-
-> 用户选"手动输入"时追问路径，输入 `无` 或 `-` 表示无设计文档，视为空值。
-> **注**：配置项3的"无"选项是合法空值（表示无设计文档）；配置项2的"无"是无效输入（需求不能为空）——两者语义不同，处理逻辑不同。
-
----
-
-**配置项4：自动化项目根目录**
-
-构建选项列表：
-- 若检测到 `pytest.ini` → 加入"当前目录（检测到 pytest.ini）"选项
-- 末位加"手动输入"选项
-- 若当前选项总数（不含"手动输入"）≤ 3，再加一个"无"选项
-
-> 用户选"手动输入"时追问路径，输入 `无` 或 `-` 表示无自动化目录，视为空值。
-> 若用户输入了路径，用 `Glob` 校验该路径下是否存在 `pytest.ini`，不存在则输出警告（不阻断执行）。
+收到 `AskUserQuestion` 结果后，检查各项是否为"手动输入"：
+- 需求ID 选了"手动输入" → 再次单独调用 `AskUserQuestion` 询问具体值（格式：BANK-XXXX 或 IP-XXXX，不能为空）
+- 需求文档 选了"手动输入" → 再次询问文件路径（不能为空，输入 `无`/`-` 提示错误并重询）
+- 设计文档 选了"手动输入" → 再次询问文件路径（输入 `无`/`-` 视为空值，合法）
+- 自动化目录 选了"手动输入" → 再次询问目录路径（输入 `无`/`-` 视为空值；输入有效路径后用 `Glob` 校验是否存在 `pytest.ini`，不存在则警告不阻断）
 
 ---
 
