@@ -1,6 +1,8 @@
 ---
 name: case-designer
-description: 此技能用于生成场景案例和可视化测试设计。当用户说帮我生成测试案例、把需求转成测试用例、生成PlantUML流程图、画一下测试功能点、需要测试MindMap或测试案例可视化、生成场景案例时应触发。
+description: 此技能应在用户说"帮我生成测试案例"、"把需求转成测试用例"、"生成PlantUML流程图"、"画一下测试功能点"、"需要测试MindMap"、"测试案例可视化"、"生成场景案例"时使用。用于生成场景案例和可视化测试设计。
+version: 2.0.0
+status: active
 allowed-tools: Read, Write, Edit, Glob, Grep, Bash(uv *), Bash(uv run:*), Task
 ---
 
@@ -320,8 +322,15 @@ left side
 
 ### 步骤 7：自动生成 XMind 文件
 
-```
-从 Markdown 文件中提取详细测试案例 MindMap 代码块 → 调用 ${CLAUDE_SKILL_DIR}/scripts/plantuml_to_xmind.py 脚本 → 转换为 XMind 格式 → 输出到同目录
+从 Markdown 文件中提取详细测试案例 MindMap 代码块，调用转换脚本生成 XMind 格式。
+
+**脚本路径**：`<插件根目录>/skills/case-designer/scripts/plantuml_to_xmind.py`
+
+> **注意**：在子代理（Task）中 `${CLAUDE_SKILL_DIR}` 不可用，须由主流程预先用 `Glob` 定位脚本绝对路径后传入。
+
+**用法**：
+```bash
+uv run '<脚本绝对路径>' <Markdown文件或PlantUML文件> <需求ID>
 ```
 
 **自动转换逻辑**：
@@ -329,8 +338,7 @@ left side
 - 从 Markdown 输出文件中提取需求ID（如 `BANK-1234`）
 - 从 Markdown 中提取详细测试案例的 PlantUML MindMap 代码块
 - 使用脚本自动转换为 `BANK-XXXX_CASE.xmind`
-
-> 💡 **提示**：XMind 文件会自动生成在输出目录中，便于团队协作编辑和可视化展示。
+- XMind 文件生成在输入文件同目录
 
 ## 输出格式
 
@@ -571,11 +579,10 @@ right side
 
 格式转换实用脚本：
 
-- **`${CLAUDE_SKILL_DIR}/scripts/plantuml_to_xmind.py`** - PlantUML MindMap 转 XMind 格式工具
-  - 用法：`uv run ${CLAUDE_SKILL_DIR}/scripts/plantuml_to_xmind.py <Markdown文件或PlantUML文件> <需求ID>`
-  - 示例：`uv run ${CLAUDE_SKILL_DIR}/scripts/plantuml_to_xmind.py ./result/BANK-XXXX_CASE.md BANK-XXXX`
+- **`<插件根目录>/skills/case-designer/scripts/plantuml_to_xmind.py`** - PlantUML MindMap 转 XMind 格式工具
+  - 用法：`uv run <脚本绝对路径> <Markdown文件或PlantUML文件> <需求ID>`
   - 输出：生成到输入文件同目录，文件名为 `BANK-XXXX_CASE.xmind`
-  - **注意**：在子代理（Task）中 `${CLAUDE_SKILL_DIR}` 不可用，须由主流程预先计算脚本绝对路径后传入
+  - **注意**：在子代理（Task）中 `${CLAUDE_SKILL_DIR}` 不可用，须由主流程预先用 `Glob` 定位脚本绝对路径后传入
 
 ### 参考文件
 
@@ -609,4 +616,4 @@ right side
 
 ---
 
-**状态**: ✅ 可用 | **版本**: v2.0.0
+**状态**: ✅ 可用

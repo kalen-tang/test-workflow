@@ -1,8 +1,9 @@
 ---
 name: doc-converter
-description: 将 docx/doc 文档批量转换为 UTF-8 Markdown。当用户说"转换文档"、"docx 转 md"、"doc 转 markdown"、"转换需求文档格式"、"文档格式转换"，或 workflow 需要将 Word 文档转为 md 时应触发。
+description: 此技能应在用户说"转换文档"、"docx 转 md"、"doc 转 markdown"、"转换需求文档格式"、"文档格式转换"，或 workflow 需要将 Word 文档转为 md 时使用。将 docx/doc 文档批量转换为 UTF-8 Markdown。
+version: 1.0.0
 status: active
-allowed-tools: Read, Write, Edit, Grep, Glob, Bash(uv run:*), Bash, TodoWrite, AskUserQuestion,  Skill, Task
+allowed-tools: Read, Glob, Bash(uv run:*)
 ---
 
 # 文档转换器

@@ -1,6 +1,7 @@
 ---
 name: design-parser
-description: 此技能用于检查开发方案文档（设计文档）是否符合规范，并产出规范化后的 MD 文件供后续接口自动化生成使用。当用户说"检查开发方案"、"规范化设计文档"、"开发方案转 MD"、"解析开发方案"、"分析开发方案完整性"、"开发文档规范检查"、"检查接口是否完整"、"设计文档评审"时应触发。
+description: 此技能应在用户说"检查开发方案"、"规范化设计文档"、"开发方案转 MD"、"解析开发方案"、"分析开发方案完整性"、"开发文档规范检查"、"检查接口是否完整"、"设计文档评审"时使用。检查开发方案文档是否符合规范，并产出规范化后的 MD 文件供后续接口自动化生成使用。
+version: 1.0.0
 status: active
 allowed-tools: Read Write Edit Glob Grep Bash
 ---
@@ -30,10 +31,10 @@ allowed-tools: Read Write Edit Glob Grep Bash
 | 格式 | 读取方式 |
 |------|---------|
 | `.md` | 直接使用 Read 工具读取 |
-| `.docx` | 用下方的 Python 脚本一次性提取全部文本和表格，写入临时文件后用 Read 工具读取 |
+| `.docx` | 参照 `references/docx-reader.md` 中的 Python 脚本提取文本和表格，写入临时文件后用 Read 工具读取 |
 | `.pdf` | 使用 Read 工具直接读取（支持 PDF） |
 
-**.docx 标准读取脚本**：见 `references/docx-reader.md`，将 `YOUR_DOC_PATH` 替换为实际路径后直接运行。运行后用 Read 工具读取 `result/_tmp_docx.txt`，完成后删除该临时文件。
+**.docx 读取方式**：参见 `references/docx-reader.md`，将 `YOUR_DOC_PATH` 替换为实际路径后直接运行。运行后用 Read 工具读取 `result/_tmp_docx.txt`，完成后删除该临时文件。
 
 读取内容后：
 - 识别章节编号和标题

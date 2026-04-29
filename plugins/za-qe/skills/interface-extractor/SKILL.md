@@ -1,6 +1,7 @@
 ---
 name: interface-extractor
-description: 当用户要求"提取接口信息"、"分析开发方案"、"接口数据提取"、"提取接口"、"接口校验"、"微服务映射"、"分析设计文档接口"、"从udoc提取接口"，或提到接口提取、接口分析、测试左移分析时，应使用此技能。
+description: 此技能应在用户要求"提取接口信息"、"分析开发方案"、"接口数据提取"、"提取接口"、"接口校验"、"微服务映射"、"分析设计文档接口"、"从udoc提取接口"，或提到接口提取、接口分析、测试左移分析时使用。
+version: 1.0.0
 status: active
 allowed-tools: Read Write Edit Glob Grep
 ---

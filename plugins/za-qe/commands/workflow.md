@@ -105,9 +105,11 @@ allowed-tools: Read, Write, Edit, Grep, Glob, Bash(uv run:*), Bash(uvx *), Bash,
 ```
 环境探测结果：
   找到文件：N 个 docx/doc（需求候选：X 个，设计候选：Y 个，未分类：Z 个）
-  检测到ID：BANK-XXXX（来自文件名 xxx.docx）
+  检测到ID：BANK-XXXXX（来自文件名 xxx.docx）/ 无有效ID（过滤后）
   pytest.ini：✅ 检测到 / ❌ 未检测到
 ```
+
+> 探测摘要中仅展示数字部分 ≥ 10000 的有效 ID；过滤掉的 ID（如 `BANK-999`）不显示。
 
 ---
 
@@ -120,6 +122,14 @@ allowed-tools: Read, Write, Edit, Grep, Glob, Bash(uv run:*), Bash(uvx *), Bash,
 - 末位固定加"手动输入"选项
 - 若候选数量 ≤ 2，末位再加"无"选项（需求ID和需求文档除外，不加"无"）
 
+**需求ID 过滤规则**：
+
+检测到的 ID 须同时满足以下条件才作为候选选项：
+- 数字部分 ≥ 10000（即 `BANK-10000`/`IP-10000` 及以上）；小于 10000 的 ID（如 `BANK-999`）**忽略，不作为选项**
+- 格式符合 `BANK-\d{5,}` 或 `IP-\d{5,}`
+
+过滤后若无有效候选 ID（或原本就未检测到任何 ID），需求ID 问题**仅保留"手动输入"一个选项**，该选项 description 标注"必填，请输入 BANK-XXXXX 或 IP-XXXXX（数字≥10000）"。
+
 **`AskUserQuestion` 调用结构**：
 
 ```
@@ -128,12 +138,12 @@ questions:
     question: "请选择或输入需求ID："
     multiSelect: false
     options:
-      - label: "{检测到的ID1}"
+      - label: "{检测到的ID1}"          # 数字≥10000 的 ID 才加入
         description: "来自文件名：{来源文件名}"
-      - label: "{检测到的ID2}"          # 若有
+      - label: "{检测到的ID2}"          # 若有（数字≥10000）
         description: "来自文件名：{来源文件名}"
       - label: "手动输入"
-        description: "自行输入 BANK-XXXX 或 IP-XXXX 格式"
+        description: "自行输入 BANK-XXXXX 或 IP-XXXXX 格式（必填，不能为空）"
 
   - header: "需求文档"
     question: "请选择需求文档（必填）："
@@ -169,13 +179,13 @@ questions:
         description: "不关联自动化工程"
 ```
 
-> 若未检测到任何ID，需求ID 问题只保留"手动输入"选项，跳过检测结果选项。
+> 经过滤后无有效候选 ID（或未检测到任何 ID），需求ID 问题只保留"手动输入"选项，description 标注必填说明。
 > 用户未通过参数传入 `[需求ID]` 时才展示需求ID问题；若已传入则该问题从 `questions` 中移除（只展示3个问题）。
 
 **用户选"手动输入"后的处理**：
 
 收到 `AskUserQuestion` 结果后，检查各项是否为"手动输入"：
-- 需求ID 选了"手动输入" → 再次单独调用 `AskUserQuestion` 询问具体值（格式：BANK-XXXX 或 IP-XXXX，不能为空）
+- 需求ID 选了"手动输入" → 再次单独调用 `AskUserQuestion` 询问具体值（格式：BANK-XXXXX 或 IP-XXXXX，数字部分必须 ≥ 10000，不能为空；输入不合规则重询）
 - 需求文档 选了"手动输入" → 再次询问文件路径（不能为空，输入 `无`/`-` 提示错误并重询）
 - 设计文档 选了"手动输入" → 再次询问文件路径（输入 `无`/`-` 视为空值，合法）
 - 自动化目录 选了"手动输入" → 再次询问目录路径（输入 `无`/`-` 视为空值；输入有效路径后用 `Glob` 校验是否存在 `pytest.ini`，不存在则警告不阻断）
@@ -560,6 +570,4 @@ workflow.md 已记录当前进度，下次执行 /za-qe:qe-workflow 可从失败
 - `/za-qe:case-designer` — 独立执行场景案例设计
 - `/za-qe:api-generator` — 独立执行 API 用例生成
 
----
 
-**版本**: v3.0.0 | **状态**: ✅ 可用

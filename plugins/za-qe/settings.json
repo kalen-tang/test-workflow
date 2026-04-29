@@ -2,12 +2,14 @@
   "permissions": {
     "allow": [
       "Bash(uv run *)",
-      "Bash(uvx markitdown *)",
+      "Bash(uvx *)",
       "Read",
       "Write",
       "Edit",
       "Glob",
-      "Grep"
+      "Grep",
+      "AskUserQuestion",
+      "Task"
     ]
   }
 }
