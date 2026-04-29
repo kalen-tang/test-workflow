@@ -1,7 +1,7 @@
 ---
 name: case-designer
 description: 此技能用于生成场景案例和可视化测试设计。当用户说帮我生成测试案例、把需求转成测试用例、生成PlantUML流程图、画一下测试功能点、需要测试MindMap或测试案例可视化、生成场景案例时应触发。
-allowed-tools: Read, Write, Edit, Glob, Grep, Bash(uv *), Bash(uv run:*)
+allowed-tools: Read, Write, Edit, Glob, Grep, Bash(uv *), Bash(uv run:*), Task
 ---
 
 # 场景案例设计器
@@ -235,40 +235,41 @@ left side
 
 #### 主流程：派发子代理
 
-用 `Task` 工具派发一个子代理，传入以下信息：
-- 需求文档路径：`<根目录>/BANK-XXXX_PRD.md`（子代理自行 Read，不在 prompt 里传内容）
-- 验证脚本绝对路径：`<CLAUDE_SKILL_DIR绝对路径>/scripts/validate_plantuml.py`
+派发前准备（主流程执行）：
+1. 用 `Glob` 工具定位 `validate_plantuml.py` 脚本绝对路径（`<插件根目录>/skills/case-designer/scripts/validate_plantuml.py`），不使用 `${CLAUDE_SKILL_DIR}`，确保子代理可用
+2. 用 `Read` 工具读取 `<插件根目录>/skills/case-designer/references/flowchart-generation.md` 内容，嵌入子代理 prompt
+
+用 `Task` 工具派发一个子代理，Task prompt 须包含：
+- 需求文档绝对路径：`<根目录>/BANK-XXXX_PRD.md`（子代理自行 Read）
+- 验证脚本绝对路径（上一步已计算）
 - 临时文件路径：`<根目录>/temp/flowchart_validate.puml`
 - 输出文件路径：`<根目录>/temp/flowchart_result.puml`
+- `flowchart-generation.md` 的完整内容（让子代理知晓生成规范）
 
 #### 子代理任务
 
 1. 读取需求文档，分析业务流程，识别主要步骤和决策点
-2. 生成符合以下规范的 PlantUML Activity Diagram：
-   - 使用 `!theme materia` 主题
-   - 包含主要流程、关键决策点、异常处理
-   - 格式参见 case-designer references/flowchart-generation.md
-3. 将生成的代码块写入临时文件：
-   ```bash
-   # Write 工具写入 <根目录>/temp/flowchart_validate.puml
-   ```
+2. 按照 prompt 中传入的 flowchart-generation.md 规范生成 PlantUML Activity Diagram
+3. 用 `Write` 工具将流程图代码块写入 `<根目录>/temp/flowchart_validate.puml`
 4. 执行验证：
    ```bash
    uv run '<验证脚本绝对路径>' --file '<根目录>/temp/flowchart_validate.puml'
    ```
-5. 若返回 `ERROR` → 根据错误信息修正代码块，更新临时文件，重新验证（最多重试 5 次）
+5. 若返回 `ERROR` → 根据错误信息修正代码块，用 `Edit` 更新临时文件，重新验证（最多重试 5 次）
 6. 验证通过后将最终代码块写入结果文件 `<根目录>/temp/flowchart_result.puml`
-7. 最后一行输出状态：
-   - 成功：`STATUS: OK`
-   - 5次仍失败：`STATUS: WARN 流程图验证失败，已保留最后一次生成结果，请人工检查`
+7. 在输出中包含状态标记：
+   - 成功：`---STATUS---\nOK\n---END---`
+   - 5次仍失败：`---STATUS---\nWARN 流程图验证失败，已保留最后一次生成结果，请人工检查\n---END---`
 
 #### 主流程：接收子代理结果
 
-- `STATUS: OK` → 读取 `<根目录>/temp/flowchart_result.puml` 内容，作为流程图代码块，继续步骤3
-- `STATUS: WARN` → 同样读取结果文件继续，但在最终输出中标注"⚠️ 流程图语法存在问题，建议人工检查"
-- 删除两个临时文件（`flowchart_validate.puml`、`flowchart_result.puml`）
+主流程用正则从子代理输出中提取 `---STATUS---\n(.*?)\n---END---` 判断状态：
 
-> `${CLAUDE_SKILL_DIR}` 在子代理内可能不可用，因此主流程在派发子代理前需计算脚本绝对路径并显式传入。
+1. 先用 `Read` 工具读取 `<根目录>/temp/flowchart_result.puml` 内容（赋值给变量）
+2. 若读取失败（文件不存在）→ 标注"⚠️ 流程图生成失败，结果文件不存在"，跳过流程图，继续步骤3
+3. 读取成功后删除两个临时文件（`flowchart_validate.puml`、`flowchart_result.puml`）
+4. 状态为 `OK` → 将读取内容作为流程图代码块，继续步骤3
+5. 状态为 `WARN` → 同样继续，但在最终输出中标注"⚠️ 流程图语法存在问题，建议人工检查"
 
 ### 步骤 3：生成测试功能点
 
@@ -570,9 +571,10 @@ right side
 
 格式转换实用脚本：
 
-- **`${CLAUDE_SKILL_DIR}/scripts/plantuml_to_xmind.py`** - PlantUML MindMap 转 XMind 格式工具
-  - 用法：`uv run ${CLAUDE_SKILL_DIR}/scripts/plantuml_to_xmind.py <Markdown文件或PlantUML文件> <需求ID>`
-  - 示例：`uv run ${CLAUDE_SKILL_DIR}/scripts/plantuml_to_xmind.py ./result/BANK-XXXX_CASE.md BANK-XXXX`
+- **`scripts/plantuml_to_xmind.py`** - PlantUML MindMap 转 XMind 格式工具
+  - 调用前先用 `Glob` 定位脚本绝对路径（`${CLAUDE_SKILL_DIR}` 在子代理中不可用，始终使用绝对路径）
+  - 用法：`uv run <脚本绝对路径>/plantuml_to_xmind.py <Markdown文件或PlantUML文件> <需求ID>`
+  - 示例：`uv run /path/to/skills/case-designer/scripts/plantuml_to_xmind.py ./result/BANK-XXXX_CASE.md BANK-XXXX`
   - 输出：生成到输入文件同目录，文件名为 `BANK-XXXX_CASE.xmind`
 
 ### 参考文件

@@ -356,23 +356,31 @@ temp/design_<原文件名>.md  →  <根目录>/BANK-XXXX_DESIGN.md
 
 **触发条件**：同时存在需求文档和设计文档时，用 `Task` 工具同时派发两个子代理并行执行。
 
+派发前准备：读取以下两个 Skill 文件内容，后续传入各自子代理 prompt：
+- req-parser 规范：`<插件根目录>/skills/req-parser/SKILL.md`
+- design-parser 规范：`<插件根目录>/skills/design-parser/SKILL.md`
+
 #### 子代理A：req-parser
 
-- **任务**：按照 req-parser Skill 的流程，读取 `<根目录>/BANK-XXXX_PRD.md`，规范化后覆盖写入同路径
-- **返回格式**（最后一行）：
-  - 成功：`STATUS: OK`
-  - 失败：`STATUS: ERROR <原因>`
-- **约束**：不得修改 `workflow.md`
+Task prompt 须包含：
+- req-parser SKILL.md 的完整内容（让子代理知晓规范）
+- 输入文件绝对路径：`<根目录>/BANK-XXXX_PRD.md`
+- 输出文件绝对路径：`<根目录>/BANK-XXXX_PRD.md`（覆盖写入）
+- 约束：不得修改 `workflow.md`
+- 要求：输出中包含 `---STATUS---\nOK\n---END---` 或 `---STATUS---\nERROR <原因>\n---END---`
 
 #### 子代理B：design-parser
 
-- **任务**：按照 design-parser Skill 的流程，读取 `<根目录>/BANK-XXXX_DESIGN.md`，规范化后覆盖写入同路径
-- **返回格式**（最后一行）：
-  - 成功：`STATUS: OK`
-  - 失败：`STATUS: ERROR <原因>`
-- **约束**：不得修改 `workflow.md`
+Task prompt 须包含：
+- design-parser SKILL.md 的完整内容（让子代理知晓规范）
+- 输入文件绝对路径：`<根目录>/BANK-XXXX_DESIGN.md`
+- 输出文件绝对路径：`<根目录>/BANK-XXXX_DESIGN.md`（覆盖写入）
+- 约束：不得修改 `workflow.md`
+- 要求：输出中包含 `---STATUS---\nOK\n---END---` 或 `---STATUS---\nERROR <原因>\n---END---`
 
 #### 等待两个子代理完成后，主流程处理结果
+
+主流程用正则从各子代理输出中提取 `---STATUS---\n(.*?)\n---END---` 判断状态（全文扫描，不依赖最后一行）：
 
 - 两者均 `OK` → 用 `Edit` 将 `workflow.md` 中 3.1 和 3.2 均标记为 `[x]`，追加产出文件记录，立即进入步骤3.3
 - 子代理A失败 → 将 3.1 标记为 `[!]`，中止后续执行（design-parser 结果已产出可保留）
